@@ -16,11 +16,7 @@ object Main {
       currentPlayerIndex: Int
   )
 
-<<<<<<< HEAD
   /** Function to print the game board */
-=======
-  /**Function to print the game board*/
->>>>>>> 11a0a14e5bb17f6ae528602f9c60cf99f97f2174
 
   println("The condition of the game")
   def printGameBoard(gameState: GameState): Unit = {

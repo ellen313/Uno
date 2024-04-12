@@ -8,10 +8,6 @@ object Main {
   case class GameState(players: List[PlayerHand], gameBoard: GameBoard, currentPlayerIndex: Int)
 
   /**Function to print the game board*/
-
-  println("Game condition")
-
-  println("The condition of the game")
   def printGameBoard(gameState: GameState): Unit = {
     println("Player Hand:")
     for (card <- gameState.players.head.cards) {

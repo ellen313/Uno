@@ -9,7 +9,7 @@ object Main {
 
   /**Function to print the game board*/
 
-  println("The condition of the game")
+  println("Game condition")
   def printGameBoard(gameState: GameState): Unit = {
     println("Player Hand:")
     for (card <- gameState.players.head.cards) {

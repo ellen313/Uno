@@ -9,6 +9,8 @@ object Main {
 
   /**Function to print the game board*/
 
+  println("Game condition")
+
   println("The condition of the game")
   def printGameBoard(gameState: GameState): Unit = {
     println("Player Hand:")

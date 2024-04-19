@@ -1,8 +1,10 @@
+import scala.util.Random
 object Main {
   case class Card(value: Int, color: String, number: Int) {
     def isSet: Boolean = value != 0
   }
-  case class PlayerHand(cards: List[Card])
+  case class PlayerHand(cards: List[Card]) {}
+
   case class GameBoard(
       playerStacks: List[List[Card]],
       centerStack: List[Card],

@@ -1,5 +1,8 @@
 import scala.util.Random
+<<<<<<< HEAD
 
+=======
+>>>>>>> 301810f69cc9bb608ec4e7eb526dacee830244f3
 object Main {
   case class GameBoard(cards: List[Card],
     playerStacks: List[List[Card]],
@@ -18,6 +21,17 @@ object Main {
     }
     def getDrawPile: List[Card] = drawPile
   }
+<<<<<<< HEAD
+=======
+  case class PlayerHand(cards: List[Card]) {}
+
+  case class GameBoard(
+      playerStacks: List[List[Card]],
+      centerStack: List[Card],
+      drawPile: List[Card],
+      discardPile: List[Card]
+  )
+>>>>>>> 301810f69cc9bb608ec4e7eb526dacee830244f3
 
   case class GameState(
       players: List[PlayerHand],

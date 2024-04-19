@@ -1,8 +1,24 @@
 import scala.util.Random
+
 object Main {
-  case class Card(value: Int, color: String, number: Int) {
-    def isSet: Boolean = value != 0
+  case class GameBoard(cards: List[Card],
+    playerStacks: List[List[Card]],
+    centerStack: List[Card],
+    drawPile: List[Card],
+    discardPile: List[Card]
+    ) {
+    def shuffle(): GameBoard = {
+      GameBoard(Random.shuffle(cards), playerStacks, centerStack, drawPile, discardPile)
+    }
+    def draw(): (Card, GameBoard) = {
+      val drawnCard = drawPile.head //draw first card from pile
+      val updatedDrawPile = drawPile.tail //tail has all elements except the first in its list; returns list after the first element
+      val updatedGameBoard = copy(drawPile = updatedDrawPile) //actualize gameboard
+      (drawnCard, updatedGameBoard) // return tuple
+    }
+    def getDrawPile: List[Card] = drawPile
   }
+  
   case class PlayerHand(cards: List[Card]) {}
 
   case class GameBoard(
@@ -19,9 +35,7 @@ object Main {
   )
 
   /** Function to print the game board */
-
-  println("The condition of the game")
-  def printGameBoard(gameState: GameState): Unit = {
+  /*def printGameBoard(gameState: GameState): Unit = {
     println("Player Hand:")
     for (card <- gameState.players.head.cards) {
       // print color and number
@@ -30,12 +44,12 @@ object Main {
 
     println("\nPlayer Stacks:")
     for (stack <- gameState.gameBoard.playerStacks) {
-      // run through the cars in each playerstack
+      // run through the cards in each playerstack
       for (card <- stack) {
         // print color and number
         println(card.color + "-" + card.number)
       }
-      // seperate player stacks
+      // separate player stacks
       println("---")
     }
 
@@ -51,21 +65,21 @@ object Main {
     for (card <- gameState.gameBoard.discardPile) {
       println(card.color + "-" + card.number)
     }
-  }
+  }*/
 
   // main method
   def main(args: Array[String]): Unit = {
-    val playerHand = PlayerHand(List(Card(1, "red", 2), Card(2, "blue", 3)))
+    val playerHand = PlayerHand(List(Card("red", 3), Card("green", 5)))
     val playerStacks =
-      List(List(Card(3, "green", 1)), List(Card(4, "yellow", 4)))
-    val centerStack = List(Card(5, "red", 3))
-    val drawPile = List(Card(6, "green", 2))
-    val discardPile = List(Card(7, "yellow", 1))
+      List(Card("blue", 8), Card("red", 10))
+    val centerStack = List(List(Card("green", 1), Card("red", 6)))
+    val drawPile = List(Card("blue", 5))
+    val discardPile = List(Card("red", 7))
 
     val gameBoard = GameBoard(playerStacks, centerStack, drawPile, discardPile)
     val gameState =
       GameState(List(playerHand), gameBoard, currentPlayerIndex = 0)
 
-    printGameBoard(gameState)
+    //printGameBoard(gameState)
   }
 }

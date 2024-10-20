@@ -1,28 +1,43 @@
 import scala.util.Random
 
+sealed trait Card{def color: String} //Card as superclass 
 
-case class Card(color: String, number: Int) //value means the card is set
-
-case class SkipBoCard(card: String)
-
-private object SkipBoCard {
-   def apply(): SkipBoCard = SkipBoCard("SkipBo")
+//different card types as subclasses
+case class NumberCard(color: String, number: Int) extends Card
+case class ActionCard(color: String, action: String) extends Card
+case class WildCard(action: String) extends Card {
+  override def color: String = "wild"
 }
 
- object CardFactory {
-   def createRandomCard(): Card = {
-     val randomNumber = generateCardNumber()
-     val randomColor = generateCardColor()
+object NumberCard{
 
-     Card(randomColor, randomNumber)
-   }
- }
+  def createNumberCard():
+    NumberCard = {
+    val colors = List("red", "blue", "green", "yellow")
+    val randomColor = Random.shuffle(colors).head
+    val randomNumber =  Random.nextInt(10) //0 to 9
+    NumberCard(randomColor, randomNumber)
+  }
+}
 
- private def generateCardNumber(): Int = Random.shuffle(1 to 12).head
+object ActionCard{
 
- private def generateCardColor(): String = {
-   val colors = List("red", "blue", "green")
-   Random.shuffle(colors).head
- }
+  def createActionCard():
+    ActionCard = {
+    val colors = List("red", "blue", "green", "yellow")
+    val randomColor = Random.shuffle(colors).head
+    val actions = List("draw two", "reverse", "skip")
+    val randomAction = Random.shuffle(actions).head
+    ActionCard(randomColor, randomAction)
+  }
+}
 
+object WildCard{
 
+  def createWildCard():
+  WildCard = {
+    val actions = List("wild", "wild draw four") //wild: player can change color
+    val randomAction = Random.shuffle(actions).head
+    WildCard(randomAction)
+  }
+}

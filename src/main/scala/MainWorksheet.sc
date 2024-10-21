@@ -1,53 +1,45 @@
-case class Card(value: Int, color: String, number: Int) {
-  def isSet: Boolean = value != 0
-}
-case class PlayerHand(cards: List[Card])
-case class GameBoard(
-    playerStacks: List[List[Card]],
-    centerStack: List[Card],
-    drawPile: List[Card],
-    discardPile: List[Card]
-)
-  case class Card(color: String, number: Int){
-    def isSet: Boolean = value != 0
-  }
-  val card1=Card(1,"red",1)
-  card1.isSet
-  card1.color
+// testing the card class
+val numCard = NumberCard("red", 5)
+val actionCard = ActionCard("blue", "draw two")
+val wildCard = WildCard("wild draw four")
 
-  case class PlayerHand(cards: List[Card])
+numCard.color      // expected: "red"
+numCard.number     // expected: 5
+actionCard.action  // expected: "draw two"
+wildCard.color     // expected: "wild"
 
-  val hand1=PlayerHand(List(card1))
-  case class GameBoard(playerStacks: List[List[Card]], centerStack: List[Card], drawPile: List[Card], discardPile: List[Card])
+//------------------------------------------
 
-  case class GameState(players: List[PlayerHand], gameBoard: GameBoard, currentPlayerIndex: Int)
+// testing the playerhand class
+val playerHand1 = PlayerHand(List(numCard, actionCard))
+playerHand1.displayHand()  // expected: "red-5", "blue-draw two"
+playerHand1.hasUno         // expected: false
+playerHand1.isEmpty        // expected: false
 
+// adding a new card to the playerhand
+val updatedHand1 = playerHand1.addCard(wildCard)
+updatedHand1.displayHand()  // expected: "wild draw four", "red-5", "blue-draw two"
 
-  def main(args: Array[String]): Unit = {
-    val playerHand = PlayerHand(List(Card(createRandomCard()), Card(createRandomCard())))
-    val playerStacks = List(List(Card(createRandomCard())), List(Card(createRandomCard())))
-    val centerStack = List(Card(createRandomCard()))
-    val drawPile = List(Card(createRandomCard()))
-    val discardPile = List(Card(createRandomCard()))
+//------------------------------------------
 
-    val gameBoard = GameBoard(playerStacks, centerStack, drawPile, discardPile)
-    val gameState = GameState(List(playerHand), gameBoard, currentPlayerIndex = 0)
+// testing the gameboard
+val gameBoard1 = GameBoard(List(numCard, actionCard, wildCard), List.empty[Card])
+val (drawnCard1, updatedPlayerHand1, updatedBoard1) = gameBoard1.drawCard(playerHand1)
 
-  }
-case class GameState(
-    players: List[PlayerHand],
-    gameBoard: GameBoard,
-    currentPlayerIndex: Int
-)
+drawnCard1  // expected: NumberCard("red", 5)
+updatedPlayerHand1.displayHand() // expected:  "red-5", "red-5", "blue-draw two"
+updatedBoard1.drawPile.size // expected: 2 (because one card was drawn)
 
-def main(args: Array[String]): Unit = {
-  val playerHand = PlayerHand(List(Card(1, "red", 2), Card(2, "blue", 3)))
-  val playerStacks = List(List(Card(3, "green", 1)), List(Card(4, "yellow", 4)))
-  val centerStack = List(Card(5, "red", 3))
-  val drawPile = List(Card(6, "green", 2))
-  val discardPile = List(Card(7, "yellow", 1))
+//------------------------------------------
 
-  val gameBoard = GameBoard(playerStacks, centerStack, drawPile, discardPile)
-  val gameState = GameState(List(playerHand), gameBoard, currentPlayerIndex = 0)
+// testing the gamestate class
+case class GameState(players: List[PlayerHand], gameBoard: GameBoard, currentPlayerIndex: Int)
 
-}
+val gameState1 = GameState(List(playerHand1), gameBoard1, 0)
+gameState1.players(0).displayHand()
+
+val (drawnCard2, updatedPlayerHand2, updatedBoard2) = gameState1.gameBoard.drawCard(gameState1.players(0))
+
+drawnCard2  // expected: NumberCard("red", 5)
+updatedPlayerHand2.displayHand()
+updatedBoard2.drawPile.size

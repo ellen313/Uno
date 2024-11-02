@@ -1,6 +1,7 @@
 import scala.util.Random
 
 case class GameBoard(drawPile: List[Card], discardPile: List[Card]) {
+
   def createDeckWithAllCards(): List[Card] = {
     val numberCards = for {
       // 1x0 and 2x1-9 for each color
@@ -44,5 +45,47 @@ case class GameBoard(drawPile: List[Card], discardPile: List[Card]) {
     val updatedDrawPile = drawPile.tail 
     val updatedPlayerHand = playerHand.addCard(drawnCard) 
     (drawnCard, updatedPlayerHand, copy(drawPile = updatedDrawPile))
+  }
+
+  def playCard(card: Card, gameState: GameState): GameState = {
+    val currentPlayer = gameState.players(gameState.currentPlayerIndex)
+
+    if (!currentPlayer.cards.contains(card)) {
+      throw new IllegalArgumentException("Card not in hand")
+    }
+
+    val topCard = gameState.gameBoard.discardPile.lastOption
+    if (!isValidPlay(card, topCard)) {
+      throw new IllegalArgumentException("You can not play this card!")
+    }
+
+    val updatedHand = currentPlayer.removeCard(card)
+    val updatedDiscardPile = gameState.gameBoard.discardPile :+ card
+    val updatedGameBoard = gameState.gameBoard.copy(discardPile = updatedDiscardPile)
+
+    gameState.copy(
+      players = gameState.players.updated(gameState.currentPlayerIndex, updatedHand),
+      gameBoard = updatedGameBoard
+    )
+  }
+
+  def isValidPlay(card: Card, topCard: Option[Card]): Boolean = {
+    topCard match {
+      case None => true 
+      case Some(tCard) =>
+        (card, tCard) match {
+          case (WildCard(_), _) => true
+          case (_, WildCard(_)) => true
+          case (NumberCard(color, number), NumberCard(topColor, topNumber)) =>
+            color == topColor || number == topNumber
+          case (NumberCard(color, _), ActionCard(topColor, _)) =>
+            color == topColor
+          case (ActionCard(color, _), NumberCard(topColor, _)) =>
+            color == topColor
+          case (ActionCard(color, _), ActionCard(topColor, _)) =>
+            color == topColor
+          case _ => false
+        }
+    }
   }
 }

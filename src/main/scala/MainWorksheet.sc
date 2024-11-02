@@ -32,14 +32,18 @@ updatedBoard1.drawPile.size // expected: 2 (because one card was drawn)
 
 //------------------------------------------
 
-// testing the gamestate class
-case class GameState(players: List[PlayerHand], gameBoard: GameBoard, currentPlayerIndex: Int)
+//test playCard - method
+val testHand = PlayerHand(List(numCard, actionCard))
+val testGameBoard = GameBoard(List.empty[Card], List.empty[Card])
+val testGameState = GameState(List(testHand), testGameBoard, 0, List(numCard, actionCard, wildCard))
 
-val gameState1 = GameState(List(playerHand1), gameBoard1, 0)
-gameState1.players(0).displayHand()
 
-val (drawnCard2, updatedPlayerHand2, updatedBoard2) = gameState1.gameBoard.drawCard(gameState1.players(0))
 
-drawnCard2  // expected: NumberCard("red", 5)
-updatedPlayerHand2.displayHand()
-updatedBoard2.drawPile.size
+val updatedState = testGameBoard.playCard(numCard, testGameState)
+updatedState.players(0).displayHand()    // expected: only "blue-draw two"
+updatedState.gameBoard.discardPile       // expected: List(numCard)
+
+//test isValidPlay - method
+testGameBoard.isValidPlay(numCard,Some(wildCard)) // expected: true
+testGameBoard.isValidPlay(numCard,Some(actionCard)) // expected: false
+testGameBoard.isValidPlay(numCard,Some(numCard))

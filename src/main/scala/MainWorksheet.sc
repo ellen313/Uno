@@ -37,13 +37,26 @@ val testHand = PlayerHand(List(numCard, actionCard))
 val testGameBoard = GameBoard(List.empty[Card], List.empty[Card])
 val testGameState = GameState(List(testHand), testGameBoard, 0, List(numCard, actionCard, wildCard))
 
-
-
 val updatedState = testGameBoard.playCard(numCard, testGameState)
-updatedState.players(0).displayHand()    // expected: only "blue-draw two"
+updatedState.players(0).displayHand()    // expected: "blue-draw two"
 updatedState.gameBoard.discardPile       // expected: List(numCard)
 
 //test isValidPlay - method
 testGameBoard.isValidPlay(numCard,Some(wildCard)) // expected: true
 testGameBoard.isValidPlay(numCard,Some(actionCard)) // expected: false
 testGameBoard.isValidPlay(numCard,Some(numCard))
+
+//test nextPlayer - method
+val playerHand2 = PlayerHand(List(numCard, actionCard))
+val players = List(playerHand1, updatedHand1, playerHand2) //3 players
+val testGameState2 = GameState(players, gameBoard1, 2, gameBoard1.drawPile)
+
+println(s"Start: current player-index: ${testGameState2.currentPlayerIndex}")
+
+val stateAfterNext = testGameState2.nextPlayer(testGameState2)
+println(s"after using method nextPlayer: current player-index: ${stateAfterNext.currentPlayerIndex}") // expected: 1
+
+// reverse
+val reversedState = stateAfterNext.copy(isReversed = true)
+val stateAfterReverseNext = reversedState.nextPlayer(reversedState)
+println(s"after using reversed method nextPlayer: current player-index: ${stateAfterReverseNext.currentPlayerIndex}") // expected: 0

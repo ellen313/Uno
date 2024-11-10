@@ -5,7 +5,8 @@ case class PlayerHand(cards: List[Card]) {
   def addCard(card: Card): PlayerHand = {
     copy(cards = card :: cards) //add card to the head of list cards
   }
-
+  def containsCard(card: Card): Boolean = cards.contains(card)
+  
   //remove a card from players hand
   def removeCard(card: Card): PlayerHand = {
     copy(cards = cards.filter(c => c != card))

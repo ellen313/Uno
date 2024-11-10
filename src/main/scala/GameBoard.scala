@@ -48,47 +48,76 @@ case class GameBoard(drawPile: List[Card], discardPile: List[Card]) {
     (drawnCard, updatedPlayerHand, copy(drawPile = updatedDrawPile))
   }
 
+
   def playCard(card: Card, gameState: GameState): GameState = {
-    val currentPlayer = gameState.players(gameState.currentPlayerIndex)
-
-    if (!currentPlayer.cards.contains(card)) { //check für später bei benutzereingabe
-      throw new IllegalArgumentException("Card not in hand")
-    }
-
+    var updatedPlayerHand = gameState.players(gameState.currentPlayerIndex)
+    var drawPile = gameState.gameBoard.drawPile
     val topCard = gameState.gameBoard.discardPile.lastOption
-    if (!isValidPlay(card, topCard)) {
-      throw new IllegalArgumentException("You can not play this card!")
+    var playableCardFound = isValidPlay(card, topCard)
+    var drawCount = 0 
+    
+    while (!playableCardFound && drawPile.nonEmpty && drawCount < 10) {
+      val (drawnCard, newHand, newGameBoard) = gameState.gameBoard.drawCard(updatedPlayerHand)
+      updatedPlayerHand = newHand
+      drawPile = newGameBoard.drawPile
+      playableCardFound = isValidPlay(updatedPlayerHand.cards.last, topCard)
+      drawCount += 1
     }
-
-    val updatedHand = currentPlayer.removeCard(card)
-    val updatedDiscardPile = gameState.gameBoard.discardPile :+ card
+    
+    if (!playableCardFound) {
+      return gameState.nextPlayer(gameState)
+    }
+    
+    val updatedHand = updatedPlayerHand.removeCard(updatedPlayerHand.cards.last)
+    
+    val updatedDiscardPile = gameState.gameBoard.discardPile :+ updatedPlayerHand.cards.last
     val updatedGameBoard = gameState.gameBoard.copy(discardPile = updatedDiscardPile)
-
+    
     val baseGameState = gameState.copy(
       players = gameState.players.updated(gameState.currentPlayerIndex, updatedHand),
       gameBoard = updatedGameBoard
     )
-    val finalGameState = card match {
-      case ActionCard(_, "reverse") => baseGameState.nextPlayer(baseGameState.copy(isReversed = !gameState.isReversed))
+    
+    val finalGameState = updatedPlayerHand.cards.last match {
+      case ActionCard(_, "reverse") =>
+        baseGameState.copy(isReversed = !gameState.isReversed)
+        
       case ActionCard(_, "skip") => baseGameState.nextPlayer(baseGameState.nextPlayer(baseGameState))
-
+      
       case ActionCard(_, "draw two") =>
         val nextIndex = baseGameState.nextPlayer(baseGameState).currentPlayerIndex
-        val updatedNextPlayerHand = (1 to 2).foldLeft(baseGameState.players(nextIndex)) { (hand, _) =>
-          baseGameState.gameBoard.drawCard(hand)._2
+        val (updatedNextPlayerHand, updatedGameBoard) = (1 to 2).foldLeft((baseGameState.players(nextIndex), baseGameState.gameBoard)) {
+          case ((hand, gameBoard), _) =>
+            val (drawnCard, updatedHand, updatedUpdatedGameBoard) = gameBoard.drawCard(hand)
+            (updatedHand, updatedUpdatedGameBoard)
         }
-        baseGameState.copy(players = baseGameState.players.updated(nextIndex, updatedNextPlayerHand))
+        val updatedGameState = baseGameState.copy(
+          players = baseGameState.players.updated(nextIndex, updatedNextPlayerHand),
+          gameBoard = updatedGameBoard,
+          currentPlayerIndex = nextIndex
+        )
+        val updatedGameStateAfterDrawTwo = updatedGameState.nextPlayer(updatedGameState)
+        updatedGameStateAfterDrawTwo
+        
       case WildCard("wild draw four") =>
         val nextIndex = baseGameState.nextPlayer(baseGameState).currentPlayerIndex
-        val updatedNextPlayerHand = (1 to 4).foldLeft(baseGameState.players(nextIndex)) { (hand, _) =>
-          baseGameState.gameBoard.drawCard(hand)._2
+        val (updatedNextPlayerHand, updatedGameBoard) = (1 to 4).foldLeft((baseGameState.players(nextIndex), baseGameState.gameBoard)) {
+          case ((hand, gameBoard), _) =>
+            val (drawnCard, updatedHand, updatedUpdatedGameBoard) = gameBoard.drawCard(hand)
+            (updatedHand, updatedUpdatedGameBoard)
         }
-        baseGameState.copy(players = baseGameState.players.updated(nextIndex, updatedNextPlayerHand))
-      case _ => baseGameState.nextPlayer(baseGameState)
+        baseGameState.copy(
+          players = baseGameState.players.updated(nextIndex, updatedNextPlayerHand),
+          gameBoard = updatedGameBoard,
+          currentPlayerIndex = nextIndex
+        )
+        
+      case _ =>
+        baseGameState.nextPlayer(baseGameState)
     }
     finalGameState
   }
-
+  
   def isValidPlay(card: Card, topCard: Option[Card]): Boolean = {
     topCard match {
       case None => true

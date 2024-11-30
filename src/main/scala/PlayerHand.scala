@@ -9,7 +9,8 @@ case class PlayerHand(cards: List[Card]) {
   
   //remove a card from players hand
   def removeCard(card: Card): PlayerHand = {
-    copy(cards = cards.filter(c => c != card))
+    val (before, after) = cards.span(_ != card)
+    copy(cards = before ++ after.drop(1))
   }
 
   //check if player can say 'Uno'

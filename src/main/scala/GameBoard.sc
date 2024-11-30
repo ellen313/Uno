@@ -1,110 +1,106 @@
 //this worksheet is used to test the methods from GameBoard.scala
 
-val numCard = NumberCard("red", 5)
-val actionCard = ActionCard("blue", "draw two")
-val wildCard = WildCard("wild draw four")
-val playerHand1 = PlayerHand(List(numCard, actionCard))
-val playerHand2 = playerHand1.addCard(wildCard)
-val playerHand3 = PlayerHand(List(numCard, actionCard))
-
-val gameBoard1 = GameBoard(List(numCard, actionCard, wildCard), List.empty[Card])
-val (drawnCard1, updatedPlayerHand1, updatedBoard1) = gameBoard1.drawCard(playerHand1)
-
-drawnCard1  // expected: NumberCard("red", 5)
-updatedPlayerHand1.displayHand() // expected:  "red-5", "red-5", "blue-draw two"
-updatedBoard1.drawPile.size // expected: 2 (because one card was drawn)
-//==============================================================================
-//test playCard - method
-
-// Karten definieren
-val redDrawTwo = ActionCard("red", "draw two")
-val greenSkip = ActionCard("green", "skip")
-val yellowReverse = ActionCard("yellow", "reverse")
+//============================================= playCard method ========================================================
+val redThree = NumberCard("red", 3)
+val redSkip = ActionCard("red", "skip")
+val redReverse = ActionCard("red", "reverse")
 val wildDrawFour = WildCard("wild draw four")
-val redNumberCard3 = NumberCard("red", 3)
+val blueTwo = NumberCard("blue", 2)
+val drawTwoBlue = ActionCard("blue","draw two")
+val greenFour = NumberCard("green", 4)
+val yellowSeven = NumberCard("yellow", 7)
 
 
-// Spielerhände definieren
-val player1Hand = PlayerHand(List(redNumberCard3, redDrawTwo))
-val player2Hand = PlayerHand(List(greenSkip, yellowReverse, wildDrawFour))
-val player3Hand =  PlayerHand(List(redNumberCard3, yellowReverse, wildDrawFour))
-// Spielfeld und Spielstatus definieren
-val initialDeck = List(redDrawTwo, redNumberCard3, wildDrawFour, NumberCard("green", 2), greenSkip, NumberCard("blue", 2), wildDrawFour)
-val initialGameBoard = GameBoard(initialDeck, List(NumberCard("red", 3)))
-val initialGameState = GameState(List(player1Hand, player2Hand, player3Hand), initialGameBoard, 0, initialGameBoard.drawPile)
+// PlayerHands
+val player1Hand = PlayerHand(List(redThree, redSkip, blueTwo))
+val player2Hand = PlayerHand(List(redReverse, wildDrawFour, redSkip))
+val player3Hand = PlayerHand(List(redThree, redReverse, drawTwoBlue))
 
-// Aktuelle Karte auf dem Ablagestapel prüfen
-val topCard = initialGameState.gameBoard.discardPile.lastOption
-initialGameState.currentPlayerIndex //expected: 0 (Player 1 )
-initialGameState.players(1).cards.size //anzahl der Karten des Spielers 2
-initialGameState.players(1).cards
-initialGameState.gameBoard.drawPile
+// GameBoard Piles
+val drawPile1 = List(wildDrawFour, blueTwo, redThree, redSkip, greenFour, yellowSeven)
+val discardPile1 = List(NumberCard("red", 3))
 
+val allCards = drawPile1 ++ discardPile1 ++ player1Hand.cards ++ player2Hand.cards ++ player3Hand.cards
 
-// Draw-Two-Karte testen
-val stateAfterDrawTwo = initialGameBoard.playCard(redDrawTwo, initialGameState)
-val isDrawTwoOnDiscardPile = stateAfterDrawTwo.gameBoard.discardPile.last == redDrawTwo //expected: true
-val player1HandContainsDrawTwo = stateAfterDrawTwo.players(0).cards.contains(redDrawTwo)
-val player2HandAfter = stateAfterDrawTwo.players(1).cards.size //expected: 5
-stateAfterDrawTwo.gameBoard.drawPile
-stateAfterDrawTwo.players(1).displayHand()
+// GameBoard
+val initialGameBoard = GameBoard(drawPile1, discardPile1)
 
-val currentPlayerIndexAfter = stateAfterDrawTwo.currentPlayerIndex //expected: 2 (Player 3)
+// GameState with all three Players
+val initialGameState = GameState(
+  players = List(player1Hand, player2Hand, player3Hand),
+  gameBoard = initialGameBoard,
+  currentPlayerIndex = 0,
+  allCards = allCards.distinct
+)
 
-stateAfterDrawTwo.gameBoard.discardPile.lastOption
-stateAfterDrawTwo.players(2).displayHand()
-stateAfterDrawTwo.players(0).displayHand()
-stateAfterDrawTwo.players(2).cards.size //expected: 3
-stateAfterDrawTwo.players(0).cards.size  //expected: 1
-stateAfterDrawTwo.gameBoard.drawPile
+// -------------------------- test skip --------------------------------------------------------------------------------
+val currentPlayerIdx = initialGameState.currentPlayerIndex //expected: 0 (Player 1)
+val stateAfterSkip = initialGameBoard.playCard(redSkip, initialGameState)
+val currentPlayerAfterSKip = stateAfterSkip.currentPlayerIndex //expected: 2 (Player 3)
 
-// Teste die 'wild draw four' Karte
-val stateAfterWildDrawFour = initialGameBoard.playCard(wildDrawFour, stateAfterDrawTwo)
-val currentPlayerIndexAfterWildDrawFour = stateAfterWildDrawFour.currentPlayerIndex //expected: 0 (Player 1)
-val player3HandAfterWildDrawFour = stateAfterWildDrawFour.players(2).cards.size //expected: 2
-val player1HandAfterWildDrawFour = stateAfterWildDrawFour.players(0).cards.size //expected: 5
+//checks
+val skipOnDiscardPile = stateAfterSkip.gameBoard.discardPile.last == redSkip //expected: true
+val skipOnPlayerHand = stateAfterSkip.players(0) == redSkip //expected: false
 
-stateAfterWildDrawFour.players(0).displayHand()
-stateAfterWildDrawFour.gameBoard.drawPile
-stateAfterWildDrawFour.currentPlayerIndex
+// -------------------------- test reverse -----------------------------------------------------------------------------
+val currentPlayerIdx2 = stateAfterSkip.currentPlayerIndex //expected: 2 (Player 3)
+val reversedStatus = stateAfterSkip.isReversed //expected: false
 
-// Teste die 'skip' Karte
-val stateAfterSkip = initialGameBoard.playCard(greenSkip, stateAfterWildDrawFour)
-stateAfterSkip.currentPlayerIndex
+val stateAfterReverse = initialGameBoard.playCard(redReverse, stateAfterSkip)
+val currentPlayerAfterReverse = stateAfterReverse.currentPlayerIndex //expected: 1 (Player 2)
+val reversedStatus2 = stateAfterReverse.isReversed //expected: true
 
+val reverseOnDiscardPile = stateAfterSkip.gameBoard.discardPile.last == redSkip //expected: true
+val reverseOnPlayerHand = stateAfterSkip.players(2).containsCard(redSkip) //expected: false
 
+// -------------------------- test draw four ---------------------------------------------------------------------------
+stateAfterReverse.currentPlayerIndex
+val cardNumBefore1 = stateAfterReverse.players(1).cards.length //expected: 3
+val cardNumBefore0 = stateAfterReverse.players(0).cards.length //expected: 2 (Player who will draw)
+val stateAfterDrawFour = initialGameBoard.playCard(wildDrawFour,stateAfterReverse)
 
+val currentPlayerAfterDrawFour = stateAfterDrawFour.currentPlayerIndex //expected: 0
+val cardNumAfter1 = stateAfterDrawFour.players(1).cards.length //expected: 2
+val cardNumAfter0 = stateAfterDrawFour.players(0).cards.length //expected: 6 (Player who draws)
 
+val drawFourOnDiscardPile = stateAfterDrawFour.gameBoard.discardPile.last == wildDrawFour //expected:true
+val drawFourOnPlayerHand = stateAfterDrawFour.players(1).containsCard(wildDrawFour) //expected: false (Player who discarded)
 
+// -------------------------- test other card --------------------------------------------------------------------------
+stateAfterDrawFour.currentPlayerIndex //expected: 0
+val cardNumBefore = stateAfterDrawFour.players(0).cards.length //expected: 6
+val cardNumBefore2 = stateAfterDrawFour.players(2).cards.length //expected: 2
 
+val stateAfterOtherCard = initialGameBoard.playCard(blueTwo,stateAfterDrawFour)
 
+stateAfterOtherCard.currentPlayerIndex //expected: 2
+val cardNumAfter = stateAfterOtherCard.players(0).cards.length //expected: 5
+val twoBlueOnDiscardPile = stateAfterOtherCard.gameBoard.discardPile.last == blueTwo //expected: true
 
+// -------------------------- test draw two ----------------------------------------------------------------------------
+stateAfterOtherCard.currentPlayerIndex
+val cardNumBefore20 = stateAfterOtherCard.players(2).cards.length //expected: 2
+val cardNumBefore10 = stateAfterOtherCard.players(1).cards.length //expected: 2 (Player who will draw)
+val stateAfterDrawTwo = initialGameBoard.playCard(drawTwoBlue,stateAfterOtherCard)
 
-//=============================================================================================
-val testHand = PlayerHand(List(numCard, actionCard))
+val currentPlayerAfterDrawTwo = stateAfterDrawTwo.currentPlayerIndex //expected: 1
+val cardNumAfter20 = stateAfterDrawTwo.players(2).cards.length //expected: 1
+val cardNumAfter10 = stateAfterDrawTwo.players(1).cards.length //expected: 4 (Player who draws)
+
+val drawTwoOnDiscardPile = stateAfterDrawTwo.gameBoard.discardPile.last == drawTwoBlue //expected: true
+val drawTwoOnPlayerHand = stateAfterDrawTwo.players(2).containsCard(drawTwoBlue) //expected: false
+
+//######################################################################################################################
+val testHand = PlayerHand(List(redThree, redSkip))
 val testGameBoard = GameBoard(List.empty[Card], List.empty[Card])
-val testGameState = GameState(List(testHand), testGameBoard, 0, List(numCard, actionCard, wildCard))
+val testGameState = GameState(List(testHand), testGameBoard, 0, List(redThree, redSkip, wildDrawFour))
 
-//test isValidPlay - method
-val test1 = testGameBoard.isValidPlay(NumberCard("red", 5), Some(NumberCard("red", 3)))  // true
-val test2 = testGameBoard.isValidPlay(NumberCard("red", 5), Some(NumberCard("blue", 5)))  // true
-val test3 = testGameBoard.isValidPlay(NumberCard("red", 5), Some(ActionCard("blue", "skip")))  // false
-val test4 = testGameBoard.isValidPlay(WildCard("wild draw four"), Some(ActionCard("blue", "draw two")))  //true
-val test5 = testGameBoard.isValidPlay(WildCard("wild draw four"), Some(WildCard("wild draw four")))  //false
-
-//test nextPlayer - method
-val players = List(player1Hand, player2Hand, player3Hand) //3 players
-val testGameState2 = GameState(players, gameBoard1, 2, gameBoard1.drawPile)
-
-println(s"Start: current player-index: ${testGameState2.currentPlayerIndex}")
-
-val stateAfterNext = testGameState2.nextPlayer(testGameState2)
-println(s"after using method nextPlayer: current player-index: ${stateAfterNext.currentPlayerIndex}") // expected: 0
-
-// reverse
-val reversedState = stateAfterNext.copy(isReversed = true)
-val stateAfterReverseNext = reversedState.nextPlayer(reversedState)
-println(s"after using reversed method nextPlayer: current player-index: ${stateAfterReverseNext.currentPlayerIndex}") // expected: 0
+//============================================= isValidPlay method ========================================================
+val test1 = testGameBoard.isValidPlay(NumberCard("red", 5), Some(NumberCard("red", 3)))  ////expected: true
+val test2 = testGameBoard.isValidPlay(NumberCard("red", 5), Some(NumberCard("blue", 5)))  ////expected: true
+val test3 = testGameBoard.isValidPlay(NumberCard("red", 5), Some(ActionCard("blue", "skip")))  ////expected: false
+val test4 = testGameBoard.isValidPlay(WildCard("wild draw four"), Some(ActionCard("blue", "draw two")))  ////expected: true
+val test5 = testGameBoard.isValidPlay(WildCard("wild draw four"), Some(WildCard("wild draw four")))  ////expected: false
 
 
 

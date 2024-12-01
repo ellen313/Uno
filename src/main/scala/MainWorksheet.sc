@@ -8,43 +8,71 @@ numCard.number     // expected: 5
 actionCard.action  // expected: "draw two"
 wildCard.color     // expected: "wild"
 
-//------------------------------------------
+//######################################################################################################################
+//----------------------- creating a random game scenario for main and test somgit e methods -------------------------------
+/** Note:
+ * The test is random, as cards are shuffled and dealt each time.
+ * Players simply play the first card in their hand.
+ * If the test takes too long, try running it again due to the randomness of card distribution.
+ */
 
-// testing the playerhand class
-val playerHand1 = PlayerHand(List(numCard, actionCard))
-playerHand1.displayHand()  // expected: "red-5", "blue-draw two"
-playerHand1.hasUno         // expected: false
-playerHand1.isEmpty        // expected: false
+// Game with two Players, initialize GameBoard and -State
+val initialGameBoard = GameBoard(List.empty[Card], List.empty[Card]).shuffleDeck()
+val players = List(PlayerHand(List.empty[Card]), PlayerHand(List.empty[Card]))
+var gameState = GameState(players, initialGameBoard, 0, initialGameBoard.drawPile)
 
-// adding a new card to the playerhand
-//val updatedHand1 = playerHand1.addCard(wildCard)
-val updatedHand1 = playerHand1 + wildCard
-updatedHand1.displayHand()  // expected: "wild draw four", "red-5", "blue-draw two"
+// Deal initial cards
+gameState = gameState.dealInitialCards(2)
 
-//------------------------------------------
+// Show PlayerHands
+println("After dealing cards:")
+gameState.players.zipWithIndex.foreach { case (hand, index) =>
+  println(s"Player ${index + 1}:")
+  hand.displayHand()
+  println(s"'Uno'? ${hand.hasUno}")
+  println()
+}
 
-// testing the gameboard
-val gameBoard1 = GameBoard(List(numCard, actionCard, wildCard), List.empty[Card])
-val (drawnCard1, updatedPlayerHand1, updatedBoard1) = gameBoard1.drawCard(playerHand1)
+println("\n--- round 1 ---")
 
-drawnCard1  // expected: NumberCard("red", 5)
-updatedPlayerHand1.displayHand() // expected:  "red-5", "red-5", "blue-draw two"
-updatedBoard1.drawPile.size // expected: 2 (because one card was drawn)
+var currentPlayerIdx = gameState.currentPlayerIndex
+var currentPlayer = gameState.players(currentPlayerIdx)
 
-//------------------------------------------
+// Current Player plays
+val cardToPlay = currentPlayer.cards.head
+gameState = gameState.gameBoard.playCard(cardToPlay, gameState)  // Player plays card
 
-//test playCard - method
-val testHand = PlayerHand(List(numCard, actionCard))
-val testGameBoard = GameBoard(List.empty[Card], List.empty[Card])
-val testGameState = GameState(List(testHand), testGameBoard, 0, List(numCard, actionCard, wildCard))
+println(s"Player ${currentPlayerIdx + 1} has discarded the card $cardToPlay.")
+println(s"Player ${currentPlayerIdx + 1} now has ${gameState.players(currentPlayerIdx).cards.length} cards.")
+println(s"Can Player ${currentPlayerIdx + 1} say 'Uno'? ${gameState.players.head.hasUno}")
 
+// Player says "Uno"
+if (currentPlayer.hasUno) {
+  gameState = gameState.copy(players = gameState.players.updated(currentPlayerIdx, currentPlayer.sayUno()))
+  println(s"Player ${currentPlayerIdx + 1} says 'Uno'!")
+}
 
+// Next Player plays
+println("\n--- Next Player plays ---")
+// now move to the next player
+currentPlayerIdx = gameState.currentPlayerIndex
+currentPlayer = gameState.players(currentPlayerIdx)
 
-val updatedState = testGameBoard.playCard(numCard, testGameState)
-updatedState.players(0).displayHand()    // expected: only "blue-draw two"
-updatedState.gameBoard.discardPile       // expected: List(numCard)
+// Next Player plays
+val cardToPlayNext = currentPlayer.cards.head
+gameState = gameState.gameBoard.playCard(cardToPlayNext, gameState)
 
-//test isValidPlay - method
-testGameBoard.isValidPlay(numCard,Some(wildCard)) // expected: true
-testGameBoard.isValidPlay(numCard,Some(actionCard)) // expected: false
-testGameBoard.isValidPlay(numCard,Some(numCard))
+println(s"Player ${currentPlayerIdx + 1} has discarded the card $cardToPlayNext.")
+println(s"Player ${currentPlayerIdx + 1} now has ${gameState.players(currentPlayerIdx).cards.length} cards.")
+println(s"Can Player ${currentPlayerIdx + 1} say 'Uno'? ${gameState.players(currentPlayerIdx).hasUno}")
+
+// Next Player says "Uno"
+if (currentPlayer.hasUno) {
+  gameState = gameState.copy(players = gameState.players.updated(currentPlayerIdx, currentPlayer.sayUno()))
+  println(s"Player ${currentPlayerIdx + 1} says 'Uno'!")
+}
+
+// check for a winner
+println("\n--- check for a winner ---")
+gameState.checkForWinner()
+

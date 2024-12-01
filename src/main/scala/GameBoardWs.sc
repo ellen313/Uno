@@ -10,7 +10,6 @@ val drawTwoBlue = ActionCard("blue","draw two")
 val greenFour = NumberCard("green", 4)
 val yellowSeven = NumberCard("yellow", 7)
 
-
 // PlayerHands
 val player1Hand = PlayerHand(List(redThree, redSkip, blueTwo))
 val player2Hand = PlayerHand(List(redReverse, wildDrawFour, redSkip))

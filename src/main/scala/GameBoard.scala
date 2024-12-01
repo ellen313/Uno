@@ -35,8 +35,16 @@ case class GameBoard(drawPile: List[Card], discardPile: List[Card]) {
   def shuffleDeck(): GameBoard = {
     val allCards = createDeckWithAllCards()
     val shuffledCards = Random.shuffle(allCards)
-    GameBoard(shuffledCards, List.empty[Card])
+    
+    val discardPile = shuffledCards.headOption match {
+      case Some(card) => List(card)
+      case None => List.empty[Card]
+    }
+    val drawPile = shuffledCards.tail
+    
+    GameBoard(drawPile, discardPile)
   }
+
 
   def drawCard(playerHand: PlayerHand): (Card, PlayerHand, GameBoard) = {
     if (drawPile.isEmpty) {
@@ -97,10 +105,10 @@ case class GameBoard(drawPile: List[Card], discardPile: List[Card]) {
     }
 
     val updatedHand = currentPlayerHand.removeCard(card)
-
+    
     val updatedDiscardPile = gameState.gameBoard.discardPile :+ card
     val updatedGameBoard = gameState.gameBoard.copy(discardPile = updatedDiscardPile)
-
+    
     val baseGameState = gameState.copy(
       players = gameState.players.updated(currentPlayerIndex, updatedHand),
       gameBoard = updatedGameBoard
@@ -120,12 +128,12 @@ case class GameBoard(drawPile: List[Card], discardPile: List[Card]) {
         val nextAfterReverse = newGameState.nextPlayer(newGameState)
 
         nextAfterReverse
-
+        
       //------------ draw two ------------
       case ActionCard(_, "draw two") =>
         val nextPlayerIndex = baseGameState.nextPlayer(baseGameState).currentPlayerIndex
 
-        val (updatedNextPlayerHand, updatedGameBoard) = (1 to 2).foldLeft((baseGameState.players(nextPlayerIndex),
+        val (updatedNextPlayerHand, updatedGameBoard) = (1 to 2).foldLeft((baseGameState.players(nextPlayerIndex), 
               baseGameState.gameBoard)) {
           case ((hand, gameBoard), _) =>
             val (drawnCard, updatedHand, updatedGameBoard) = gameBoard.drawCard(hand)

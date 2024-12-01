@@ -1,20 +1,28 @@
 
-case class PlayerHand(cards: List[Card]) {
+case class PlayerHand(cards: List[Card], hasSaidUno: Boolean = false) {
 
   //add a card to players hand
   def addCard(card: Card): PlayerHand = {
-    copy(cards = card :: cards) //add card to the head of list cards
+    copy(cards = card :: cards, hasSaidUno = false) //add card to the head of list cards
   }
   def containsCard(card: Card): Boolean = cards.contains(card)
   
   //remove a card from players hand
   def removeCard(card: Card): PlayerHand = {
     val (before, after) = cards.span(_ != card)
-    copy(cards = before ++ after.drop(1))
+    copy(cards = before ++ after.drop(1), hasSaidUno = false)
   }
 
   //check if player can say 'Uno'
   def hasUno: Boolean = cards.length == 1
+
+  def sayUno(): PlayerHand = {
+    if (hasUno) copy(hasSaidUno = true)
+    else this //nothing to change
+  }
+  def resetUnoStatus(): PlayerHand = {
+    copy(hasSaidUno = false)
+  }
 
   //if hand is empty
   def isEmpty: Boolean = cards.isEmpty

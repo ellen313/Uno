@@ -190,11 +190,3 @@ val test2 = testGameBoard.isValidPlay(NumberCard("red", 5), Some(NumberCard("blu
 val test3 = testGameBoard.isValidPlay(NumberCard("red", 5), Some(ActionCard("blue", "skip")))  ////expected: false
 val test4 = testGameBoard.isValidPlay(WildCard("wild draw four"), Some(ActionCard("blue", "draw two")))  ////expected: true
 val test5 = testGameBoard.isValidPlay(WildCard("wild draw four"), Some(WildCard("wild draw four")))  ////expected: false
-
-
-
-
-
-
-
-

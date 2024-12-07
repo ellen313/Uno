@@ -89,12 +89,102 @@ val cardNumAfter10 = stateAfterDrawTwo.players(1).cards.length //expected: 4 (Pl
 val drawTwoOnDiscardPile = stateAfterDrawTwo.gameBoard.discardPile.last == drawTwoBlue //expected: true
 val drawTwoOnPlayerHand = stateAfterDrawTwo.players(2).containsCard(drawTwoBlue) //expected: false
 
+//====================================== test hasUno and resetUno in playCard ==========================================
+
+val redFive = NumberCard("red", 5)
+val greenTwo = NumberCard("green", 2)
+val blueSeven = NumberCard("blue", 7)
+val yellowThree = NumberCard("yellow", 3)
+val redSkip2 = ActionCard("red", "skip")
+val wildDrawFour2 = WildCard("wild draw four")
+
+// PlayerHands
+val player1 = PlayerHand(List(redFive, greenTwo))
+val player2 = PlayerHand(List(blueSeven, yellowThree))
+val player3 = PlayerHand(List(NumberCard("yellow", 5), redSkip))
+val player4 = PlayerHand(List(NumberCard("blue", 4), wildDrawFour2))
+val player5 = PlayerHand(List(NumberCard("blue", 4)))
+
+
+// GameBoard
+val initialDiscardPile = List(NumberCard("red", 9))
+val initialDrawPile = List(NumberCard("green", 8), NumberCard("blue", 6),greenTwo, yellowThree,redSkip)
+val gameBoard = GameBoard(initialDrawPile, initialDiscardPile)
+
+// GameState
+var gameStatus = GameState(
+  players = List(player1, player2, player3, player4, player5),
+  gameBoard = gameBoard,
+  currentPlayerIndex = 0,
+  allCards = initialDrawPile ++ initialDiscardPile ++ player1.cards ++ player2.cards ++ player3.cards ++ player4.cards
+)
+
+println("Initial GameState:")
+gameStatus.players.zipWithIndex.foreach { case (hand, index) =>
+  println(s"Player ${index + 1} Hand: ${hand.cards}")
+}
+println(s"Top of Discard Pile: ${gameStatus.gameBoard.discardPile.lastOption.getOrElse("None")}\n")
+
+//----------------- test a simple Card ----------------------
+val normalCard = redFive
+println(s"Player 1 plays: $normalCard")
+val gameStatusNormalCard = gameStatus.gameBoard.playCard(normalCard, gameStatus)
+
+println("\nAfter Player 1 plays:")
+gameStatusNormalCard.players.zipWithIndex.foreach { case (hand, index) =>
+  println(s"Player ${index + 1} Hand: ${hand.cards}")
+}
+println(s"Top of Discard Pile: ${gameStatusNormalCard.gameBoard.discardPile.lastOption.getOrElse("None")}")
+println(s"Player 1 Uno Status: ${gameStatusNormalCard.players.head.hasUno}") //expected: true
+println(s"Player 1 has said Uno: ${gameStatusNormalCard.players.head.hasSaidUno}\n") //expected: true
+
+//--------------- test ActionCard (RedSkip) --------------------
+println(s"Player 3 plays: $redSkip2")
+val gameStatusRedSkip = gameStatus
+  .copy(currentPlayerIndex = 2)
+  .gameBoard
+  .playCard(redSkip2, gameStatus.copy(currentPlayerIndex = 2))
+
+println("\nAfter Player 3 plays:")
+gameStatusRedSkip.players.zipWithIndex.foreach { case (hand, index) =>
+  println(s"Player ${index + 1} Hand: ${hand.cards}")
+}
+println(s"Top of Discard Pile: ${gameStatusRedSkip.gameBoard.discardPile.lastOption.getOrElse("None")}")
+println(s"Player 3 Uno Status: ${gameStatusRedSkip.players(2).hasUno}") //expected: true
+println(s"Player 3 has said Uno: ${gameStatusRedSkip.players(2).hasSaidUno}\n") //expected: true
+
+//--------------- test Wildcard and resetUnoStatus -----------------
+
+println(s"Player 4 plays: $wildDrawFour2")
+
+println("\nBefore Player 4 plays (hasUno status of Player 5):")
+println(s"Player 5 Uno Status: ${gameStatus.players(4).hasUno}") //expected: true
+println(s"Player 5 has said Uno: ${gameStatus.players(4).hasSaidUno}\n") //expected: false (because not set yet)
+
+val gameStatusWildCard = gameStatus
+  .copy(currentPlayerIndex = 3)
+  .gameBoard
+  .playCard(wildDrawFour2, gameStatus.copy(currentPlayerIndex = 3))
+
+gameStatusWildCard.gameBoard.drawPile
+
+println("\nAfter Player 4 plays:")
+gameStatusWildCard.players.zipWithIndex.foreach { case (hand, index) =>
+  println(s"Player ${index + 1} Hand: ${hand.cards}")
+}
+println(s"Top of Discard Pile: ${gameStatusWildCard.gameBoard.discardPile.lastOption.getOrElse("None")}")
+println(s"Player 4 Uno Status: ${gameStatusWildCard.players(3).hasUno}") //expected: true
+println(s"Player 4 has said Uno: ${gameStatusWildCard.players(3).hasSaidUno}\n") //expected: true
+println(s"Player 5 Uno Status: ${gameStatusWildCard.players(4).hasUno}") //expected: false
+println(s"Player 5 has said Uno: ${gameStatusWildCard.players(4).hasSaidUno}\n") //expected: false
+
 //######################################################################################################################
+
 val testHand = PlayerHand(List(redThree, redSkip))
 val testGameBoard = GameBoard(List.empty[Card], List.empty[Card])
 val testGameState = GameState(List(testHand), testGameBoard, 0, List(redThree, redSkip, wildDrawFour))
 
-//============================================= isValidPlay method ========================================================
+//============================================= isValidPlay method =====================================================
 val test1 = testGameBoard.isValidPlay(NumberCard("red", 5), Some(NumberCard("red", 3)))  ////expected: true
 val test2 = testGameBoard.isValidPlay(NumberCard("red", 5), Some(NumberCard("blue", 5)))  ////expected: true
 val test3 = testGameBoard.isValidPlay(NumberCard("red", 5), Some(ActionCard("blue", "skip")))  ////expected: false

@@ -1,4 +1,4 @@
-//this worksheet is used to test the methods from GameBoard.scala
+/***this worksheet is used to test the methods from GameBoard.scala*/
 
 //============================================= playCard method ========================================================
 val redThree = NumberCard("red", 3)
@@ -90,7 +90,6 @@ val drawTwoOnDiscardPile = stateAfterDrawTwo.gameBoard.discardPile.last == drawT
 val drawTwoOnPlayerHand = stateAfterDrawTwo.players(2).containsCard(drawTwoBlue) //expected: false
 
 //====================================== test hasUno and resetUno in playCard ==========================================
-
 val redFive = NumberCard("red", 5)
 val greenTwo = NumberCard("green", 2)
 val blueSeven = NumberCard("blue", 7)
@@ -104,7 +103,6 @@ val player2 = PlayerHand(List(blueSeven, yellowThree))
 val player3 = PlayerHand(List(NumberCard("yellow", 5), redSkip))
 val player4 = PlayerHand(List(NumberCard("blue", 4), wildDrawFour2))
 val player5 = PlayerHand(List(NumberCard("blue", 4)))
-
 
 // GameBoard
 val initialDiscardPile = List(NumberCard("red", 9))
@@ -154,7 +152,6 @@ println(s"Player 3 Uno Status: ${gameStatusRedSkip.players(2).hasUno}") //expect
 println(s"Player 3 has said Uno: ${gameStatusRedSkip.players(2).hasSaidUno}\n") //expected: true
 
 //--------------- test Wildcard and resetUnoStatus -----------------
-
 println(s"Player 4 plays: $wildDrawFour2")
 
 println("\nBefore Player 4 plays (hasUno status of Player 5):")

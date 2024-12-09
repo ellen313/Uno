@@ -1,3 +1,4 @@
+package model
 
 case class PlayerHand(cards: List[Card], hasSaidUno: Boolean = false) {
 

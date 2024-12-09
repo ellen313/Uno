@@ -1,5 +1,5 @@
+package model
 import scala.util.Random
-
 
 case class GameBoard(drawPile: List[Card], discardPile: List[Card]) {
 

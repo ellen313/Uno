@@ -1,3 +1,5 @@
+import model.*
+
 object Main {
   def main(args: Array[String]): Unit = {
     val numberPlayers =  2

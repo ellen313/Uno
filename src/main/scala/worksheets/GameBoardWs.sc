@@ -1,3 +1,5 @@
+import model._
+
 /***this worksheet is used to test the methods from GameBoard.scala*/
 
 //============================================= playCard method ========================================================

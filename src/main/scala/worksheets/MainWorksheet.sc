@@ -1,3 +1,4 @@
+import model._
 // testing the card class
 val numCard = NumberCard("red", 5)
 val actionCard = ActionCard("blue", "draw two")

@@ -14,8 +14,7 @@ case class WildCard(action: String) extends Card {
 
 object NumberCard{
 
-  def createNumberCard():
-    NumberCard = {
+  def createNumberCard(): NumberCard = {
     val randomColor = Random.shuffle(colors).head
     val randomNumber =  Random.nextInt(10) //0 to 9
     NumberCard(randomColor, randomNumber)
@@ -24,8 +23,7 @@ object NumberCard{
 
 object ActionCard{
 
-  def createActionCard():
-    ActionCard = {
+  def createActionCard(): ActionCard = {
     val randomColor = Random.shuffle(colors).head
     val actions = List("draw two", "reverse", "skip")
     val randomAction = Random.shuffle(actions).head
@@ -35,8 +33,7 @@ object ActionCard{
 
 object WildCard{
 
-  def createWildCard():
-  WildCard = {
+  def createWildCard(): WildCard = {
     val actions = List("wild", "wild draw four") //wild: player can change color
     val randomAction = Random.shuffle(actions).head
     WildCard(randomAction)

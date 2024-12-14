@@ -1,56 +1,57 @@
-import Main.{GameBoard, PlayerHand, GameState, Card}
-import org.scalatest.matchers.should.Matchers.*
+import model._
+import org.scalatest.matchers.should.Matchers._
 import org.scalatest.wordspec.AnyWordSpec
 
 class UnoSpec extends AnyWordSpec {
+
   "A card" when {
-    "created with a valid number and color" should {
-      "return a valid Card object" in {
-        val card = Card.numberCard.createNumberCard()
+    "created as a NumberCard" should {
+      "have a valid color and number" in {
+        val card = NumberCard.createNumberCard()
+        List("red", "blue", "green", "yellow") should contain(card.color)
+        card.number should (be >= 0 and be <= 9)
       }
     }
-      "created with an invalid number or color" should {
-        "return a WildCard object" in {
-          val wildCard = Card.WildCard.createRandomCard()
-          assert(wildCard.isRight)
-          assert(wildCard.right.get.card == "Wild")
-        }
+
+    "created as a WildCard" should {
+      "always have the color 'wild' and a valid action" in {
+        val wildCard = WildCard.createWildCard()
+        wildCard.color shouldEqual "wild"
+        List("wild", "wild draw four") should contain(wildCard.action)
       }
     }
+  }
 
   "The DrawPile" when {
-    "creating a random card" should {
-      "return a valid Card object if the generated number and color are valid" in {
-        val randomCard = Card.numberCard.createRandomcard()
-        assert(randomCard.isLeft)
-        val card = randomCard.left.get
-        assert(List("yellow","red", "blue", "green").contains(card.colors))
-        //assert(card.number >= 0 && card.number <= 9)
-        assert(card.randomNumber)
-        assert(card.isSet)
+    "creating a random NumberCard" should {
+      "return a valid NumberCard object" in {
+        val randomCard = NumberCard.createNumberCard()
+        List("red", "blue", "green", "yellow") should contain(randomCard.color)
+        randomCard.number should (be >= 0 and be <= 9)
       }
+    }
 
-      "return a WildCard object if the generated number or color are invalid" in {
-        //Implement test for invalid number of color
-        val wildCard = Card.WildCard.createRandomCard()
-        assert(wildCard.isRight)
-        assert(wildCard.right.get.card == "Wild")
+    "creating a random WildCard" should {
+      "return a valid WildCard object" in {
+        val wildCard = WildCard.createWildCard()
+        wildCard.color shouldEqual "wild"
+        List("wild", "wild draw four") should contain(wildCard.action)
       }
     }
   }
 
   "A player" when {
-    "players hand is empty" should {
-      "win" in {
+    "the player's hand is empty" should {
+      "indicate the player has won" in {
         val playerHand = PlayerHand(List())
-        playerHand.isEmpty should be(true)
+        playerHand.cards shouldBe empty
       }
     }
 
     "the player's hand is not empty" should {
-      "keep on playing" in {
-        val playerHand = PlayerHand(List(Card()))
-        playerHand.isEmpty should be(false)
+      "indicate the player must keep playing" in {
+        val playerHand = PlayerHand(List(NumberCard("red", 5)))
+        playerHand.cards should not be empty
       }
     }
   }

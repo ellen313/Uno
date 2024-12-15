@@ -20,16 +20,20 @@ case class GameBoard(drawPile: List[Card], discardPile: List[Card]) {
     }
     val allNumberCards = numberCards.flatten.toList
 
-    val actionCards = List("draw two", "skip", "reverse").flatMap { action =>
+    val actionCards = List("draw two", "skip", "reverse").flatMap { action => //24 cards
       List(
         ActionCard("red", action),
+        ActionCard("red", action),
+        ActionCard("blue", action),
         ActionCard("blue", action),
         ActionCard("green", action),
+        ActionCard("green", action),
+        ActionCard("yellow", action),
         ActionCard("yellow", action)
       )
     }
-    val wildCards = List.fill(4)(WildCard("wild")) ++ List.fill(4)(WildCard("wild draw four"))
-    allNumberCards ++ actionCards ++ wildCards
+    val wildCards = List.fill(4)(WildCard("wild")) ++ List.fill(4)(WildCard("wild draw four")) //8 cards 
+    allNumberCards ++ actionCards ++ wildCards // 108 cards
   }
 
   def shuffleDeck(): GameBoard = {

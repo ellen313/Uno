@@ -12,12 +12,21 @@ class UnoSpec extends AnyWordSpec {
         card.number should (be >= 0 and be <= 9)
       }
     }
-
     "created as a WildCard" should {
       "always have the color 'wild' and a valid action" in {
         val wildCard = WildCard.createWildCard()
         wildCard.color shouldEqual "wild"
         List("wild", "wild draw four") should contain(wildCard.action)
+      }
+    }
+    "created as an ActionCard" should {
+      "have a valid color and action" in {
+        val card = ActionCard.createActionCard()
+
+        List("red", "blue", "green", "yellow") should contain(card.color)
+
+        val validActions = List("draw two", "reverse", "skip")
+        validActions should contain(card.action)
       }
     }
   }

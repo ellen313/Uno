@@ -2,7 +2,7 @@ import model._
 import org.scalatest.matchers.should.Matchers._
 import org.scalatest.wordspec.AnyWordSpec
 
-class UnoSpec extends AnyWordSpec {
+class CardSpec extends AnyWordSpec {
 
   "A card" when {
     "created as a NumberCard" should {

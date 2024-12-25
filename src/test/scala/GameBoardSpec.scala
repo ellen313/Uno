@@ -1,43 +1,240 @@
-import
-import org.scalatest.matchers.should.Matchers._
+package model
+
+import org.scalatest.matchers.should.Matchers.*
 import org.scalatest.wordspec.AnyWordSpec
 
 class GameBoardSpec extends AnyWordSpec {
-  "A gameBoard" when {
+
+  "A GameBoard" when {
+    /**test method createDeckWithAllCards*/
+    "created" should {
+      "generate a full deck of cards with correct composition" in {
+        val gameBoard = GameBoard(Nil, Nil)
+        val fullDeck = gameBoard.createDeckWithAllCards()
+
+        fullDeck.count(_.isInstanceOf[NumberCard]) shouldEqual 76 // 19 * 4 colors (0 once, 1-9 twice)
+        fullDeck.count(_.isInstanceOf[ActionCard]) shouldEqual 24 // 3 actions * 4 colors * 2 per color
+        fullDeck.count(_.isInstanceOf[WildCard]) shouldEqual 8   // 4 wilds + 4 wild draw fours
+        fullDeck.size shouldEqual 108
+      }
+    }
+    //------------------------------------------------------------------------------------------------------------------
+    /**test method shuffleDeck*/
     "shuffled" should {
-      "return a new gameBoard with shuffled cards" in {
-        val initialCards = List(Card("green", 8), Card("red", 6))
-        val gameBoard = GameBoard(initialCards)
-        val shuffledGameBoard = gameBoard.shuffle()
+      "create a shuffled deck with a discard pile containing the top card" in {
+        val gameBoard = GameBoard(Nil, Nil).shuffleDeck()
+        gameBoard.drawPile.size shouldEqual 107 // 108 total cards - 1 discard pile card
+        gameBoard.discardPile.size shouldEqual 1
+      }
 
-        shuffledGameBoard.cards should not be initialCards
+      "return an empty discard pile when the deck is empty" in {
+        val emptyDeckGameBoard = new GameBoard(Nil, Nil) {
+          override def createDeckWithAllCards(): List[Card] = List.empty
+        }
+        val shuffledGameBoard = emptyDeckGameBoard.shuffleDeck()
+
+        shuffledGameBoard.drawPile shouldBe empty
+        shuffledGameBoard.discardPile shouldBe empty
       }
     }
-    "drawn" should {
-      "return a tuple with the drawn card an the updated GameBoard" in {
-        val initialCards = List(Card("blue", 9), Card("red", 2))
-        val gameBoard = GameBoard(initialCards)
-        val (drawnCard, updatedGameBoard) = gameBoard.draw()
+    //------------------------------------------------------------------------------------------------------------------
+    /**test method drawCard*/
+    "a card is drawn" should {
+      "return the correct card, updated player hand, and updated draw pile" in {
+        val initialDrawPile = List(NumberCard("blue", 5), NumberCard("red", 3))
+        val gameBoard = GameBoard(initialDrawPile, discardPile = List.empty)
+        val playerHand = PlayerHand(List(NumberCard("yellow", 7)))
 
-        updatedGameBoard.cards should not contain drawnCard
+        val (drawnCard, updatedHand, updatedBoard) = gameBoard.drawCard(playerHand)
+
+        drawnCard shouldEqual NumberCard("blue", 5)
+        updatedHand.cards should contain(drawnCard)
+        updatedBoard.drawPile shouldEqual List(NumberCard("red", 3))
+      }
+
+      "throw an exception if the draw pile is empty" in {
+        val gameBoard = GameBoard(Nil, Nil)
+        val playerHand = PlayerHand(Nil)
+
+        an[RuntimeException] should be thrownBy {
+          gameBoard.drawCard(playerHand)
+        }
       }
     }
-  }
+    //------------------------------------------------------------------------------------------------------------------
+    /**test method isValidPlay*/
+    "validating a play" should {
+      //test case with None
+      "accept any card if there is no top card" in {
+        val gameBoard = GameBoard(Nil, Nil)
+        val card = NumberCard("red", 5)
 
-  "A gameState" when {
-    "printed" should {
-      "print the game condition correctly" in {
-        val playerHand = PlayerHand(List(Card("red", 8), Card("blue", 10)))
-        val playerStacks = List(List(Card("green", 12)), List(Card("blue", 9)))
-        val centerStack = List(Card("blue", 6))
-        val drawPile = List(Card("green", 3))
-        val discardPile = List(Card("red", 8))
+        gameBoard.isValidPlay(card, None) shouldBe true
+      }
+      //test case (WildCard("wild draw four"), WildCard("wild draw four")) => false
+      "not accept two 'wild draw four' cards" in {
+        val topCard = Some(WildCard("wild draw four"))
+        val wildDrawFour = WildCard("wild draw four")
 
-        val gameBoard = GameBoard(playerStacks, centerStack, drawPile, discardPile)
-        val gameState = GameState(List(playerHand), gameBoard, currentPlayerIndex = 0)
+        val gameBoard = GameBoard(Nil, Nil)
+        gameBoard.isValidPlay(wildDrawFour, topCard) shouldBe false
+      }
+      //test case (WildCard("wild"), _) => true
+      "accept any card on a wild card" in {
+        val topCard = WildCard("wild")
+        val someCard = NumberCard("red", 5)
 
-        val printedOutput: Unit = printGameBoard(gameState)
-        printedOutput shouldEqual expectedOutput //define expected output
+        val gameBoard = GameBoard(Nil, Nil)
+        gameBoard.isValidPlay(someCard, Some(topCard)) shouldBe true
+      }
+      //test case (WildCard("wild draw four"), _) => true
+      "accept any card on a wild draw four" in {
+        val topCard = WildCard("wild draw four")
+        val someCard = NumberCard("yellow", 3)
+
+        val gameBoard = GameBoard(Nil, Nil)
+        gameBoard.isValidPlay(someCard, Some(topCard)) shouldBe true
+      }
+      //test case (_, WildCard("wild"))=> true
+      "accept a wild card on top of any card" in {
+        val topCard = NumberCard("blue", 5)
+        val wildCard = WildCard("wild")
+
+        val gameBoard = GameBoard(Nil, Nil)
+        gameBoard.isValidPlay(wildCard, Some(topCard)) shouldBe true
+      }
+      //test case (_, WildCard("wild draw four"))=> true
+      "accept a wild draw four card on top of any card" in {
+        val topCard = ActionCard("red", "skip")
+        val wildDrawFour = WildCard("wild draw four")
+
+        val gameBoard = GameBoard(Nil, Nil)
+        gameBoard.isValidPlay(wildDrawFour, Some(topCard)) shouldBe true
+      }
+      //test case (ActionCard(color, "draw two"), ActionCard(topColor, "draw two")) => color == topColor
+      "accept a 'draw two' card only if the top card is the same color 'draw two'" in {
+        val topCard = Some(ActionCard("red", "draw two"))
+        val validCard = ActionCard("red", "draw two")
+        val invalidCard = ActionCard("blue", "draw two")
+
+        val gameBoard = GameBoard(Nil, Nil)
+        gameBoard.isValidPlay(validCard, topCard) shouldBe true
+        gameBoard.isValidPlay(invalidCard, topCard) shouldBe false
+      }
+      //test case (NumberCard(color, number), NumberCard(topColor, topNumber))=>color == topColor || number == topNumber
+      "accept number cards with matching color or number" in {
+        val topCard1 = NumberCard("red", 5)
+        val validCard1 = NumberCard("red", 5)
+        val validCard2 = NumberCard("blue", 5)
+        val validCard3 = NumberCard("red", 7)
+        val invalidCard = NumberCard("blue", 3)
+
+        val gameBoard = GameBoard(Nil, Nil)
+        gameBoard.isValidPlay(validCard1, Some(topCard1)) shouldBe true
+        gameBoard.isValidPlay(validCard2, Some(topCard1)) shouldBe true
+        gameBoard.isValidPlay(validCard3, Some(topCard1)) shouldBe true
+        gameBoard.isValidPlay(invalidCard, Some(topCard1)) shouldBe false
+      }
+
+      "validate color match between NumberCard and ActionCard" in {
+        val validNumberCard = NumberCard("red", 5)
+        val validActionCard = ActionCard("red", "skip")
+        val invalidActionCard = ActionCard("blue", "reverse")
+
+        val gameBoard = GameBoard(Nil, Nil)
+
+        //colors match
+        gameBoard.isValidPlay(validNumberCard, Some(validActionCard)) shouldBe true
+
+        //colors do not match
+        gameBoard.isValidPlay(validNumberCard, Some(invalidActionCard)) shouldBe false
+
+        val validActionCard2 = ActionCard("green", "draw two")
+        val validNumberCard2 = NumberCard("green", 8)
+        val invalidNumberCard = NumberCard("yellow", 3)
+
+        //colors match
+        gameBoard.isValidPlay(validActionCard2, Some(validNumberCard2)) shouldBe true
+
+        //colors do not match
+        gameBoard.isValidPlay(validActionCard2, Some(invalidNumberCard)) shouldBe false
+      }
+      //case (ActionCard(color, action), ActionCard(topColor, topAction)) => color == topColor || action == topAction
+      "accept an action card if it has the same color or action as the top action card" in {
+        val topCard = Some(ActionCard("red", "skip"))
+        val validCard = ActionCard("red", "reverse")
+        val validAction = ActionCard("blue", "skip")
+        val invalidCard = ActionCard("blue", "draw two")
+
+        val gameBoard = GameBoard(Nil, Nil)
+        gameBoard.isValidPlay(validCard, topCard) shouldBe true
+        gameBoard.isValidPlay(validAction, topCard) shouldBe true
+        gameBoard.isValidPlay(invalidCard, topCard) shouldBe false
+      }
+      //case _ => false
+      "reject a card with an invalid wildcard type and top card" in {
+        val topCard = NumberCard("blue", 5)
+        val invalidWildCard = WildCard("unknown")
+
+        val gameBoard = GameBoard(Nil, Nil)
+        gameBoard.isValidPlay(invalidWildCard, Some(topCard)) shouldBe false
+      }
+    }
+    //------------------------------------------------------------------------------------------------------------------
+    /**test method shuffleDeck*/
+    "playing a card" should {
+
+      "correctly handle a normal NumberCard" in {
+        val playerHand = PlayerHand(List(NumberCard("red", 5), NumberCard("blue", 3)))
+        val gameBoard = GameBoard(drawPile = List(NumberCard("yellow", 9)), discardPile = List(NumberCard("red", 3)))
+        val gameState = GameState(
+          players = List(playerHand),
+          gameBoard = gameBoard,
+          currentPlayerIndex = 0,
+          allCards = List.empty
+        )
+
+        val updatedGameState = gameBoard.playCard(NumberCard("red", 5), gameState)
+
+        updatedGameState.gameBoard.discardPile.last shouldEqual NumberCard("red", 5)
+        updatedGameState.players.head.cards should not contain NumberCard("red", 5)
+      }
+
+      "handle a wild card correctly" in {
+        val playerHand = PlayerHand(List(WildCard("wild"), NumberCard("blue", 3)))
+        val gameBoard = GameBoard(drawPile = List(NumberCard("yellow", 9)), discardPile = List(NumberCard("red", 3)))
+        val gameState = GameState(
+          players = List(playerHand),
+          gameBoard = gameBoard,
+          currentPlayerIndex = 0,
+          allCards = List.empty
+        )
+
+        val updatedGameState = gameBoard.playCard(WildCard("wild"), gameState)
+
+        updatedGameState.gameBoard.discardPile.last shouldEqual WildCard("wild")
+        updatedGameState.players.head.cards should not contain WildCard("wild")
+      }
+
+      "handle a draw two card correctly" in {
+        val playerHand = PlayerHand(List(ActionCard("red", "draw two")))
+        val nextPlayerHand = PlayerHand(Nil)
+        val gameBoard = GameBoard(
+          drawPile = List(NumberCard("yellow", 7), NumberCard("blue", 2)),
+          discardPile = List(NumberCard("red", 3))
+        )
+        val gameState = GameState(
+          players = List(playerHand, nextPlayerHand),
+          gameBoard = gameBoard,
+          currentPlayerIndex = 0,
+          allCards = List.empty
+        )
+
+        val updatedGameState = gameBoard.playCard(ActionCard("red", "draw two"), gameState)
+
+        updatedGameState.players(1).cards should have size 2
+        updatedGameState.players(1).cards should contain(NumberCard("yellow", 7))
+        updatedGameState.players(1).cards should contain(NumberCard("blue", 2))
       }
     }
   }

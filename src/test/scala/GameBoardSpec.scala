@@ -184,9 +184,12 @@ class GameBoardSpec extends AnyWordSpec {
     /**test method shuffleDeck*/
     "playing a card" should {
 
-      "correctly handle a normal NumberCard" in {
+      "handle a number card correctly" in {
         val playerHand = PlayerHand(List(NumberCard("red", 5), NumberCard("blue", 3)))
-        val gameBoard = GameBoard(drawPile = List(NumberCard("yellow", 9)), discardPile = List(NumberCard("red", 3)))
+        val gameBoard = GameBoard(
+          drawPile = List(NumberCard("yellow", 9)),
+          discardPile = List(NumberCard("red", 3))
+        )
         val gameState = GameState(
           players = List(playerHand),
           gameBoard = gameBoard,
@@ -202,7 +205,10 @@ class GameBoardSpec extends AnyWordSpec {
 
       "handle a wild card correctly" in {
         val playerHand = PlayerHand(List(WildCard("wild"), NumberCard("blue", 3)))
-        val gameBoard = GameBoard(drawPile = List(NumberCard("yellow", 9)), discardPile = List(NumberCard("red", 3)))
+        val gameBoard = GameBoard(
+          drawPile = List(NumberCard("yellow", 9)),
+          discardPile = List(NumberCard("red", 3))
+        )
         val gameState = GameState(
           players = List(playerHand),
           gameBoard = gameBoard,
@@ -233,8 +239,107 @@ class GameBoardSpec extends AnyWordSpec {
         val updatedGameState = gameBoard.playCard(ActionCard("red", "draw two"), gameState)
 
         updatedGameState.players(1).cards should have size 2
-        updatedGameState.players(1).cards should contain(NumberCard("yellow", 7))
-        updatedGameState.players(1).cards should contain(NumberCard("blue", 2))
+        updatedGameState.players(1).cards should contain allOf(NumberCard("yellow", 7), NumberCard("blue", 2))
+      }
+
+      "handle a skip card correctly" in {
+        val playerHand = PlayerHand(List(ActionCard("blue", "skip")))
+        val nextPlayerHand = PlayerHand(List(NumberCard("red", 9)))
+        val skippedPlayerHand = PlayerHand(List(NumberCard("yellow", 6)))
+        val gameBoard = GameBoard(
+          drawPile = List(NumberCard("green", 2)),
+          discardPile = List(NumberCard("blue", 7))
+        )
+        val gameState = GameState(
+          players = List(playerHand, nextPlayerHand, skippedPlayerHand),
+          gameBoard = gameBoard,
+          currentPlayerIndex = 0,
+          allCards = List.empty
+        )
+
+        val updatedGameState = gameBoard.playCard(ActionCard("blue", "skip"), gameState)
+
+        updatedGameState.currentPlayerIndex shouldEqual 2 // Next player's turn is skipped
+      }
+
+      "handle a reverse card correctly" in {
+        val playerHand = PlayerHand(List(ActionCard("red", "reverse")))
+        val nextPlayerHand = PlayerHand(List(NumberCard("yellow", 8)))
+        val gameBoard = GameBoard(
+          drawPile = List(NumberCard("green", 4)),
+          discardPile = List(NumberCard("red", 5))
+        )
+        val gameState = GameState(
+          players = List(playerHand, nextPlayerHand),
+          gameBoard = gameBoard,
+          currentPlayerIndex = 0,
+          isReversed = false,
+          allCards = List.empty
+        )
+
+        val updatedGameState = gameBoard.playCard(ActionCard("red", "reverse"), gameState)
+
+        updatedGameState.isReversed shouldEqual true
+        updatedGameState.currentPlayerIndex shouldEqual 1
+      }
+
+      "handle a wild draw four card correctly" in {
+        val playerHand = PlayerHand(List(WildCard("wild draw four")))
+        val nextPlayerHand = PlayerHand(List(NumberCard("blue", 2)))
+        val gameBoard = GameBoard(
+          drawPile = List.fill(4)(NumberCard("yellow", 1)),
+          discardPile = List(NumberCard("red", 7))
+        )
+        val gameState = GameState(
+          players = List(playerHand, nextPlayerHand),
+          gameBoard = gameBoard,
+          currentPlayerIndex = 0,
+          allCards = List.empty
+        )
+
+        val updatedGameState = gameBoard.playCard(WildCard("wild draw four"), gameState)
+
+        updatedGameState.players(1).cards should have size 5
+      }
+      "handle case where no valid card is playable and draw pile is exhausted" in {
+        val playerHand = PlayerHand(List(NumberCard("blue", 3)))
+        val gameBoard = GameBoard(
+          drawPile = List(NumberCard("red", 6)),
+          discardPile = List(NumberCard("red", 5))
+        )
+        val gameState = GameState(
+          players = List(playerHand, PlayerHand(List(NumberCard("blue", 7)))),
+          gameBoard = gameBoard,
+          currentPlayerIndex = 0,
+          allCards = List.empty
+        )
+
+        val updatedGameState = gameBoard.playCard(NumberCard("blue", 3), gameState)
+
+        updatedGameState.currentPlayerIndex shouldEqual 1
+        updatedGameState.players.head.cards should have size 2
+      }
+
+      "throw an exception when the iteration count exceeds the maximum limit" in {
+        val unplayableCard = NumberCard("green", 7)
+        val playerHand = PlayerHand(List(unplayableCard))
+        val drawPile = List.fill(200)(NumberCard("blue", 9))
+        val gameBoard = GameBoard(
+          drawPile = drawPile,
+          discardPile = List(NumberCard("red", 5))
+        )
+        val gameState = GameState(
+          players = List(playerHand),
+          gameBoard = gameBoard,
+          currentPlayerIndex = 0,
+          allCards = List.empty
+        )
+
+        val exception = intercept[RuntimeException] {
+          gameBoard.playCard(unplayableCard, gameState)
+        }
+
+        exception.getMessage shouldEqual "Infinite loop detected in playCard logic."
       }
     }
   }

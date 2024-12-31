@@ -32,7 +32,7 @@ case class GameBoard(drawPile: List[Card], discardPile: List[Card]) {
         ActionCard("yellow", action)
       )
     }
-    val wildCards = List.fill(4)(WildCard("wild")) ++ List.fill(4)(WildCard("wild draw four")) //8 cards 
+    val wildCards = List.fill(4)(WildCard("wild")) ++ List.fill(4)(WildCard("wild draw four")) //8 cards
     allNumberCards ++ actionCards ++ wildCards // 108 cards
   }
 
@@ -44,7 +44,7 @@ case class GameBoard(drawPile: List[Card], discardPile: List[Card]) {
       case Some(card) => List(card)
       case None => List.empty[Card]
     }
-    val drawPile = shuffledCards.tail
+    val drawPile = if (shuffledCards.isEmpty) List.empty[Card] else shuffledCards.tail
 
     GameBoard(drawPile, discardPile)
   }
@@ -54,13 +54,40 @@ case class GameBoard(drawPile: List[Card], discardPile: List[Card]) {
     if (drawPile.isEmpty) {
       throw new RuntimeException("No cards left in the draw pile")
     }
-    val drawnCard = drawPile.head 
-    val updatedDrawPile = drawPile.tail 
-    //val updatedPlayerHand = playerHand.addCard(drawnCard)
-    val updatedPlayerHand = playerHand + drawnCard
+    val drawnCard = drawPile.head
+    val updatedDrawPile = drawPile.tail
+    val updatedPlayerHand = playerHand.addCard(drawnCard)
     (drawnCard, updatedPlayerHand, copy(drawPile = updatedDrawPile))
   }
 
+  def isValidPlay(card: Card, topCard: Option[Card]): Boolean = {
+    topCard match {
+      case None => true
+      case Some(tCard) =>
+        (card, tCard) match {
+
+          case (WildCard("wild draw four"), WildCard("wild draw four")) => false
+          case (WildCard("wild"), _) => true
+          case (WildCard("wild draw four"), _) => true
+          case (_, WildCard("wild")) => true
+          case (_, WildCard("wild draw four")) => true
+
+
+          case (ActionCard(color, "draw two"), ActionCard(topColor, "draw two")) => color == topColor
+
+          case (NumberCard(color, number), NumberCard(topColor, topNumber)) =>
+            color == topColor || number == topNumber
+
+          case (NumberCard(color, _), ActionCard(topColor, _)) => color == topColor
+          case (ActionCard(color, _), NumberCard(topColor, _)) => color == topColor
+
+          case (ActionCard(color, action), ActionCard(topColor, topAction)) =>
+            color == topColor || action == topAction
+
+          case _ => false
+        }
+    }
+  }
 
   def playCard(card: Card, gameState: GameState): GameState = {
     val currentPlayerIndex = gameState.currentPlayerIndex
@@ -72,16 +99,25 @@ case class GameBoard(drawPile: List[Card], discardPile: List[Card]) {
       var drawPile = gameState.gameBoard.drawPile
       var playableCardFound = false
 
-      while (!playableCardFound && drawPile.nonEmpty) {
+      val maxIterations = 10
+      var iterationCount = 0
+
+      while (!playableCardFound && drawPile.nonEmpty && iterationCount < maxIterations) {
+        iterationCount += 1
         val (drawnCard, newHand, newGameBoard) = gameState.gameBoard.drawCard(updatedPlayerHand)
         updatedPlayerHand = newHand
         drawPile = newGameBoard.drawPile
         playableCardFound = isValidPlay(updatedPlayerHand.cards.last, topCard)
       }
-      if (!playableCardFound) {
+
+      if (!playableCardFound || iterationCount >= maxIterations) {
+        if (iterationCount >= maxIterations)
+          throw new RuntimeException("Infinite loop detected in playCard logic.")
+
         val resetHand = updatedPlayerHand.resetUnoStatus()
         return gameState.nextPlayer(
-          gameState.copy(players = gameState.players.updated(currentPlayerIndex, resetHand)))
+          gameState.copy(players = gameState.players.updated(currentPlayerIndex, resetHand))
+        )
       }
     }
 
@@ -152,30 +188,5 @@ case class GameBoard(drawPile: List[Card], discardPile: List[Card]) {
     val finalHand = if (updatedHand.hasUno) updatedHand.sayUno() else updatedHand.resetUnoStatus()
     finalGameState.copy(
       players = finalGameState.players.updated(currentPlayerIndex, finalHand))
-  }
-  
-  def isValidPlay(card: Card, topCard: Option[Card]): Boolean = {
-    topCard match {
-      case None => true
-      case Some(tCard) =>
-        (card, tCard) match {
-
-          case (WildCard("wild draw four"), WildCard("wild draw four")) => false
-          case (WildCard(_), _) => true
-          case (_, WildCard(_)) => true
-          case (ActionCard(color, "draw two"), ActionCard(topColor, "draw two")) => color == topColor
-
-          case (NumberCard(color, number), NumberCard(topColor, topNumber)) =>
-            color == topColor || number == topNumber
-
-          case (NumberCard(color, _), ActionCard(topColor, _)) => color == topColor
-          case (ActionCard(color, _), NumberCard(topColor, _)) => color == topColor
-
-          case (ActionCard(color, action), ActionCard(topColor, topAction)) =>
-            color == topColor || action == topAction
-
-          case _ => false
-        }
-    }
   }
 }

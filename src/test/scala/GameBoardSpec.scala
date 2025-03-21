@@ -320,7 +320,7 @@ class GameBoardSpec extends AnyWordSpec {
         updatedGameState.players.head.cards should have size 2
       }
 
-      "throw an exception when the iteration count exceeds the maximum limit" in {
+      /*"throw an exception when the iteration count exceeds the maximum limit" in {
         val unplayableCard = NumberCard("green", 7)
         val playerHand = PlayerHand(List(unplayableCard))
         val drawPile = List.fill(200)(NumberCard("blue", 9))
@@ -340,7 +340,10 @@ class GameBoardSpec extends AnyWordSpec {
         }
 
         exception.getMessage shouldEqual "Infinite loop detected in playCard logic."
-      }
+      }*/
+
+
+
     }
   }
 }

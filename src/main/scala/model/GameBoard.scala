@@ -110,7 +110,7 @@ case class GameBoard(drawPile: List[Card], discardPile: List[Card]) {
         playableCardFound = isValidPlay(updatedPlayerHand.cards.last, topCard)
       }
 
-      if (!playableCardFound || iterationCount >= maxIterations) {
+      /*if (!playableCardFound || iterationCount >= maxIterations) {
         if (iterationCount >= maxIterations)
           throw new RuntimeException("Infinite loop detected in playCard logic.")
 
@@ -118,7 +118,18 @@ case class GameBoard(drawPile: List[Card], discardPile: List[Card]) {
         return gameState.nextPlayer(
           gameState.copy(players = gameState.players.updated(currentPlayerIndex, resetHand))
         )
+      }*/
+      
+      if (!playableCardFound) {
+        val resetHand = updatedPlayerHand.resetUnoStatus()
+        val updatedGameState = gameState.copy(players = gameState.players.updated(currentPlayerIndex, resetHand))
+        return gameState.nextPlayer(updatedGameState)
       }
+      
+
+      /*if (iterationCount >= maxIterations) {
+        throw new RuntimeException("Infinite loop detected in playCard logic.")
+      }*/
     }
 
     val updatedHand = currentPlayerHand.removeCard(card)

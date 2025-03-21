@@ -7,7 +7,7 @@ object Main {
 
   case class GameState(players: List[PlayerHand], gameBoard: GameBoard, currentPlayerIndex: Int)
 
-  // Funktion zur Ausgabe des Spielbretts als Strings
+  // method to print the gameboard as string
   def printGameBoard(gameState: GameState): Unit = {
     println("Player Hand:")
     gameState.players.head.cards.foreach(card => println(s"${card.color}-${card.number}"))
@@ -28,7 +28,7 @@ object Main {
     gameState.gameBoard.discardPile.foreach(card => println(s"${card.color}-${card.number}"))
   }
 
-  // Main-Methode
+  // main method
   def main(args: Array[String]): Unit = {
     val playerHand = PlayerHand(List(Card(1, "red", 2), Card(2, "blue", 3)))
     val playerStacks = List(List(Card(3, "green", 1)), List(Card(4, "yellow", 4)))

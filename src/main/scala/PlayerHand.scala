@@ -25,7 +25,7 @@ case class PlayerHand(cards: List[Card]) {
   def displayHand(): Unit = {
     cards.foreach {
       case NumberCard(color, number) =>
-        println(s"$color-$number")
+        println(s"$color-$number") // instead of (color + "-" + number)
       case ActionCard(color, actionType) =>
         println(s"$color-$actionType")
       case WildCard(actionType) =>

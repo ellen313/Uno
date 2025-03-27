@@ -16,7 +16,7 @@ case class GameBoard(drawPile: List[Card], discardPile: List[Card]) {
         )
       }
     }
-    val allNumberCards = numberCards.flatten.toList 
+    val allNumberCards = numberCards.flatten.toList
 
     val actionCards = List("draw two", "skip", "reverse").flatMap { action =>
       List(
@@ -31,18 +31,19 @@ case class GameBoard(drawPile: List[Card], discardPile: List[Card]) {
   }
 
   def shuffleDeck(): GameBoard = {
-    val allCards = createDeckWithAllCards() 
+    val allCards = createDeckWithAllCards()
     val shuffledCards = Random.shuffle(allCards)
-    GameBoard(shuffledCards, List.empty[Card]) 
+    GameBoard(shuffledCards, List.empty[Card])
   }
 
   def drawCard(playerHand: PlayerHand): (Card, PlayerHand, GameBoard) = {
     if (drawPile.isEmpty) {
       throw new RuntimeException("No cards left in the draw pile")
     }
-    val drawnCard = drawPile.head 
-    val updatedDrawPile = drawPile.tail 
-    val updatedPlayerHand = playerHand.addCard(drawnCard) 
+    val drawnCard = drawPile.head
+    val updatedDrawPile = drawPile.tail
+    //val updatedPlayerHand = playerHand.addCard(drawnCard)
+    val updatedPlayerHand = playerHand + drawnCard
     (drawnCard, updatedPlayerHand, copy(drawPile = updatedDrawPile))
   }
 }

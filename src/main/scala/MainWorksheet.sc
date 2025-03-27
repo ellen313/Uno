@@ -17,7 +17,8 @@ playerHand1.hasUno         // expected: false
 playerHand1.isEmpty        // expected: false
 
 // adding a new card to the playerhand
-val updatedHand1 = playerHand1.addCard(wildCard)
+//val updatedHand1 = playerHand1.addCard(wildCard)
+val updatedHand1 = playerHand1 + wildCard
 updatedHand1.displayHand()  // expected: "wild draw four", "red-5", "blue-draw two"
 
 //------------------------------------------
@@ -36,9 +37,9 @@ updatedBoard1.drawPile.size // expected: 2 (because one card was drawn)
 case class GameState(players: List[PlayerHand], gameBoard: GameBoard, currentPlayerIndex: Int)
 
 val gameState1 = GameState(List(playerHand1), gameBoard1, 0)
-gameState1.players(0).displayHand()
+gameState1.players.head.displayHand()
 
-val (drawnCard2, updatedPlayerHand2, updatedBoard2) = gameState1.gameBoard.drawCard(gameState1.players(0))
+val (drawnCard2, updatedPlayerHand2, updatedBoard2) = gameState1.gameBoard.drawCard(gameState1.players.head)
 
 drawnCard2  // expected: NumberCard("red", 5)
 updatedPlayerHand2.displayHand()

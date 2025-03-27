@@ -1,12 +1,17 @@
+import scala.annotation.targetName
 
 case class PlayerHand(cards: List[Card]) {
+  
+  //def addCard(card: Card): PlayerHand = {
+    //copy(cards = card :: cards) //add card to the head of list cards
+  //}
 
-  //add a card to players hand
-  def addCard(card: Card): PlayerHand = {
-    copy(cards = card :: cards) //add card to the head of list cards
+  //create operator (instead of addCard method) -> can be used as an operator e.g. 'hand + Card("7", "red")'
+  @targetName("addCard") //JVM does not support operators as method names, needs operation name and targetName annotation
+  def +(card: Card): PlayerHand = {
+    copy(cards = card :: cards)
   }
 
-  //remove a card from players hand
   def removeCard(card: Card): PlayerHand = {
     copy(cards = cards.filter(c => c != card))
   }
@@ -14,7 +19,6 @@ case class PlayerHand(cards: List[Card]) {
   //check if player can say 'Uno'
   def hasUno: Boolean = cards.length == 1
 
-  //if hand is empty
   def isEmpty: Boolean = cards.isEmpty
 
   //display cards on players hand

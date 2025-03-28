@@ -37,9 +37,9 @@ updatedBoard1.drawPile.size // expected: 2 (because one card was drawn)
 case class GameState(players: List[PlayerHand], gameBoard: GameBoard, currentPlayerIndex: Int)
 
 val gameState1 = GameState(List(playerHand1), gameBoard1, 0)
-gameState1.players(0).displayHand()
+gameState1.players.head.displayHand()
 
-val (drawnCard2, updatedPlayerHand2, updatedBoard2) = gameState1.gameBoard.drawCard(gameState1.players(0))
+val (drawnCard2, updatedPlayerHand2, updatedBoard2) = gameState1.gameBoard.drawCard(gameState1.players.head)
 
 drawnCard2  // expected: NumberCard("red", 5)
 updatedPlayerHand2.displayHand()

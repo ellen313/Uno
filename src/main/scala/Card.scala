@@ -1,6 +1,6 @@
 import scala.util.Random
 
-sealed trait Card{def color: String} //Card as superclass 
+sealed trait Card{def color: String} //Card as superclass
 
 //different card types as subclasses
 case class NumberCard(color: String, number: Int) extends Card

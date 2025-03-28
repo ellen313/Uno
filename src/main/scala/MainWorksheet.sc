@@ -17,7 +17,8 @@ playerHand1.hasUno         // expected: false
 playerHand1.isEmpty        // expected: false
 
 // adding a new card to the playerhand
-val updatedHand1 = playerHand1.addCard(wildCard)
+//val updatedHand1 = playerHand1.addCard(wildCard)
+val updatedHand1 = playerHand1 + wildCard
 updatedHand1.displayHand()  // expected: "wild draw four", "red-5", "blue-draw two"
 
 //------------------------------------------

@@ -1,7 +1,7 @@
 import scala.annotation.targetName
 
 case class PlayerHand(cards: List[Card]) {
-  
+
   //def addCard(card: Card): PlayerHand = {
     //copy(cards = card :: cards) //add card to the head of list cards
   //}
@@ -30,14 +30,16 @@ case class PlayerHand(cards: List[Card]) {
         println(s"$color-$actionType")
       case WildCard(actionType) =>
         println(s"$actionType")
+
+        println()
     }
   }
 
   def sortHand(): PlayerHand = {
     val sortedCards = cards.sortBy {
       case NumberCard(color, number) => (1, color, number)
-      case ActionCard(color, _) => (2, color, Int.MaxValue)
-      case WildCard(_) => (3, "", Int.MaxValue)
+      case ActionCard(color, _) => (2, color, Int.MaxValue) // only need first value with pattern matching
+      case WildCard(_) => (3, "", Int.MaxValue) // MaxValue is place holder because we need tuple
     }
     copy(cards = sortedCards)
   }

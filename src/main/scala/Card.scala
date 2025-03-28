@@ -16,7 +16,6 @@ object NumberCard{
     val colors = List("red", "blue", "green", "yellow")
     val randomColor = Random.shuffle(colors).head
     val randomNumber =  Random.nextInt(10) //0 to 9
-    println()
     NumberCard(randomColor, randomNumber)
   }
 }

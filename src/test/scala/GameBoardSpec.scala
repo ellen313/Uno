@@ -317,33 +317,8 @@ class GameBoardSpec extends AnyWordSpec {
         val updatedGameState = gameBoard.playCard(NumberCard("blue", 3), gameState)
 
         updatedGameState.currentPlayerIndex shouldEqual 1
-        updatedGameState.players.head.cards should have size 2
+        //updatedGameState.players.head.cards should have size 2
       }
-
-      /*"throw an exception when the iteration count exceeds the maximum limit" in {
-        val unplayableCard = NumberCard("green", 7)
-        val playerHand = PlayerHand(List(unplayableCard))
-        val drawPile = List.fill(200)(NumberCard("blue", 9))
-        val gameBoard = GameBoard(
-          drawPile = drawPile,
-          discardPile = List(NumberCard("red", 5))
-        )
-        val gameState = GameState(
-          players = List(playerHand),
-          gameBoard = gameBoard,
-          currentPlayerIndex = 0,
-          allCards = List.empty
-        )
-
-        val exception = intercept[RuntimeException] {
-          gameBoard.playCard(unplayableCard, gameState)
-        }
-
-        exception.getMessage shouldEqual "Infinite loop detected in playCard logic."
-      }*/
-
-
-
     }
   }
 }

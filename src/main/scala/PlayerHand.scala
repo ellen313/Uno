@@ -26,7 +26,6 @@ case class PlayerHand(cards: List[Card]) {
         println(s"$color-$actionType")
       case WildCard(actionType) =>
         println(s"$actionType")
-        println()
     }
   }
 

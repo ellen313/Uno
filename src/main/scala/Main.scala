@@ -10,14 +10,9 @@ object Main {
 
     val playerHands = List.fill(numberPlayers)(PlayerHand(List.empty[Card]))
     var gameState = GameState(playerHands, initialGameBoard, 0, initialGameBoard.drawPile)
-
-    //start game by dealing cards to players
+    
     gameState = gameState.dealInitialCards(cardsPerPlayer)
 
-    for(i <- gameState.players.indices) {
-      println(s"player ${i + 1}'s hand:")
-      gameState.players(i).displayHand()
-      print("\n")
-    }
+    UnoTui.startGame(gameState)
   }
 }

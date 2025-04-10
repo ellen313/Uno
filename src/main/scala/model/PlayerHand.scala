@@ -1,10 +1,12 @@
 package model
 
-case class PlayerHand(cards: List[Card], hasSaidUno: Boolean = false) {
+import scala.annotation.targetName
 
-  //add a card to players hand
-  def addCard(card: Card): PlayerHand = {
-    copy(cards = card :: cards, hasSaidUno = false) //add card to the head of list cards
+case class PlayerHand(cards: List[Card], hasSaidUno: Boolean = false) {
+  
+  @targetName("addCard")
+    def +(card: Card): PlayerHand = {
+    copy(cards = card :: cards)
   }
   def containsCard(card: Card): Boolean = cards.contains(card)
   

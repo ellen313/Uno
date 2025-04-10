@@ -56,7 +56,7 @@ case class GameBoard(drawPile: List[Card], discardPile: List[Card]) {
     }
     val drawnCard = drawPile.head
     val updatedDrawPile = drawPile.tail
-    val updatedPlayerHand = playerHand.addCard(drawnCard)
+    val updatedPlayerHand = playerHand + drawnCard
     (drawnCard, updatedPlayerHand, copy(drawPile = updatedDrawPile))
   }
 

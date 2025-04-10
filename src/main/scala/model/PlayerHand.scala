@@ -1,11 +1,18 @@
 package model
 
+import scala.annotation.targetName
+
 case class PlayerHand(cards: List[Card], hasSaidUno: Boolean = false) {
 
   //add a card to players hand
-  def addCard(card: Card): PlayerHand = {
-    copy(cards = card :: cards, hasSaidUno = false) //add card to the head of list cards
+  //def addCard(card: Card): PlayerHand = {
+    //copy(cards = card :: cards, hasSaidUno = false) //add card to the head of list cards
+  //}
+  @targetName("addCard") //JVM does not support operators as method names, needs operation name and targetName annotation
+  def +(card: Card): PlayerHand = {
+    copy(cards = card :: cards)
   }
+
   def containsCard(card: Card): Boolean = cards.contains(card)
   
   //remove a card from players hand

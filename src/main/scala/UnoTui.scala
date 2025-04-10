@@ -1,4 +1,5 @@
 import model._
+import ColorPrinter._
 import scala.io.StdIn.readLine
 
 object UnoTui {
@@ -19,12 +20,13 @@ object UnoTui {
         .filter { case (player, _) => player.hasSaidUno }
         .map { case (_, index) => s"Player ${index + 1}" }
         .mkString(", ")
-      
+
       if (playersWhoSaidUno.nonEmpty) {
         println(s"$playersWhoSaidUno said UNO")
       }
 
-      println(s"Top Card: $topCard")
+      print(s"Top Card: ")
+      printCard(topCard)
       if (selectedColor.isDefined) {
         println(s"The color that was chosen: ${selectedColor.get}")
       }
@@ -58,7 +60,7 @@ object UnoTui {
                   val chosenCard = currentPlayer.cards(cardIndex)
 
                   if (chosenCard.isInstanceOf[WildCard]) {
-                    val colors = List("Red", "Green", "Blue", "Yellow")
+                    val colors = List("red", "green", "blue", "yellow")
                     var validColor = false
 
                     while (!validColor) {
@@ -92,7 +94,7 @@ object UnoTui {
                     if (!chosenCard.isInstanceOf[WildCard]) {
                       selectedColor = None
                     }
-                    
+
                     validInput = true
                     if (!currentPlayer.hasSaidUno && currentPlayer.cards.length == 2) {
                       println("You said 'UNO'!")
@@ -125,7 +127,8 @@ object UnoTui {
   def showHand(playerHand: PlayerHand): Unit = {
     println("Your Cards:")
     playerHand.cards.zipWithIndex.foreach { case (card, index) =>
-      println(s"$index - $card")
+      print(s"$index - ")
+      printCard(card)
     }
   }
 
@@ -143,14 +146,15 @@ object UnoTui {
   def handleCardSelection(input: String, game: GameState, currentPlayer: PlayerHand, topCard: Card): GameState = {
     try {
       val cardIndex = input.toInt
-      
+
       if (cardIndex >= 0 && cardIndex < currentPlayer.cards.length) {
         val chosenCard = currentPlayer.cards(cardIndex)
 
         if (game.gameBoard.isValidPlay(chosenCard, Some(topCard))) {
           //selected card is valid
-          println(s"Played: $chosenCard")
-          
+          print(s"Played: ")
+          printCard(chosenCard)
+
           val updatedGameState = game.gameBoard.playCard(chosenCard, game)
           updatedGameState
         } else {

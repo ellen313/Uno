@@ -90,8 +90,8 @@ case class GameBoard(drawPile: List[Card], discardPile: List[Card]) {
   }
 
   def playCard(card: Card, gameState: GameState): GameState = {
-    val currentPlayerIndex = gameState.currentPlayerIndex
-    val currentPlayerHand = gameState.players(currentPlayerIndex)
+    val originalPlayerIndex = gameState.currentPlayerIndex
+    val currentPlayerHand = gameState.players(originalPlayerIndex)
     val topCard = gameState.gameBoard.discardPile.lastOption
 
     if (!isValidPlay(card, topCard)) {
@@ -124,7 +124,7 @@ case class GameBoard(drawPile: List[Card], discardPile: List[Card]) {
     val updatedGameBoard = gameState.gameBoard.copy(discardPile = updatedDiscardPile)
 
     val baseGameState = gameState.copy(
-      players = gameState.players.updated(currentPlayerIndex, updatedHand),
+      players = gameState.players.updated(originalPlayerIndex, updatedHand),
       gameBoard = updatedGameBoard
     )
 
@@ -180,10 +180,12 @@ case class GameBoard(drawPile: List[Card], discardPile: List[Card]) {
         updatedGameState
 
       //------------ default ------------
-      case _ => baseGameState.nextPlayer(baseGameState)
+      case _ =>
+        val updatedGameState = baseGameState.nextPlayer(baseGameState)
+        updatedGameState
     }
     val finalHand = if (updatedHand.hasUno) updatedHand.sayUno() else updatedHand.resetUnoStatus()
     finalGameState.copy(
-      players = finalGameState.players.updated(currentPlayerIndex, finalHand))
+      players = finalGameState.players.updated(originalPlayerIndex, finalHand))
   }
 }

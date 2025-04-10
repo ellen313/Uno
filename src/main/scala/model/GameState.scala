@@ -31,7 +31,6 @@ case class GameState( players: List[PlayerHand], gameBoard: GameBoard, currentPl
       hand.isEmpty || (hand.hasUno && hand.hasSaidUno)
     } match {
       case Some((_, winnerIndex)) =>
-        println(s"Player ${winnerIndex + 1} wins!")
         Some(winnerIndex)
       // no winner found:
       case None =>

@@ -10,7 +10,7 @@ class PlayerHandSpec extends AnyWordSpec{
 
     "add a card to the player's hand" in {
       val hand = PlayerHand(List(NumberCard("red", 5)))
-      val updatedHand = hand.addCard(NumberCard("blue", 3))
+      val updatedHand = hand + NumberCard("blue", 3)
       updatedHand.cards should contain(NumberCard("blue", 3))
       updatedHand.cards should have size 2
       updatedHand.hasSaidUno shouldBe false

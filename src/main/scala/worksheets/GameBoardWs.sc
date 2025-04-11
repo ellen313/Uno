@@ -41,7 +41,7 @@ val currentPlayerAfterSKip = stateAfterSkip.currentPlayerIndex //expected: 2 (Pl
 
 //checks
 val skipOnDiscardPile = stateAfterSkip.gameBoard.discardPile.last == redSkip //expected: true
-val skipOnPlayerHand = stateAfterSkip.players(0) == redSkip //expected: false
+val skipOnPlayerHand = stateAfterSkip.players.head == redSkip //expected: false
 
 // -------------------------- test reverse -----------------------------------------------------------------------------
 val currentPlayerIdx2 = stateAfterSkip.currentPlayerIndex //expected: 2 (Player 3)
@@ -57,25 +57,25 @@ val reverseOnPlayerHand = stateAfterSkip.players(2).containsCard(redSkip) //expe
 // -------------------------- test draw four ---------------------------------------------------------------------------
 stateAfterReverse.currentPlayerIndex
 val cardNumBefore1 = stateAfterReverse.players(1).cards.length //expected: 3
-val cardNumBefore0 = stateAfterReverse.players(0).cards.length //expected: 2 (Player who will draw)
+val cardNumBefore0 = stateAfterReverse.players.head.cards.length //expected: 2 (Player who will draw)
 val stateAfterDrawFour = initialGameBoard.playCard(wildDrawFour,stateAfterReverse)
 
 val currentPlayerAfterDrawFour = stateAfterDrawFour.currentPlayerIndex //expected: 0
 val cardNumAfter1 = stateAfterDrawFour.players(1).cards.length //expected: 2
-val cardNumAfter0 = stateAfterDrawFour.players(0).cards.length //expected: 6 (Player who draws)
+val cardNumAfter0 = stateAfterDrawFour.players.head.cards.length //expected: 6 (Player who draws)
 
 val drawFourOnDiscardPile = stateAfterDrawFour.gameBoard.discardPile.last == wildDrawFour //expected:true
 val drawFourOnPlayerHand = stateAfterDrawFour.players(1).containsCard(wildDrawFour) //expected: false (Player who discarded)
 
 // -------------------------- test other card --------------------------------------------------------------------------
 stateAfterDrawFour.currentPlayerIndex //expected: 0
-val cardNumBefore = stateAfterDrawFour.players(0).cards.length //expected: 6
+val cardNumBefore = stateAfterDrawFour.players.head.cards.length //expected: 6
 val cardNumBefore2 = stateAfterDrawFour.players(2).cards.length //expected: 2
 
 val stateAfterOtherCard = initialGameBoard.playCard(blueTwo,stateAfterDrawFour)
 
 stateAfterOtherCard.currentPlayerIndex //expected: 2
-val cardNumAfter = stateAfterOtherCard.players(0).cards.length //expected: 5
+val cardNumAfter = stateAfterOtherCard.players.head.cards.length //expected: 5
 val twoBlueOnDiscardPile = stateAfterOtherCard.gameBoard.discardPile.last == blueTwo //expected: true
 
 // -------------------------- test draw two ----------------------------------------------------------------------------

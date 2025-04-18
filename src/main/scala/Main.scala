@@ -17,7 +17,8 @@ object Main {
     gameState = gameState.dealInitialCards(cardsPerPlayer)
     println("Let's start the Game!")
     Thread.sleep(2000)
-    UnoTui.startGame(gameState)
+    val tui = new UnoTui_neu(gameState)
+    tui.display()
   }
 
   def readValidInt(prompt: String, min: Int, max: Int): Int = {

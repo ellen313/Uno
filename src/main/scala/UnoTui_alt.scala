@@ -2,7 +2,7 @@ import model._
 import ColorPrinter._
 import scala.io.StdIn.readLine
 
-object UnoTui {
+object UnoTui_alt {
 
   def startGame(gameState: GameState): Unit = {
     var game = gameState
@@ -47,6 +47,15 @@ object UnoTui {
           }
 
           val input = readLine().trim
+
+          // für GUI anstatt readLine:
+          // val playButton = new Button("Play Card")
+          // playButton.onAction = _ => {
+          //   val selectedCard = handListView.selectionModel().getSelectedItem
+          //   if (isValidMove(selectedCard)) {
+          //   playCard(selectedCard)
+          //   }
+          // }
 
           input match {
             case "draw" =>

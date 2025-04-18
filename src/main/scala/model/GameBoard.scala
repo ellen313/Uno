@@ -60,7 +60,7 @@ case class GameBoard(drawPile: List[Card], discardPile: List[Card]) {
     (drawnCard, updatedPlayerHand, copy(drawPile = updatedDrawPile))
   }
 
-  def isValidPlay(card: Card, topCard: Option[Card]): Boolean = {
+  def isValidPlay(card: Card, topCard: Option[Card], selectedColor: Option[String] = None): Boolean = {
     topCard match {
       case None => true
       case Some(tCard) =>

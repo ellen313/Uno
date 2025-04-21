@@ -8,12 +8,17 @@ class UnoTui_neu(var game: GameState) {
 
   def display(): Unit = {
     val currentPlayer = game.players(game.currentPlayerIndex)
-    val topCard = game.gameBoard.discardPile.last
-
     println("\n--------------------------------------------------------------------")
     println(s"Player ${game.currentPlayerIndex + 1}'s turn!")
-    println(s"Top Card: ")
-    printCard(topCard)
+
+    if (game.gameBoard.discardPile.nonEmpty) {
+      val topCard = game.gameBoard.discardPile.last
+      println(s"Top Card: $topCard")
+    } else {
+      println("No card on discard pile yet.")
+    }
+
+    game.players(game.currentPlayerIndex).displayHand()
 
     if (selectedColor.isDefined) {
       println(s"Selected Color: ${selectedColor.get}")
@@ -22,6 +27,7 @@ class UnoTui_neu(var game: GameState) {
     showHand(currentPlayer)
 
     val playable = currentPlayer.cards.exists(card =>
+      val topCard = game.gameBoard.discardPile.last
       game.gameBoard.isValidPlay(card, Some(topCard), selectedColor)
     )
 

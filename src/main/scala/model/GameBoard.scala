@@ -52,8 +52,17 @@ case class GameBoard(drawPile: List[Card], discardPile: List[Card]) {
 
   def drawCard(playerHand: PlayerHand): (Card, PlayerHand, GameBoard) = {
     if (drawPile.isEmpty) {
+      if (discardPile.size <= 1) {
       throw new RuntimeException("No cards left in the draw pile")
+    } else {
+      val reshuffled = scala.util.Random.shuffle(discardPile.init)
+      return this.copy(
+        drawPile = reshuffled,
+        discardPile = List(discardPile.last)
+      ).drawCard(playerHand)
     }
+  }
+    
     val drawnCard = drawPile.head
     val updatedDrawPile = drawPile.tail
     val updatedPlayerHand = playerHand + drawnCard

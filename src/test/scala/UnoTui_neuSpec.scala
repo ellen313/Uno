@@ -10,10 +10,11 @@ class UnoTui_neuSpec extends AnyWordSpec {
   "UnoTui" should {
 
     "display the current game state correctly" in {
+      val topCard = NumberCard("red", 5)
       val playerHand = PlayerHand(List(NumberCard("red", 5), ActionCard("blue", "skip")))
       val gameBoard = GameBoard(
-        drawPile = List(NumberCard("yellow", 3)),
-        discardPile = List(NumberCard("green", 7))
+        drawPile = List.fill(5)(NumberCard("yellow", 3)),
+        discardPile = List(topCard)
       )
       val gameState = GameState(List(playerHand), gameBoard, 0, List())
       val tui = new UnoTui_neu(gameState)
@@ -32,34 +33,41 @@ class UnoTui_neuSpec extends AnyWordSpec {
 
     "draw a card when input is 'draw'" in {
       val initialHand = PlayerHand(List(NumberCard("red", 5)))
-      val drawPile = List(NumberCard("blue", 2))
+      val topCard = NumberCard("green", 7)
+      val drawPile = List(NumberCard("green", 6))
 
-      val card1 = NumberCard("red", 1)
-      val card2 = ActionCard("green", "skip")
+      //val card1 = NumberCard("blue", 1)
+      //val card2 = ActionCard("blue", "skip")
       val gameBoard = GameBoard(
         drawPile = drawPile,
-        discardPile = List(card1, card2)
+        discardPile = List(topCard)
       )
       val gameState = GameState(List(initialHand), gameBoard, 0, drawPile)
       val tui = new UnoTui_neu(gameState)
 
-      val input = new ByteArrayInputStream("draw\n".getBytes)
+      //val input = new ByteArrayInputStream("draw\n".getBytes)
       val output = new ByteArrayOutputStream()
 
-      Console.withIn(input) {
-        Console.withOut(new PrintStream(output)) {
+      Console.withOut(new PrintStream(output)) {
+        Console.withIn(new ByteArrayInputStream("draw\n".getBytes)) {
           tui.handleCardSelection("draw")
         }
       }
 
-      val updateHand = gameState.players.head.cards
-      updateHand.exists(_.color == "blue") shouldBe true
+      //val updateHand = gameState.players.head.cards
+      //updateHand.exists(_.color == "blue") shouldBe true
+      tui.game.players.head.cards should have size 2
+      tui.game.players.head.cards.exists(c =>
+        c.color == "blue" && c.asInstanceOf[NumberCard].number == 2
+      ) shouldBe true
     }
 
     "reject invalid card index" in {
       val hand = PlayerHand(List(NumberCard("red", 5)))
-      val gameBoard = GameBoard(List(NumberCard("yellow", 3)),
-        discardPile = List(NumberCard("red", 4)))
+      val gameBoard = GameBoard(
+        drawPile = List(NumberCard("yellow", 3)),
+        discardPile = List(NumberCard("red", 4))
+      )
       val gameState = GameState(List(hand), gameBoard, 0, List())
       val tui = new UnoTui_neu(gameState)
 
@@ -72,8 +80,165 @@ class UnoTui_neuSpec extends AnyWordSpec {
         }
       }
 
-      //val consoleOut = output.toString
-      //consoleOut should include("Invalid card index")
+      //val outputString = output.toString
+      //outputString should include("Invalid index! Please select a valid card.")
+    }
+
+    "display players who said UNO" in {
+      val player1 = PlayerHand(List(NumberCard("red", 1)), hasSaidUno = true)
+      val player2 = PlayerHand(List(NumberCard("blue", 2)))
+      val gameBoard = GameBoard(
+        drawPile = List.fill(5)(NumberCard("yellow", 3)),
+        discardPile = List(NumberCard("red", 3)))
+      val gameState = GameState(List(player1, player2), gameBoard, 0, List())
+      val tui = new UnoTui_neu(gameState)
+
+      val outputCapture = new ByteArrayOutputStream()
+      Console.withOut(new PrintStream(outputCapture)) {
+        tui.display()
+      }
+
+      val output = outputCapture.toString
+      output should include("Player 1 said UNO")
+    }
+
+    "display selected color when defined" in {
+      val player = PlayerHand(List(NumberCard("red", 1)))
+      val gameBoard = GameBoard(
+        drawPile = List.fill(5)(NumberCard("yellow", 3)),
+        discardPile = List(NumberCard("red", 3)))
+      val gameState = GameState(List(player), gameBoard, 0, List())
+      val tui = new UnoTui_neu(gameState)
+      tui.selectedColor = Some("blue")
+
+      val outputCapture = new ByteArrayOutputStream()
+      Console.withOut(new PrintStream(outputCapture)) {
+        tui.display()
+      }
+
+      val output = outputCapture.toString
+      output should include("The color that was chosen: blue")
+    }
+
+    "handle wild card color selection" in {
+      val player = PlayerHand(List(WildCard("wild")))
+      val gameBoard = GameBoard(
+        drawPile = List.empty,
+        discardPile = List(NumberCard("green", 3)))
+      val gameState = GameState(List(player), gameBoard, 0, List())
+      val tui = new UnoTui_neu(gameState)
+
+      // Simulate user input "1" (for green)
+      val input = new ByteArrayInputStream("1\n".getBytes)
+      val output = new ByteArrayOutputStream()
+
+      Console.withIn(input) {
+        Console.withOut(new PrintStream(output)) {
+          tui.chooseWildColor()
+        }
+      }
+
+      tui.selectedColor shouldBe Some("green")
+      output.toString should include("Wild Card color changed to: green")
+    }
+
+    "handle invalid color selection" in {
+      val player = PlayerHand(List(WildCard("wild")))
+      val gameBoard = GameBoard(
+        drawPile = List.empty,
+        discardPile = List(NumberCard("green", 3)))
+      val gameState = GameState(List(player), gameBoard, 0, List())
+      val tui = new UnoTui_neu(gameState)
+
+      // Simulate invalid input ("abc") then valid input ("2")
+      val input = new ByteArrayInputStream("abc\n2\n".getBytes)
+      val output = new ByteArrayOutputStream()
+
+      Console.withIn(input) {
+        Console.withOut(new PrintStream(output)) {
+          tui.chooseWildColor()
+        }
+      }
+
+      val outputStr = output.toString
+      outputStr should include("Invalid input. Please enter a number between 0 and 3.")
+      tui.selectedColor shouldBe Some("blue")
+    }
+
+    "handle playing a wild card" in {
+      val player = PlayerHand(List(WildCard("wild")))
+      val gameBoard = GameBoard(
+        drawPile = List.empty,
+        discardPile = List(NumberCard("green", 3)))
+      val gameState = GameState(List(player), gameBoard, 0, List())
+      val tui = new UnoTui_neu(gameState)
+
+      // Simulate playing wild card (index 0) and choosing color (1 for green)
+      val input = new ByteArrayInputStream("1\n".getBytes)
+      val output = new ByteArrayOutputStream()
+
+      Console.withIn(input) {
+        Console.withOut(new PrintStream(output)) {
+          tui.handleCardSelection("0")
+        }
+      }
+
+      val outputStr = output.toString
+      outputStr should include("Played: WildCard(wild)")
+      outputStr should include("Wild Card color changed to: green")
+    }
+
+    "handle invalid play when color doesn't match selected color" in {
+      val player = PlayerHand(List(NumberCard("red", 1)))
+      val gameBoard = GameBoard(
+        drawPile = List.empty,
+        discardPile = List(NumberCard("green", 3)))
+      val gameState = GameState(List(player), gameBoard, 0, List())
+      val tui = new UnoTui_neu(gameState)
+      tui.selectedColor = Some("blue")
+
+      val output = new ByteArrayOutputStream()
+      Console.withOut(new PrintStream(output)) {
+        tui.handleCardSelection("0")
+      }
+
+      val outputStr = output.toString
+      outputStr should include("Invalid play! The color must be blue")
+    }
+
+    "handle player saying UNO when they have 2 cards" in {
+      val player = PlayerHand(List(NumberCard("red", 1), NumberCard("blue", 2)), hasSaidUno = false)
+      val gameBoard = GameBoard(
+        drawPile = List.empty,
+        discardPile = List(NumberCard("red", 3)))
+      val gameState = GameState(List(player), gameBoard, 0, List())
+      val tui = new UnoTui_neu(gameState)
+
+      val output = new ByteArrayOutputStream()
+      Console.withOut(new PrintStream(output)) {
+        tui.handleCardSelection("0")
+      }
+
+      val outputStr = output.toString
+      outputStr should include("You said 'UNO'!")
+      gameState.players.head.hasSaidUno shouldBe true
+    }
+
+    "announce winner when a player has no cards left" in {
+      val player = PlayerHand(List.empty)
+      val gameBoard = GameBoard(
+        drawPile = List.empty,
+        discardPile = List(NumberCard("red", 3)))
+      val gameState = GameState(List(player), gameBoard, 0, List())
+      val tui = new UnoTui_neu(gameState)
+
+      val output = new ByteArrayOutputStream()
+      Console.withOut(new PrintStream(output)) {
+        tui.checkForWinner()
+      }
+
+      val outputStr = output.toString
+      outputStr should include("Player 1 wins! Game over.")
     }
   }
 }

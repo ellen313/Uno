@@ -16,8 +16,7 @@ class ColorPrinterSpec extends AnyWordSpec {
 
     "set action to Reset for unknown actions" in {
       val wildCard = WildCard("invalid action")
-      assert(wildCard.action == "invalid action") // The action string is what you pass, but Reset is applied later.
-      // Assuming the Reset is applied when printing, you'd verify the output behavior in the printCard function
+      assert(wildCard.action == "invalid action")
     }
   }
 

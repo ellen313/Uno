@@ -4,6 +4,8 @@ import scala.io.StdIn.readLine
 
 class UnoTui_neu(var game: GameState) {
 
+  private var gameShouldExit = false
+
   var selectedColor: Option[String] = None
 
   def display(): Unit = {
@@ -147,12 +149,13 @@ class UnoTui_neu(var game: GameState) {
 
   def checkForWinner(): Unit = {
     game.checkForWinner() match {
-      case Some(winnerIndex) =>
-        if (game.players(winnerIndex).cards.isEmpty) {
+      case Some(winnerIndex)
+        if game.players(winnerIndex).cards.isEmpty =>
           println(s"Player ${winnerIndex + 1} wins! Game over.")
-          System.exit(0)
-        }
-      case None =>
+          gameShouldExit = true
+        case _ =>
     }
   }
+
+  def shouldExit: Boolean = gameShouldExit
 }

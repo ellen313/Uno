@@ -8,144 +8,151 @@ class UnoTui_neu(var game: GameState) {
 
   def display(): Unit = {
     val currentPlayer = game.players(game.currentPlayerIndex)
+    val topCard = game.gameBoard.discardPile.last
+
     println("\n--------------------------------------------------------------------")
     println(s"Player ${game.currentPlayerIndex + 1}'s turn!")
 
-    if (game.gameBoard.discardPile.nonEmpty) {
-      val topCard = game.gameBoard.discardPile.last
-      println(s"Top Card: $topCard")
-    } else {
-      println("No card on discard pile yet.")
+    val playersWhoSaidUno = game.players.zipWithIndex
+      .filter { case (player, _) => player.hasSaidUno }
+      .map { case (_, index) => s"Player ${index + 1}" }
+      .mkString(", ")
+
+    if (playersWhoSaidUno.nonEmpty) {
+      println(s"$playersWhoSaidUno said UNO")
     }
 
-    game.players(game.currentPlayerIndex).displayHand()
-
+    print("Top Card: ")
+    printCard(topCard)
     if (selectedColor.isDefined) {
-      println(s"Selected Color: ${selectedColor.get}")
+      println(s"The color that was chosen: ${selectedColor.get}")
     }
 
     showHand(currentPlayer)
 
-    val playable = currentPlayer.cards.exists(card =>
-      val topCard = game.gameBoard.discardPile.last
-      game.gameBoard.isValidPlay(card, Some(topCard), selectedColor)
-    )
-
-    if (!playable) {
-      println("No playable cards. Drawing a card...")
-      drawCardForPlayer()
+    if (!currentPlayer.cards.exists(card => game.gameBoard.isValidPlay(card, Some(topCard), selectedColor))) {
+      println("No playable Card! You have to draw a Card...")
+      game = drawCardForPlayer(currentPlayer)
+      display()
     } else {
-      println("Choose a card index or type 'draw':")
+      println("Select a card (index) to play or type 'draw' to draw a card:")
+    }
+  }
+
+  def chooseWildColor(): Unit = {
+    val colors = List("red", "green", "blue", "yellow")
+    var validColor = false
+    while (!validColor) {
+      println("Please choose a color for the Wild Card:")
+      colors.zipWithIndex.foreach { case (color, index) =>
+        println(s"$index - $color")
+      }
+      val colorInput = readLine().trim
+      try {
+        val colorIndex = colorInput.toInt
+        if (colorIndex >= 0 && colorIndex < colors.length) {
+          val chosenColor = colors(colorIndex)
+          selectedColor = Some(chosenColor)
+          println(s"Wild Card color changed to: $chosenColor")
+          validColor = true
+        } else {
+          println("Invalid color choice. Please try again.")
+        }
+      } catch {
+        case _: NumberFormatException =>
+          println("Invalid input. Please enter a number between 0 and 3.")
+      }
     }
   }
 
   def handleCardSelection(input: String): Unit = {
     val currentPlayer = game.players(game.currentPlayerIndex)
+    val topCard = game.gameBoard.discardPile.last
 
     input match {
       case "draw" =>
-        drawCardForPlayer()
+        game = drawCardForPlayer(currentPlayer)
+        println("Turn complete.")
+        display()
+
       case _ =>
         try {
-          val index = input.toInt
-          if (index <= 0 && index < currentPlayer.cards.length) {
-            val selectedCard = currentPlayer.cards(index)
+          val cardIndex = input.toInt
+          if (cardIndex >= 0 && cardIndex < currentPlayer.cards.length) {
+            val chosenCard = currentPlayer.cards(cardIndex)
 
-            // Wildcard Handling
-            if (selectedCard.isInstanceOf[WildCard]) {
-              selectedColor = askForColor()
+            chosenCard match {
+              case wild: WildCard =>
+                chooseWildColor()
+                println(s"Played: ${wild}")
+                game = game.gameBoard.playCard(wild, game)
+
+              case _ =>
+                if (selectedColor.isDefined &&
+                  chosenCard.color.toLowerCase != selectedColor.get.toLowerCase &&
+                  !chosenCard.isInstanceOf[WildCard]) {
+                  println(s"Invalid play! The color must be ${selectedColor.get}. Try again.")
+                  display()
+                  return
+                }
+
+                if (!game.gameBoard.isValidPlay(chosenCard, Some(topCard), selectedColor)) {
+                  println("Invalid card! Please select a valid card.")
+                  display()
+                  return
+                }
+
+                println(s"Played: $chosenCard")
+                game = game.gameBoard.playCard(chosenCard, game)
             }
 
-            //Valid Play Check
-            val topCard = game.gameBoard.discardPile.last
-            if (game.gameBoard.isValidPlay(selectedCard, Some(topCard), selectedColor)) {
-              //selected card is valid
-              println(s"Played: $selectedCard")
-              game = game.gameBoard.playCard(selectedCard, game)
-              if (!selectedCard.isInstanceOf[WildCard]) selectedColor = None
+            if (!chosenCard.isInstanceOf[WildCard]) selectedColor = None
 
-              if (!currentPlayer.hasSaidUno && currentPlayer.cards.length == 2) {
-                println("You said UNO!")
-                game = game.playerSaysUno(game.currentPlayerIndex)
-              }
-
-              checkWinner()
-            } else {
-              //selected card is invalid
-              println("Invalid play. Try again.")
-              display()
+            if (!currentPlayer.hasSaidUno && currentPlayer.cards.length == 2) {
+              println("You said 'UNO'!")
+              game = game.playerSaysUno(game.currentPlayerIndex)
             }
+
+            checkForWinner()
+            println("Turn complete.")
+            display()
           } else {
-            println("invalid card index.")
+            println("Invalid index! Please select a valid card.")
             display()
           }
         } catch {
           case _: NumberFormatException =>
-            println("Please enter a valid number or 'draw'.")
+            println("Invalid input! Please select a valid index or type 'draw':")
             display()
         }
     }
   }
 
-  def drawCardForPlayer(): Unit = {
-    val currentPlayer = game.players(game.currentPlayerIndex)
-    val (drawnCard, updatedHand, updatedBoard) = game.gameBoard.drawCard(currentPlayer)
-
-    println(s"You drew: $drawnCard")
-
-    game = game.copy(
-      players = game.players.updated(game.currentPlayerIndex, updatedHand),
-      gameBoard = updatedBoard
-    )
-
-    nextTurn()
-  }
-
-  def showHand(player: PlayerHand): Unit = {
-    println("Your hand:")
-    player.cards.zipWithIndex.foreach { case (card, index) =>
+  private def showHand(playerHand: PlayerHand): Unit = {
+    println("Your Cards:")
+    playerHand.cards.zipWithIndex.foreach { case (card, index) =>
       print(s"$index - ")
       printCard(card)
     }
   }
 
-  def askForColor(): Option[String] = {
-    val colors = List("red", "green", "blue", "yellow")
-    println("Choose a color for the WildCard:")
-
-    colors.zipWithIndex.foreach { case (color, i) =>
-      println(s"$i - $color")
-    }
-
-    var valid = false
-    var chosen: Option[String] = None
-
-    while (!valid) {
-      val input = readLine("Color index: ").trim
-      try {
-        val i = input.toInt
-        if (i >= 0 && i < colors.length) {
-          chosen = Some(colors(i))
-          valid = true
-        } else println("Invalid number.")
-      } catch {
-        case _: NumberFormatException => println("Please enter a valid number.")
-      }
-    }
-    chosen
+  private def drawCardForPlayer(currentPlayer: PlayerHand): GameState = {
+    val (drawnCard, updatedHand, updatedBoard) = game.gameBoard.drawCard(currentPlayer)
+    println(s"You drew: $drawnCard")
+    game.copy(
+      players = game.players.updated(game.currentPlayerIndex, updatedHand),
+      gameBoard = updatedBoard
+    )
   }
 
-  def nextTurn(): Unit = {
-    game = game.copy(currentPlayerIndex = (game.currentPlayerIndex + 1) % game.players.length)
-    display()
-  }
-
-  def checkWinner(): Unit = {
+  private def checkForWinner(): Unit = {
     game.checkForWinner() match {
-      case Some(index) if game.players(index).cards.isEmpty =>
-        println(s"Player ${index + 1} wins! Game Over.")
-      case _ =>
-        nextTurn()
+      case Some(winnerIndex) =>
+        if (game.players(winnerIndex).cards.isEmpty) {
+          println(s"Player ${winnerIndex + 1} wins! Game over.")
+          System.exit(0)
+        }
+      case None =>
     }
   }
 }

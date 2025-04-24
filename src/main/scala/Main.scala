@@ -10,7 +10,7 @@ object Main {
   def runUno(numberPlayers: Option[Int] = None, cardsPerPlayer: Int = 7): GameState = {
     println("Welcome to UNO!")
 
-    val players = numberPlayers.getOrElse(readValidInt("How many players? (2-10): ", min = 2, max = 10))
+    var players = numberPlayers.getOrElse(readValidInt("How many players? (2-10): ", min = 2, max = 10))
 
     // Initialize empty GameBoard, PlayerHands, and GameState
     val initialGameBoard = GameBoard(List.empty[Card], List.empty[Card]).shuffleDeck()

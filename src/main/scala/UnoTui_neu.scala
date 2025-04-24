@@ -145,7 +145,7 @@ class UnoTui_neu(var game: GameState) {
     )
   }
 
-  private def checkForWinner(): Unit = {
+  def checkForWinner(): Unit = {
     game.checkForWinner() match {
       case Some(winnerIndex) =>
         if (game.players(winnerIndex).cards.isEmpty) {

@@ -1,4 +1,5 @@
 import model._
+// $COVERAGE-OFF$
 object ColorPrinter {
   //ansi escape codes
   val Reset = "\u001B[0m"
@@ -26,9 +27,9 @@ object ColorPrinter {
         val actionString = wild.action match {
           case "wild" => "Wild Card"
           case "wild draw four" => "Wild Draw Four"
-          case _ => 
         }
         println(s"${Reset}$actionString$Reset")
     }
   }
 }
+// $COVERAGE-ON$

@@ -1,4 +1,4 @@
-import model.*
+import model._
 import scala.io.StdIn.readLine
 
 @main def runUno(): Unit = {

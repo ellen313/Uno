@@ -242,5 +242,28 @@ class UnoTui_neuSpec extends AnyWordSpec {
       outputStr should include("Player 1 wins! Game over.")
       tui.shouldExit shouldBe true
     }
+    "handle out-of-range wild card color input" in {
+      val player = PlayerHand(List(WildCard("wild")))
+      val gameBoard = GameBoard(
+        drawPile = List.empty,
+        discardPile = List(NumberCard("green", 3)))
+      val gameState = GameState(List(player), gameBoard, 0, List())
+      val tui = new UnoTui_neu(gameState)
+
+      val input = new ByteArrayInputStream("5\n2\n".getBytes)
+      val output = new ByteArrayOutputStream()
+
+      Console.withIn(input) {
+        Console.withOut(new PrintStream(output)) {
+          tui.chooseWildColor()
+        }
+      }
+
+      val outputStr = output.toString
+      outputStr should include("Invalid color choice. Please try again.")
+      outputStr should include("Wild Card color changed to: blue")
+      tui.selectedColor shouldBe Some("blue")
+    }
+
   }
 }

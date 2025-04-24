@@ -41,8 +41,7 @@ case class GameState( players: List[PlayerHand], gameBoard: GameBoard, currentPl
   def playerSaysUno(playerIndex: Int): GameState = {
     val updatedPlayers = players.updated(
       playerIndex,
-      players(playerIndex).sayUno()
-    )
-    copy(players = updatedPlayers)
+      players(playerIndex).copy(hasSaidUno = true))
+    this.copy(players = updatedPlayers)
   }
 }

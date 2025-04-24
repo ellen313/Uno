@@ -1,6 +1,6 @@
 import org.scalatest.wordspec.AnyWordSpec
 
-class MainTest extends AnyWordSpec {
+class MainSpec extends AnyWordSpec {
 
   "The Main object" should {
     "initialize the game and deal cards correctly" in {

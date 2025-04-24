@@ -7,14 +7,13 @@ class MainSpec extends AnyWordSpec {
       
       val out = new java.io.ByteArrayOutputStream()
       Console.withOut(out) {
-        
-        Main.main(Array())
-        
-        val output = out.toString()
-        
-        assert(output.contains("player 1's hand:"))
-        assert(output.contains("player 2's hand:"))
+        val gameState = Main.runUno(Some(2), 7)
+        assert(gameState.players.length == 2)
+        assert(gameState.players.forall(_.cards.length == 7))
       }
+        //Main.main(Array())
+      val output = out.toString()
+      assert(output.contains("Player 1's turn"))
     }
   }
 }

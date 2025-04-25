@@ -5,7 +5,7 @@ import org.scalatest.wordspec.AnyWordSpec
 
 import java.io.{ByteArrayInputStream, ByteArrayOutputStream, PrintStream}
 
-class UnoTui_neuSpec extends AnyWordSpec {
+class UnoTuiSpec extends AnyWordSpec {
 
   "UnoTui" should {
 
@@ -17,7 +17,7 @@ class UnoTui_neuSpec extends AnyWordSpec {
         discardPile = List(topCard)
       )
       val gameState = GameState(List(playerHand), gameBoard, 0, List())
-      val tui = new UnoTui_neu(gameState)
+      val tui = new UnoTui(gameState)
 
       val outputCapture = new ByteArrayOutputStream()
       Console.withOut(new PrintStream(outputCapture)) {
@@ -41,7 +41,7 @@ class UnoTui_neuSpec extends AnyWordSpec {
         discardPile = List(topCard)
       )
       val gameState = GameState(List(initialHand), gameBoard, 0, drawPile)
-      val tui = new UnoTui_neu(gameState)
+      val tui = new UnoTui(gameState)
       
       val output = new ByteArrayOutputStream()
 
@@ -62,7 +62,7 @@ class UnoTui_neuSpec extends AnyWordSpec {
         discardPile = List(NumberCard("red", 4))
       )
       val gameState = GameState(List(hand), gameBoard, 0, List())
-      val tui = new UnoTui_neu(gameState)
+      val tui = new UnoTui(gameState)
 
       val input = new ByteArrayInputStream("10\n".getBytes())
       val output = new ByteArrayOutputStream()
@@ -81,7 +81,7 @@ class UnoTui_neuSpec extends AnyWordSpec {
         drawPile = List.fill(5)(NumberCard("yellow", 3)),
         discardPile = List(NumberCard("red", 3)))
       val gameState = GameState(List(player1, player2), gameBoard, 0, List())
-      val tui = new UnoTui_neu(gameState)
+      val tui = new UnoTui(gameState)
 
       val outputCapture = new ByteArrayOutputStream()
       Console.withOut(new PrintStream(outputCapture)) {
@@ -98,7 +98,7 @@ class UnoTui_neuSpec extends AnyWordSpec {
         drawPile = List.fill(5)(NumberCard("yellow", 3)),
         discardPile = List(NumberCard("red", 3)))
       val gameState = GameState(List(player), gameBoard, 0, List())
-      val tui = new UnoTui_neu(gameState)
+      val tui = new UnoTui(gameState)
       tui.selectedColor = Some("blue")
 
       val outputCapture = new ByteArrayOutputStream()
@@ -116,7 +116,7 @@ class UnoTui_neuSpec extends AnyWordSpec {
         drawPile = List.empty,
         discardPile = List(NumberCard("green", 3)))
       val gameState = GameState(List(player), gameBoard, 0, List())
-      val tui = new UnoTui_neu(gameState)
+      val tui = new UnoTui(gameState)
 
       // Simulate user input "1" (for green)
       val input = new ByteArrayInputStream("1\n".getBytes)
@@ -138,7 +138,7 @@ class UnoTui_neuSpec extends AnyWordSpec {
         drawPile = List.empty,
         discardPile = List(NumberCard("green", 3)))
       val gameState = GameState(List(player), gameBoard, 0, List())
-      val tui = new UnoTui_neu(gameState)
+      val tui = new UnoTui(gameState)
 
       // Simulate invalid input ("abc") then valid input ("2")
       val input = new ByteArrayInputStream("abc\n2\n".getBytes)
@@ -161,7 +161,7 @@ class UnoTui_neuSpec extends AnyWordSpec {
         drawPile = List.fill(5)(NumberCard("yellow", 3)),
         discardPile = List(NumberCard("green", 3)))
       val gameState = GameState(List(player), gameBoard, 0, List())
-      val tui = new UnoTui_neu(gameState)
+      val tui = new UnoTui(gameState)
 
       val input = new ByteArrayInputStream("1\n".getBytes) // Choose green
       val output = new ByteArrayOutputStream()
@@ -185,7 +185,7 @@ class UnoTui_neuSpec extends AnyWordSpec {
         drawPile = List.fill(5)(NumberCard("green", 3)),
         discardPile = List(NumberCard("green", 3)))
       val gameState = GameState(List(player), gameBoard, 0, List())
-      val tui = new UnoTui_neu(gameState)
+      val tui = new UnoTui(gameState)
       tui.selectedColor = Some("blue")
 
       val output = new ByteArrayOutputStream()
@@ -203,7 +203,7 @@ class UnoTui_neuSpec extends AnyWordSpec {
         drawPile = List.empty,
         discardPile = List(NumberCard("red", 3)))
       val gameState = GameState(List(player), gameBoard, 0, List())
-      val tui = new UnoTui_neu(gameState)
+      val tui = new UnoTui(gameState)
 
       val output = new ByteArrayOutputStream()
       Console.withOut(new PrintStream(output)) {
@@ -220,7 +220,7 @@ class UnoTui_neuSpec extends AnyWordSpec {
         drawPile = List.empty,
         discardPile = List(NumberCard("green", 3)))
       val gameState = GameState(List(player), gameBoard, 0, List())
-      val tui = new UnoTui_neu(gameState)
+      val tui = new UnoTui(gameState)
 
       val input = new ByteArrayInputStream("5\n2\n".getBytes)
       val output = new ByteArrayOutputStream()
@@ -244,7 +244,7 @@ class UnoTui_neuSpec extends AnyWordSpec {
         discardPile = List(NumberCard("green", 3))
       )
       val gameState = GameState(List(player), gameBoard, 0, List())
-      val tui = new UnoTui_neu(gameState)
+      val tui = new UnoTui(gameState)
 
       val input = new ByteArrayInputStream("0\n".getBytes)
       val output = new ByteArrayOutputStream()
@@ -265,7 +265,7 @@ class UnoTui_neuSpec extends AnyWordSpec {
         discardPile = List(NumberCard("green", 3))
       )
       val gameState = GameState(List(player), gameBoard, 0, List())
-      val tui = new UnoTui_neu(gameState)
+      val tui = new UnoTui(gameState)
 
       val input = new ByteArrayInputStream("abc\n".getBytes)
       val output = new ByteArrayOutputStream()
@@ -290,7 +290,7 @@ class UnoTui_neuSpec extends AnyWordSpec {
         discardPile = List(NumberCard("red", 3))
       )
       val gameState = GameState(List(player), gameBoard, 0, List())
-      val tui = new UnoTui_neu(gameState)
+      val tui = new UnoTui(gameState)
 
       val output = new ByteArrayOutputStream()
       Console.withOut(new PrintStream(output)) {

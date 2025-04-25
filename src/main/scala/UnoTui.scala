@@ -2,7 +2,7 @@ import model._
 import ColorPrinter._
 import scala.io.StdIn.readLine
 
-class UnoTui_neu(var game: GameState) {
+class UnoTui(var game: GameState) {
 
   private var gameShouldExit = false
 

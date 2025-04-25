@@ -265,5 +265,26 @@ class UnoTui_neuSpec extends AnyWordSpec {
       tui.selectedColor shouldBe Some("blue")
     }
 
+    "reject invalid card play when the card does not match the top card" in {
+      val player = PlayerHand(List(NumberCard("red", 1)))
+      val gameBoard = GameBoard(
+        drawPile = List.fill(5)(NumberCard("yellow", 3)),
+        discardPile = List(NumberCard("green", 3))
+      )
+      val gameState = GameState(List(player), gameBoard, 0, List())
+      val tui = new UnoTui_neu(gameState)
+
+      val input = new ByteArrayInputStream("0\n".getBytes)
+      val output = new ByteArrayOutputStream()
+
+      Console.withIn(input) {
+        Console.withOut(new PrintStream(output)) {
+          tui.handleCardSelection("0")
+        }
+      }
+      val outputStr = output.toString
+      outputStr should include("Invalid card! Please select a valid card.")
+    }
+
   }
 }

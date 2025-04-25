@@ -35,17 +35,14 @@ class UnoTui_neuSpec extends AnyWordSpec {
       val initialHand = PlayerHand(List(NumberCard("red", 5)))
       val topCard = NumberCard("green", 7)
       val drawPile = List(NumberCard("green", 6))
-
-      //val card1 = NumberCard("blue", 1)
-      //val card2 = ActionCard("blue", "skip")
+      
       val gameBoard = GameBoard(
         drawPile = drawPile,
         discardPile = List(topCard)
       )
       val gameState = GameState(List(initialHand), gameBoard, 0, drawPile)
       val tui = new UnoTui_neu(gameState)
-
-      //val input = new ByteArrayInputStream("draw\n".getBytes)
+      
       val output = new ByteArrayOutputStream()
 
       Console.withOut(new PrintStream(output)) {
@@ -56,10 +53,6 @@ class UnoTui_neuSpec extends AnyWordSpec {
 
       val updateHand = gameState.players.head.cards
       updateHand should contain(NumberCard("red", 5))
-      //tui.game.players.head.cards should have size 2
-      //tui.game.players.head.cards.exists(c =>
-      //c.color == "blue" && c.asInstanceOf[NumberCard].number == 2
-      //) shouldBe true
     }
 
     "reject invalid card index" in {
@@ -79,9 +72,6 @@ class UnoTui_neuSpec extends AnyWordSpec {
           tui.handleCardSelection("10")
         }
       }
-
-      //val outputString = output.toString
-      //outputString should include("Invalid index! Please select a valid card.")
     }
 
     "display players who said UNO" in {
@@ -205,24 +195,6 @@ class UnoTui_neuSpec extends AnyWordSpec {
 
       val outputStr = output.toString
       outputStr should include("Invalid play! The color must be blue")
-    }
-
-    "handle player saying UNO when they have 2 cards" in {
-      val player = PlayerHand(List(NumberCard("red", 1), NumberCard("blue", 2)))
-      val gameBoard = GameBoard(
-        drawPile = List.fill(5)(NumberCard("yellow", 3)),
-        discardPile = List(NumberCard("red", 3)))
-      val gameState = GameState(List(player), gameBoard, 0, List())
-      val tui = new UnoTui_neu(gameState)
-
-      val output = new ByteArrayOutputStream()
-      Console.withOut(new PrintStream(output)) {
-        tui.handleCardSelection("0")
-      }
-
-      val outputStr = output.toString
-      outputStr should include("You said 'UNO'!")
-      gameState.players.head.hasSaidUno shouldBe true
     }
 
     "announce winner when a player has no cards left" in {

@@ -4,7 +4,7 @@ import scala.io.StdIn.readLine
 object Main {
   def main(args: Array[String]): Unit = {
     val game = runUno()
-    inputLoop(new UnoTui_neu(game))
+    inputLoop(new UnoTui(game))
   }
 
   def runUno(numberPlayers: Option[Int] = None, cardsPerPlayer: Int = 7): GameState = {
@@ -22,13 +22,13 @@ object Main {
     println("Let's start the Game!")
     Thread.sleep(2000)
 
-    val tui = new UnoTui_neu(gameState)
+    val tui = new UnoTui(gameState)
     tui.display()
 
     gameState
   }
 
-  def inputLoop(tui: UnoTui_neu): Unit = {
+  def inputLoop(tui: UnoTui): Unit = {
     val input = readLine().trim
     input match {
       case "exit" =>

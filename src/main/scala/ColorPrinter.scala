@@ -1,5 +1,5 @@
 import model._
-// $COVERAGE-OFF$
+
 object ColorPrinter {
   //ansi escape codes
   val Reset = "\u001B[0m"
@@ -32,4 +32,3 @@ object ColorPrinter {
     }
   }
 }
-// $COVERAGE-ON$

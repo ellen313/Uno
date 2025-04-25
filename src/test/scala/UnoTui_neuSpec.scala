@@ -285,6 +285,7 @@ class UnoTui_neuSpec extends AnyWordSpec {
       val outputStr = output.toString
       outputStr should include("Invalid card! Please select a valid card.")
     }
+
     "reject invalid input when a non-numeric value is entered for card selection" in {
       val player = PlayerHand(List(NumberCard("red", 1)))
       val gameBoard = GameBoard(
@@ -307,5 +308,26 @@ class UnoTui_neuSpec extends AnyWordSpec {
       outputStr should include("Invalid input! Please select a valid index or type 'draw':")
     }
 
+    "not say UNO when player has 2 cards but already said UNO" in {
+      val player = PlayerHand(
+        List(NumberCard("red", 1), NumberCard("blue", 2)),
+        hasSaidUno = true
+      )
+      val gameBoard = GameBoard(
+        drawPile = List.fill(5)(NumberCard("yellow", 3)),
+        discardPile = List(NumberCard("red", 3))
+      )
+      val gameState = GameState(List(player), gameBoard, 0, List())
+      val tui = new UnoTui_neu(gameState)
+
+      val output = new ByteArrayOutputStream()
+      Console.withOut(new PrintStream(output)) {
+        tui.handleCardSelection("0")
+      }
+
+      val outputStr = output.toString
+      outputStr should not include "You said 'UNO'!"
+      gameState.players.head.hasSaidUno shouldBe true
+    }
   }
 }

@@ -1,6 +1,9 @@
-import scala._
-import model._
-import org.scalatest.matchers.should.Matchers._
+
+import controller.GameBoard
+
+import scala.*
+import model.*
+import org.scalatest.matchers.should.Matchers.*
 import org.scalatest.wordspec.AnyWordSpec
 
 import java.io.{ByteArrayInputStream, ByteArrayOutputStream, PrintStream}

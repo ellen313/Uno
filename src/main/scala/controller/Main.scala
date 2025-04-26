@@ -1,4 +1,9 @@
-import model._
+package controller
+
+import model.*
+import view.*
+
+import scala.annotation.tailrec
 import scala.io.StdIn.readLine
 
 object Main {
@@ -10,7 +15,7 @@ object Main {
   def runUno(numberPlayers: Option[Int] = None, cardsPerPlayer: Int = 7): GameState = {
     println("Welcome to UNO!")
 
-    var players = numberPlayers.getOrElse(readValidInt("How many players? (2-10): ", min = 2, max = 10))
+    val players = numberPlayers.getOrElse(readValidInt("How many players? (2-10): ", min = 2, max = 10))
 
     // Initialize empty GameBoard, PlayerHands, and GameState
     val initialGameBoard = GameBoard(List.empty[Card], List.empty[Card]).shuffleDeck()
@@ -28,6 +33,7 @@ object Main {
     gameState
   }
 
+  @tailrec
   def inputLoop(tui: UnoTui): Unit = {
     val input = readLine().trim
     input match {

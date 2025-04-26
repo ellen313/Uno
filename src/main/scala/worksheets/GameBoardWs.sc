@@ -1,4 +1,5 @@
-import model._
+import controller.GameBoard
+import model.*
 
 /***this worksheet is used to test the methods from GameBoard.scala*/
 

@@ -1,5 +1,8 @@
-import model._
-import ColorPrinter._
+package view
+
+import model.*
+import view.ColorPrinter.*
+
 import scala.io.StdIn.readLine
 
 class UnoTui(var game: GameState) {
@@ -32,7 +35,7 @@ class UnoTui(var game: GameState) {
 
     showHand(currentPlayer)
 
-    if (!currentPlayer.cards.exists(card => game.gameBoard.isValidPlay(card, Some(topCard), selectedColor))) {
+    if (!currentPlayer.cards.exists(card => game.isValidPlay(card, Some(topCard), selectedColor))) {
       println("No playable Card! You have to draw a Card...")
       game = drawCardForPlayer(currentPlayer)
       display()
@@ -87,7 +90,7 @@ class UnoTui(var game: GameState) {
               case wild: WildCard =>
                 chooseWildColor()
                 println(s"Played: ${wild}")
-                game = game.gameBoard.playCard(wild, game)
+                game = game.playCard(wild, game)
 
               case _ =>
                 if (selectedColor.isDefined &&
@@ -98,14 +101,14 @@ class UnoTui(var game: GameState) {
                   return
                 }
 
-                if (!game.gameBoard.isValidPlay(chosenCard, Some(topCard), selectedColor)) {
+                if (!game.isValidPlay(chosenCard, Some(topCard), selectedColor)) {
                   println("Invalid card! Please select a valid card.")
                   display()
                   return
                 }
 
                 println(s"Played: $chosenCard")
-                game = game.gameBoard.playCard(chosenCard, game)
+                game = game.playCard(chosenCard, game)
             }
 
             if (!chosenCard.isInstanceOf[WildCard]) selectedColor = None

@@ -1,4 +1,6 @@
-import model._
+package view
+
+import model.*
 // $COVERAGE-OFF$
 object ColorPrinter {
   //ansi escape codes

@@ -21,7 +21,13 @@ object Main {
     val initialGameBoard = GameBoard(List.empty[Card], List.empty[Card]).shuffleDeck()
 
     val playerHands = List.fill(players)(PlayerHand(List.empty[Card]))
-    var gameState = GameState(playerHands, initialGameBoard, 0, initialGameBoard.drawPile)
+    var gameState = GameState(players = playerHands,
+      currentPlayerIndex = 0,
+      allCards = initialGameBoard.drawPile,
+      isReversed = false,
+      drawPile = initialGameBoard.drawPile,
+      discardPile = initialGameBoard.discardPile,
+    )
 
     gameState = gameState.dealInitialCards(cardsPerPlayer)
     println("Let's start the Game!")

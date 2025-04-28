@@ -5,10 +5,6 @@ import model.*
 import scala.util.Random
 
 case class GameBoard(drawPile: List[Card], discardPile: List[Card]) {
-
-  // private val state = new GameState(this)
-
-  // override def onStateChanged(newState: GameState): Unit = ???
   
   def createDeckWithAllCards(): List[Card] = {
     val numberCards = for {

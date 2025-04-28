@@ -13,7 +13,7 @@ class UnoTui(var game: GameState) {
 
   def display(): Unit = {
     val currentPlayer = game.players(game.currentPlayerIndex)
-    val topCard = game.gameBoard.discardPile.last
+    val topCard = game.discardPile.last
 
     println("\n--------------------------------------------------------------------")
     println(s"Player ${game.currentPlayerIndex + 1}'s turn!")
@@ -72,7 +72,7 @@ class UnoTui(var game: GameState) {
 
   def handleCardSelection(input: String): Unit = {
     val currentPlayer = game.players(game.currentPlayerIndex)
-    val topCard = game.gameBoard.discardPile.last
+    val topCard = game.discardPile.last
 
     input match {
       case "draw" =>
@@ -142,11 +142,12 @@ class UnoTui(var game: GameState) {
   }
 
   private def drawCardForPlayer(currentPlayer: PlayerHand): GameState = {
-    val (drawnCard, updatedHand, updatedBoard) = game.gameBoard.drawCard(currentPlayer)
+    val (drawnCard, updatedHand, updatedDrawPile, updatedDiscardPile) = game.drawCard(currentPlayer, game.drawPile, game.discardPile)
     println(s"You drew: $drawnCard")
     game.copy(
       players = game.players.updated(game.currentPlayerIndex, updatedHand),
-      gameBoard = updatedBoard
+      drawPile = updatedDrawPile,
+      discardPile = updatedDiscardPile
     )
   }
 

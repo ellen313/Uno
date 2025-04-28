@@ -2,7 +2,7 @@ package model
 
 case class GameState( players: List[PlayerHand], currentPlayerIndex: Int,
                       allCards: List[Card], isReversed: Boolean = false,
-                      discardPile: List[Card], drawPile: List[Card]){
+                      discardPile: List[Card], drawPile: List[Card]) extends Observable  {
 
   def nextPlayer(gameState: GameState): GameState= {
     val playerCount = gameState.players.length
@@ -18,10 +18,15 @@ case class GameState( players: List[PlayerHand], currentPlayerIndex: Int,
     var updatedGameState = this
     for (_ <- 1 to cardsPerPlayer) {
       for (playerIndex <- updatedGameState.players.indices) {
-        val (drawnCard, updatedHand, updatedBoard) = updatedGameState.drawCard(updatedGameState.players(playerIndex))
+        val drawPile = updatedGameState.drawPile
+        val discardPile = updatedGameState.discardPile
+        val (drawnCard, updatedHand, updatedDrawPile, updatedDiscardPile) =
+          updatedGameState.drawCard(updatedGameState.players(playerIndex), drawPile, discardPile)
         updatedGameState = updatedGameState.copy(
           players = updatedGameState.players.updated(playerIndex, updatedHand),
-          gameBoard = updatedBoard)
+          drawPile = updatedDrawPile,
+          discardPile = updatedDiscardPile
+        )
       }
     }
     updatedGameState
@@ -46,33 +51,32 @@ case class GameState( players: List[PlayerHand], currentPlayerIndex: Int,
     this.copy(players = updatedPlayers)
   }
 
-  def drawCard(playerHand: PlayerHand, drawPile: List[Card]): (Card, PlayerHand) = {
+  def drawCard(playerHand: PlayerHand, drawPile: List[Card], discardPile: List[Card]):
+  (Card, PlayerHand, List[Card], List[Card]) = {
     if (drawPile.isEmpty) {
       if (discardPile.size <= 1) {
         throw new RuntimeException("No cards left in the draw pile")
       } else {
         val reshuffled = scala.util.Random.shuffle(discardPile.init)
-        return this.copy(
-          drawPile = reshuffled,
-          discardPile = List(discardPile.last)
-        ).drawCard(playerHand, drawPile = drawPile)
+        return drawCard(playerHand, reshuffled, List(discardPile.last))
       }
     }
 
     val drawnCard = drawPile.head
     val updatedDrawPile = drawPile.tail
     val updatedPlayerHand = playerHand + drawnCard
-    (drawnCard, updatedPlayerHand, copy(drawPile = updatedDrawPile))
+    (drawnCard, updatedPlayerHand, updatedDrawPile, discardPile)
   }
 
   def playCard(card: Card, gameState: GameState): GameState = {
     val originalPlayerIndex = gameState.currentPlayerIndex
     val currentPlayerHand = gameState.players(originalPlayerIndex)
-    val topCard = gameState.gameBoard.discardPile.lastOption
+    val topCard = discardPile.lastOption
 
     if (!isValidPlay(card, topCard)) {
       var updatedPlayerHand = currentPlayerHand
-      var drawPile = gameState.gameBoard.drawPile
+      var drawPile = gameState.drawPile
+      var discardPile = gameState.discardPile
       var playableCardFound = false
 
       val maxIterations = 10
@@ -80,28 +84,25 @@ case class GameState( players: List[PlayerHand], currentPlayerIndex: Int,
 
       while (!playableCardFound && drawPile.nonEmpty && iterationCount < maxIterations) {
         iterationCount += 1
-        val (drawnCard, newHand, newGameBoard) = gameState.gameBoard.drawCard(updatedPlayerHand)
+        val (drawnCard, newHand, updatedDrawPile, updatedDiscardPile) = drawCard(updatedPlayerHand, drawPile, discardPile)
         updatedPlayerHand = newHand
-        drawPile = newGameBoard.drawPile
+        drawPile = updatedDrawPile
+        discardPile = updatedDiscardPile
         playableCardFound = isValidPlay(updatedPlayerHand.cards.last, topCard)
       }
 
-      /*if (!playableCardFound) {
-        val resetHand = updatedPlayerHand.resetUnoStatus()
-        val updatedGameState = gameState.copy(players = gameState.players.updated(currentPlayerIndex, resetHand))
-        return gameState.nextPlayer(updatedGameState)
-      }*/
-
+      gameState.copy(players = gameState.players.updated(originalPlayerIndex, updatedPlayerHand))
     }
 
     val updatedHand = currentPlayerHand.removeCard(card)
 
-    val updatedDiscardPile = gameState.gameBoard.discardPile :+ card
-    val updatedGameBoard = gameState.gameBoard.copy(discardPile = updatedDiscardPile)
+    val updatedDiscardPile = discardPile :+ card
+    val updatedGameBoard = copy(discardPile = updatedDiscardPile)
 
     val baseGameState = gameState.copy(
       players = gameState.players.updated(originalPlayerIndex, updatedHand),
-      gameBoard = updatedGameBoard
+      drawPile = updatedGameBoard.drawPile,
+      discardPile = updatedGameBoard.discardPile
     )
 
     //---------------------------------------------- special card ------------------------------------------------------
@@ -123,16 +124,21 @@ case class GameState( players: List[PlayerHand], currentPlayerIndex: Int,
       case ActionCard(_, "draw two") =>
         val nextPlayerIndex = baseGameState.nextPlayer(baseGameState).currentPlayerIndex
 
-        val (updatedNextPlayerHand, updatedGameBoard) = (1 to 2).foldLeft((baseGameState.players(nextPlayerIndex),
-          baseGameState.gameBoard)) {
-          case ((hand, gameBoard), _) =>
-            val (drawnCard, updatedHand, updatedGameBoard) = gameBoard.drawCard(hand)
-            (updatedHand, updatedGameBoard)
+        val updatedDrawPile = baseGameState.drawPile
+        val updatedDiscardPile = baseGameState.discardPile
+
+        val (updatedNextPlayerHand, updatedGameBoard) = (1 to 2).foldLeft[(PlayerHand, (List[Card], List[Card]))](
+          (baseGameState.players(nextPlayerIndex),
+          (baseGameState.drawPile, baseGameState.discardPile))) {
+          case ((hand, (drawPile, discardPile)), _) =>
+            val (drawnCard, updatedHand, updatedDrawPile, updatedDiscardPile) = drawCard(hand, drawPile, discardPile)
+            (updatedHand, (updatedDrawPile, updatedDiscardPile))
         }
 
         val updatedGameState = baseGameState.copy(
           players = baseGameState.players.updated(nextPlayerIndex, updatedNextPlayerHand),
-          gameBoard = updatedGameBoard,
+          drawPile = updatedDrawPile,
+          discardPile = updatedDiscardPile,
           currentPlayerIndex = nextPlayerIndex
         )
         updatedGameState
@@ -141,16 +147,20 @@ case class GameState( players: List[PlayerHand], currentPlayerIndex: Int,
       case WildCard("wild draw four") =>
         val nextPlayerIndex = baseGameState.nextPlayer(baseGameState).currentPlayerIndex
 
+        val updatedDrawPile = baseGameState.drawPile
+        val updatedDiscardPile = baseGameState.discardPile
+
         val (updatedNextPlayerHand, updatedGameBoard) = (1 to 4).foldLeft((baseGameState.players(nextPlayerIndex),
-          baseGameState.gameBoard)) {
-          case ((hand, gameBoard), _) =>
-            val (drawnCard, updatedHand, updatedGameBoard) = gameBoard.drawCard(hand)
-            (updatedHand, updatedGameBoard)
+          (baseGameState.drawPile, baseGameState.discardPile))) {
+          case ((hand, (drawPile, discardPile)), _) =>
+            val (drawnCard, updatedHand, updatedDrawPile, updatedDiscardPile) = drawCard(hand, drawPile, discardPile)
+            (updatedHand, (updatedDrawPile, updatedDiscardPile))
         }
 
         val updatedGameState = baseGameState.copy(
           players = baseGameState.players.updated(nextPlayerIndex, updatedNextPlayerHand),
-          gameBoard = updatedGameBoard,
+          drawPile = updatedDrawPile,
+          discardPile = updatedDiscardPile,
           currentPlayerIndex = nextPlayerIndex
         )
         updatedGameState
@@ -193,6 +203,4 @@ case class GameState( players: List[PlayerHand], currentPlayerIndex: Int,
         }
     }
   }
-  
-  listener.onStateChanged(this)
 }

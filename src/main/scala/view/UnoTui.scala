@@ -5,11 +5,12 @@ import view.ColorPrinter.*
 
 import scala.io.StdIn.readLine
 
-class UnoTui(var game: GameState) {
+class UnoTui(var game: GameState) extends Observer {
 
   private var gameShouldExit = false
-
   var selectedColor: Option[String] = None
+
+  game.addObserver(this)
 
   def display(): Unit = {
     val currentPlayer = game.players(game.currentPlayerIndex)
@@ -90,7 +91,7 @@ class UnoTui(var game: GameState) {
               case wild: WildCard =>
                 chooseWildColor()
                 println(s"Played: ${wild}")
-                game = game.playCard(wild, game)
+                game = game.playCard(wild)
 
               case _ =>
                 if (selectedColor.isDefined &&
@@ -108,7 +109,7 @@ class UnoTui(var game: GameState) {
                 }
 
                 println(s"Played: $chosenCard")
-                game = game.playCard(chosenCard, game)
+                game = game.playCard(chosenCard)
             }
 
             if (!chosenCard.isInstanceOf[WildCard]) selectedColor = None
@@ -162,4 +163,8 @@ class UnoTui(var game: GameState) {
   }
 
   def shouldExit: Boolean = gameShouldExit
+
+  override def update(): Unit = {
+    display()
+  }
 }

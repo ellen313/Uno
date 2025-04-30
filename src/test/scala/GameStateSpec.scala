@@ -5,6 +5,16 @@ import model._
 class GameStateSpec extends AnyWordSpec {
 
   "GameState" should {
+
+    val dummyGameState: GameState = GameState(
+      players = List(),
+      currentPlayerIndex = 0,
+      allCards = List(),
+      isReversed = false,
+      discardPile = List(),
+      drawPile = List()
+    )
+
     //nextPlayer
     "return the previous player when isReversed is true" in {
       val player1 = PlayerHand(List(), hasSaidUno = false)
@@ -150,6 +160,85 @@ class GameStateSpec extends AnyWordSpec {
         val result = gameState.isValidPlay(card, None)
         result shouldBe true
       }
+
+      "return false when both cards are Wild Draw Four" in {
+        val card = WildCard("wild draw four")
+        val topCard = Some(WildCard("wild draw four"))
+        dummyGameState.isValidPlay(card, topCard) shouldBe false
+      }
+
+      "return true for WildCard(wild) against any card" in {
+        val card = WildCard("wild")
+        val topCard = Some(NumberCard("red", 3))
+        dummyGameState.isValidPlay(card, topCard) shouldBe true
+      }
+
+      "return true for WildCard(wild draw four) against any card" in {
+        val card = WildCard("wild draw four")
+        val topCard = Some(ActionCard("green", "reverse"))
+        dummyGameState.isValidPlay(card, topCard) shouldBe true
+      }
+
+      "return true when any card is played on top of Wild(wild)" in {
+        val card = NumberCard("yellow", 9)
+        val topCard = Some(WildCard("wild"))
+        dummyGameState.isValidPlay(card, topCard) shouldBe true
+      }
+
+      "return true when any card is played on top of Wild(wild draw four)" in {
+        val card = ActionCard("blue", "skip")
+        val topCard = Some(WildCard("wild draw four"))
+        dummyGameState.isValidPlay(card, topCard) shouldBe true
+      }
+
+      "return true when Draw Two cards match by color" in {
+        val card = ActionCard("red", "draw two")
+        val topCard = Some(ActionCard("red", "draw two"))
+        dummyGameState.isValidPlay(card, topCard) shouldBe true
+      }
+
+      "return true when NumberCards match by color" in {
+        val card = NumberCard("green", 5)
+        val topCard = Some(NumberCard("green", 9))
+        dummyGameState.isValidPlay(card, topCard) shouldBe true
+      }
+
+      "return true when NumberCards match by number" in {
+        val card = NumberCard("blue", 7)
+        val topCard = Some(NumberCard("red", 7))
+        dummyGameState.isValidPlay(card, topCard) shouldBe true
+      }
+
+      "return true when NumberCard is played on ActionCard with same color" in {
+        val card = NumberCard("yellow", 4)
+        val topCard = Some(ActionCard("yellow", "reverse"))
+        dummyGameState.isValidPlay(card, topCard) shouldBe true
+      }
+
+      "return true when ActionCard is played on NumberCard with same color" in {
+        val card = ActionCard("green", "skip")
+        val topCard = Some(NumberCard("green", 2))
+        dummyGameState.isValidPlay(card, topCard) shouldBe true
+      }
+
+      "return true when ActionCards match by color" in {
+        val card = ActionCard("blue", "skip")
+        val topCard = Some(ActionCard("blue", "reverse"))
+        dummyGameState.isValidPlay(card, topCard) shouldBe true
+      }
+
+      "return true when ActionCards match by action" in {
+        val card = ActionCard("yellow", "skip")
+        val topCard = Some(ActionCard("green", "skip"))
+        dummyGameState.isValidPlay(card, topCard) shouldBe true
+      }
+
+      "return false when no rule matches" in {
+        val card = NumberCard("green", 2)
+        val topCard = Some(NumberCard("red", 9))
+        dummyGameState.isValidPlay(card, topCard) shouldBe false
+      }
+
     }
   }
 }

@@ -13,6 +13,9 @@ class UnoTui(var game: GameState) extends Observer {
   game.addObserver(this)
 
   def display(): Unit = {
+
+    if (gameShouldExit) return
+
     val currentPlayer = game.players(game.currentPlayerIndex)
     val topCard = game.discardPile.last
 
@@ -72,12 +75,16 @@ class UnoTui(var game: GameState) extends Observer {
   }
 
   def handleCardSelection(input: String): Unit = {
+
+    if (gameShouldExit) return
+
     val currentPlayer = game.players(game.currentPlayerIndex)
     val topCard = game.discardPile.last
 
     input match {
       case "draw" =>
         game = drawCardForPlayer(currentPlayer)
+        game = game.nextPlayer()
         println("Turn complete.")
         display()
 
@@ -90,7 +97,7 @@ class UnoTui(var game: GameState) extends Observer {
             chosenCard match {
               case wild: WildCard =>
                 chooseWildColor()
-                println(s"Played: ${wild}")
+                println(s"Played: $wild")
                 game = game.playCard(wild)
 
               case _ =>
@@ -114,9 +121,11 @@ class UnoTui(var game: GameState) extends Observer {
 
             if (!chosenCard.isInstanceOf[WildCard]) selectedColor = None
 
-            if (!currentPlayer.hasSaidUno && currentPlayer.cards.length == 2) {
+            val updatedPlayer = game.players((game.currentPlayerIndex + game.players.length - 1) % game.players.length)
+
+            if (!updatedPlayer.hasSaidUno && updatedPlayer.cards.length == 1) {
               println("You said 'UNO'!")
-              game = game.playerSaysUno(game.currentPlayerIndex)
+              game = game.playerSaysUno((game.currentPlayerIndex + game.players.length - 1) % game.players.length)
             }
 
             checkForWinner()
@@ -154,11 +163,12 @@ class UnoTui(var game: GameState) extends Observer {
 
   def checkForWinner(): Unit = {
     game.checkForWinner() match {
-      case Some(winnerIndex)
-        if game.players(winnerIndex).cards.isEmpty =>
+      case Some(winnerIndex) =>
+        //if game.players(winnerIndex).cards.isEmpty =>
           println(s"Player ${winnerIndex + 1} wins! Game over.")
           gameShouldExit = true
-        case _ =>
+          game = game.copy(players = List.empty)
+        case None =>
     }
   }
 

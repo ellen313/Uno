@@ -35,11 +35,10 @@ case class GameState( players: List[PlayerHand], currentPlayerIndex: Int,
 
   def checkForWinner(): Option[Int] = {
     players.zipWithIndex.find { case (hand, _) =>
-      hand.isEmpty || (hand.hasUno && hand.hasSaidUno)
+      hand.isEmpty
     } match {
       case Some((_, winnerIndex)) =>
         Some(winnerIndex)
-      // no winner found:
       case None =>
         None
     }
@@ -70,11 +69,12 @@ case class GameState( players: List[PlayerHand], currentPlayerIndex: Int,
   }
 
   def playCard(card: Card): GameState = {
+    
+    if (players.exists(_.cards.isEmpty)) {
+      return this
+    }
 
-    notifyObservers()
-
-    val originalPlayerIndex = currentPlayerIndex
-    val currentPlayerHand = players(originalPlayerIndex)
+    val currentPlayerHand = players(currentPlayerIndex)
     val topCard = discardPile.lastOption
 
     if (!isValidPlay(card, topCard)) {
@@ -101,7 +101,7 @@ case class GameState( players: List[PlayerHand], currentPlayerIndex: Int,
     val updatedDiscardPile = discardPile :+ card
 
     val baseGameState = this.copy(
-      players = players.updated(originalPlayerIndex, updatedHand),
+      players = players.updated(currentPlayerIndex, updatedHand),
       discardPile = updatedDiscardPile
     )
 
@@ -162,7 +162,7 @@ case class GameState( players: List[PlayerHand], currentPlayerIndex: Int,
 
     val finalHand = if (updatedHand.hasUno) updatedHand.sayUno() else updatedHand.resetUnoStatus()
     val updatedFinalGameState = finalGameState.copy(
-      players = finalGameState.players.updated(originalPlayerIndex, finalHand))
+      players = finalGameState.players.updated(currentPlayerIndex, finalHand))
 
     updatedFinalGameState.notifyObservers()
     updatedFinalGameState

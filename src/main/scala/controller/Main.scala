@@ -41,13 +41,23 @@ object Main {
 
   @tailrec
   def inputLoop(tui: UnoTui): Unit = {
+
+    if (tui.shouldExit) {
+      println("Game over. GG!")
+      System.exit(0)
+      return
+    }
+
     val input = readLine().trim
     input match {
       case "exit" =>
         println("Game exited.")
       case _ =>
         tui.handleCardSelection(input)
-        inputLoop(tui)
+        if (!tui.shouldExit) inputLoop(tui)
+        else {
+            System.exit(0)
+          }
     }
   }
 

@@ -133,5 +133,23 @@ class GameStateSpec extends AnyWordSpec {
         newDrawPile.size shouldBe 1
       }
     }
+
+    //isValidPlay
+    "isValidPlay" should {
+      "return true when topCard is None" in {
+        val card = NumberCard("red", 5)
+        val dummyPlayerHand = PlayerHand(List(card), hasSaidUno = false)
+        val gameState = GameState(
+          players = List(dummyPlayerHand),
+          currentPlayerIndex = 0,
+          allCards = List.empty,
+          discardPile = List.empty,
+          drawPile = List.empty
+        )
+
+        val result = gameState.isValidPlay(card, None)
+        result shouldBe true
+      }
+    }
   }
 }

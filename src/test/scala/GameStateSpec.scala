@@ -238,7 +238,29 @@ class GameStateSpec extends AnyWordSpec {
         val topCard = Some(NumberCard("red", 9))
         dummyGameState.isValidPlay(card, topCard) shouldBe false
       }
+    }
 
+    //notifyObservers
+    "directly calling notifyObservers" should {
+      "trigger observer update" in {
+        var wasNotified = false
+
+        val gameState = GameState(
+          players = List.empty,
+          currentPlayerIndex = 0,
+          allCards = List.empty,
+          discardPile = List.empty,
+          drawPile = List.empty
+        )
+
+        gameState.addObserver(new Observer {
+          override def update(): Unit = wasNotified = true
+        })
+
+        gameState.notifyObservers()
+
+        wasNotified shouldBe true
+      }
     }
   }
 }

@@ -1,6 +1,4 @@
-
 import controller.GameBoard
-
 import scala.*
 import model.*
 import org.scalatest.matchers.should.Matchers.*

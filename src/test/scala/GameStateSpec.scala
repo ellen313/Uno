@@ -4,8 +4,8 @@ import model._
 
 class GameStateSpec extends AnyWordSpec {
 
-  "GameState.nextPlayer" should {
-
+  "GameState" should {
+    //nextPlayer
     "return the previous player when isReversed is true" in {
       val player1 = PlayerHand(List(), hasSaidUno = false)
       val player2 = PlayerHand(List(), hasSaidUno = false)
@@ -43,10 +43,8 @@ class GameStateSpec extends AnyWordSpec {
 
       next.currentPlayerIndex shouldBe 2
     }
-  }
 
-  "GameState.checkForWinner" should {
-
+    //checkForWinner
     "return Some(index) when a player has no cards" in {
       val winningHand = PlayerHand(List(), hasSaidUno = false)
       val otherHand = PlayerHand(List(NumberCard("red", 5)), hasSaidUno = false)
@@ -78,10 +76,8 @@ class GameStateSpec extends AnyWordSpec {
 
       gameState.checkForWinner() shouldBe None
     }
-  }
 
-  "GameState.playerSaysUno" should {
-
+    //playerSaysUno
     "update the hasSaidUno status of the player to true" in {
       val player1 = PlayerHand(List(NumberCard("red", 5)), hasSaidUno = false)
       val player2 = PlayerHand(List(NumberCard("blue", 7)), hasSaidUno = false)
@@ -98,6 +94,44 @@ class GameStateSpec extends AnyWordSpec {
       val updatedGameState = gameState.playerSaysUno(0)
 
       updatedGameState.players(0).hasSaidUno shouldBe true
+    }
+
+
+    "drawCard" should {
+      "throw exception when both draw and discard piles are too small" in {
+        val player = PlayerHand(List(), hasSaidUno = false)
+        val gameState = GameState(
+          players = List(player),
+          currentPlayerIndex = 0,
+          allCards = List(),
+          isReversed = false,
+          discardPile = List(NumberCard("red", 3)),
+          drawPile = List()
+        )
+
+        assertThrows[RuntimeException] {
+          gameState.drawCard(player, List(), List(NumberCard("red", 3)))
+        }
+      }
+
+      "reshuffle discard pile into draw pile if draw pile is empty" in {
+        val player = PlayerHand(List(), hasSaidUno = false)
+        val cardToDraw = NumberCard("blue", 5)
+        val discardPile = List(cardToDraw, NumberCard("red", 3), NumberCard("green", 7))
+
+        val gameState = GameState(
+          players = List(player),
+          currentPlayerIndex = 0,
+          allCards = List(),
+          isReversed = false,
+          discardPile = discardPile,
+          drawPile = List()
+        )
+
+        val (_, updatedHand, newDrawPile, _) = gameState.drawCard(player, List(), discardPile)
+        updatedHand.cards.size shouldBe 1
+        newDrawPile.size shouldBe 1
+      }
     }
   }
 }

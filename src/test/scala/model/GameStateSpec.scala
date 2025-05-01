@@ -1,6 +1,8 @@
-import org.scalatest.matchers.should.Matchers._
+package model
+
+import model.*
+import org.scalatest.matchers.should.Matchers.*
 import org.scalatest.wordspec.AnyWordSpec
-import model._
 
 class GameStateSpec extends AnyWordSpec {
 

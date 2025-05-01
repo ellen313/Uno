@@ -1,7 +1,9 @@
-import org.scalatest.matchers.should.Matchers.*
-import org.scalatest.wordspec.AnyWordSpec
+package controller
+
 import controller.GameBoard
 import model.Card
+import org.scalatest.matchers.should.Matchers.*
+import org.scalatest.wordspec.AnyWordSpec
 
 class GameBoardSpec extends AnyWordSpec {
 

@@ -1,14 +1,17 @@
+package view
+
 
 import controller.GameBoard
-
-import scala.*
 import model.*
 import org.scalatest.matchers.should.Matchers.*
 import org.scalatest.wordspec.AnyWordSpec
+
+import scala.*
+import scala.collection.immutable.List
 //import org.mockito.Mockito._
 //import org.mockito.ArgumentMatchers._
-import model._
-import view._
+import model.*
+import view.*
 
 
 class UnoTuiSpec extends AnyWordSpec {

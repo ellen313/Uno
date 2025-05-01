@@ -164,13 +164,12 @@ class GameStateSpec extends AnyWordSpec {
     }
 
     //playCard
-
     "GameState.playCard" should {
 
       "return unchanged state if any player has empty hand" in {
         val state = baseState().copy(players = List(
           PlayerHand(List(redOne), false),
-          PlayerHand(List.empty, false) // Leere Hand
+          PlayerHand(List.empty, false)
         ))
         state.playCard(redOne) shouldBe state
       }
@@ -178,7 +177,7 @@ class GameStateSpec extends AnyWordSpec {
       "stop drawing after max iterations" in {
         val state = baseState().copy(
           players = List(PlayerHand(List(blueOne), false)),
-          drawPile = List.fill(10)(blueOne) // Alle unspielbar
+          drawPile = List.fill(10)(blueOne)
         )
         val result = state.playCard(blueOne)
         result.discardPile should contain(blueOne)
@@ -186,12 +185,101 @@ class GameStateSpec extends AnyWordSpec {
 
       "update UNO status when player has UNO" in {
         val state = baseState().copy(
-          players = List(PlayerHand(List(redOne), true)) // Hat UNO gesagt
+          players = List(PlayerHand(List(redOne), true))
         )
         val result = state.playCard(redOne)
         result.players.head.hasSaidUno shouldBe false
       }
 
+
+      "handle skip card correctly by skipping the next player" in {
+        val player1 = PlayerHand(List(skipRed), false)
+        val player2 = PlayerHand(List(redOne), false)
+        val player3 = PlayerHand(List(blueOne), false)
+
+        val gameState = GameState(
+          players = List(player1, player2, player3),
+          currentPlayerIndex = 0,
+          allCards = List(skipRed, redOne, blueOne),
+          discardPile = List(redOne),
+          drawPile = List()
+        )
+
+        val result = gameState.playCard(skipRed)
+        result.currentPlayerIndex shouldBe 2 // should skip player 1 (index 1)
+      }
+
+      "handle reverse card correctly by reversing direction" in {
+        val player1 = PlayerHand(List(reverseBlue), false)
+        val player2 = PlayerHand(List(redOne), false)
+
+        val gameState = GameState(
+          players = List(player1, player2),
+          currentPlayerIndex = 0,
+          allCards = List(reverseBlue, redOne),
+          isReversed = false,
+          discardPile = List(redOne),
+          drawPile = List()
+        )
+
+        val result = gameState.playCard(reverseBlue)
+        result.isReversed shouldBe true
+        result.currentPlayerIndex shouldBe 1
+      }
+
+      "handle draw two card correctly by making next player draw 2 cards" in {
+        val player1 = PlayerHand(List(drawTwoGreen), false)
+        val player2 = PlayerHand(List(redOne), false)
+
+        val gameState = GameState(
+          players = List(player1, player2),
+          currentPlayerIndex = 0,
+          allCards = List(drawTwoGreen, redOne, blueOne, skipRed),
+          discardPile = List(redOne),
+          drawPile = List(blueOne, skipRed) // 2 cards available
+        )
+
+        val result = gameState.playCard(drawTwoGreen)
+        result.players(1).cards should have size 3 // original 1 + 2 drawn
+        result.drawPile shouldBe empty
+        result.currentPlayerIndex shouldBe 1
+      }
+
+      "handle wild draw four card correctly by making next player draw 4 cards" in {
+        val player1 = PlayerHand(List(wildDrawFour), false)
+        val player2 = PlayerHand(List(redOne), false)
+
+        val gameState = GameState(
+          players = List(player1, player2),
+          currentPlayerIndex = 0,
+          allCards = List(wildDrawFour, redOne, blueOne, skipRed, reverseBlue, drawTwoGreen),
+          discardPile = List(redOne),
+          drawPile = List(blueOne, skipRed, reverseBlue, drawTwoGreen) // exactly 4 cards
+        )
+
+        val result = gameState.playCard(wildDrawFour)
+        result.players(1).cards should have size 5 // original 1 + 4 drawn
+        result.drawPile shouldBe empty
+        result.currentPlayerIndex shouldBe 1
+      }
+
+      "handle normal number card correctly by just moving to next player" in {
+        val player1 = PlayerHand(List(redTwo), false)
+        val player2 = PlayerHand(List(blueOne), false)
+
+        val gameState = GameState(
+          players = List(player1, player2),
+          currentPlayerIndex = 0,
+          allCards = List(redTwo, blueOne),
+          discardPile = List(redOne),
+          drawPile = List()
+        )
+
+        val result = gameState.playCard(redTwo)
+        result.currentPlayerIndex shouldBe 1
+        result.isReversed shouldBe false // direction unchanged
+        result.discardPile should contain(redTwo)
+      }
     }
 
 

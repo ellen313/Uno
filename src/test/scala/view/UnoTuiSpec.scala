@@ -306,34 +306,6 @@ class UnoTuiSpec extends AnyWordSpec {
       assert(outputStr.contains("Wild Card color changed to: blue"))
     }
 
-//    "playerSaysUno should mark the previous player as having said UNO and display confirmation" in {
-//      val player1 = PlayerHand(List(NumberCard("red", 1)))
-//      val player2 = PlayerHand(List(NumberCard("blue", 2), NumberCard("green", 5)))
-//
-//      val initialGame = GameState(
-//        players = List(player1, player2),
-//        currentPlayerIndex = 1,
-//        drawPile = List(NumberCard("blue", 5)),
-//        discardPile = List(NumberCard("blue", 5)),
-//        isReversed = false,
-//        allCards = List()
-//      )
-//
-//      val unoTui = new UnoTui(initialGame)
-//
-//      val output = new ByteArrayOutputStream()
-//      Console.withOut(output) {
-//        unoTui.handleCardSelection("0")
-//        unoTui.display()
-//      }
-//
-//      val outputStr = output.toString
-//      assert(outputStr.contains("Player 2 said UNO"))
-//
-//      val updatedPlayer = unoTui.game.players.head
-//      assert(updatedPlayer.hasSaidUno)
-//    }
-
     "Invalid input should show error message without game interaction" in {
       val validCard = NumberCard("red", 1)
       val initialHand = PlayerHand(List(validCard))
@@ -415,7 +387,6 @@ class UnoTuiSpec extends AnyWordSpec {
 
     }
 
-
     "handleCardSelection should handle draw command" in {
       val gameState = GameState(
         players = List(
@@ -437,6 +408,69 @@ class UnoTuiSpec extends AnyWordSpec {
 
       assert(unoTui.game.currentPlayerIndex == 1)
       assert(unoTui.game.players.head.cards.length == 3)
+    }
+
+    "should show error when selecting an invalid card index" in {
+      val playableCard = NumberCard("green", 5)
+      val topCard = NumberCard("green", 3) // Matching color
+
+      val gameState = GameState(
+        players = List(PlayerHand(List(playableCard))),
+        currentPlayerIndex = 0,
+        drawPile = List.empty, // Empty draw pile
+        discardPile = List(topCard),
+        isReversed = false,
+        allCards = List(playableCard, topCard)
+      )
+
+      assert(gameState.isValidPlay(playableCard, Some(topCard), None))
+
+      val unoTui = new UnoTui(gameState)
+
+      val outputStream = new java.io.ByteArrayOutputStream()
+      Console.withOut(outputStream) {
+        unoTui.display()
+        unoTui.handleCardSelection("99")
+      }
+
+      val output = outputStream.toString
+
+      assert(output.contains("Invalid index! Please select a valid card."))
+      assert(!output.contains("No cards left"))
+      assert(unoTui.game.players.head.cards.contains(playableCard))
+    }
+
+    "should show error when chosen card doesn't match selected color after wild card" in {
+      val wrongCard = NumberCard("blue", 5)
+      val wildCard = WildCard("wild draw four")
+
+      val gameState = GameState(
+        players = List(PlayerHand(List(wrongCard))),
+        currentPlayerIndex = 0,
+        drawPile = List.empty,
+        discardPile = List(wildCard),
+        isReversed = false,
+        allCards = List(wrongCard, wildCard)
+      )
+
+      val unoTui = new UnoTui(gameState)
+      unoTui.selectedColor = Some("red")
+
+      val displayOutput = new java.io.ByteArrayOutputStream()
+      Console.withOut(displayOutput) {
+        unoTui.display()
+      }
+
+      val selectionOutput = new java.io.ByteArrayOutputStream()
+      Console.withOut(selectionOutput) {
+        unoTui.handleCardSelection("0")
+      }
+
+      val combinedOutput = displayOutput.toString + selectionOutput.toString
+
+      assert(combinedOutput.contains("The color that was chosen: red"))
+      assert(combinedOutput.contains("Invalid play! The color must be red. Try again."))
+      assert(combinedOutput.contains("NumberCard(blue, 5)"))
     }
 
     "handleCardSelection should handle valid card selection" in {
@@ -499,34 +533,60 @@ class UnoTuiSpec extends AnyWordSpec {
     }
   }
 
-//  "update should call display if gameShouldExit is false" in {
-//    val playableCard = NumberCard("yellow", 3)
-//    val topCard = NumberCard("yellow", 4)
-//
-//    val gameState = GameState(
-//      players = List(PlayerHand(List(playableCard))),
-//      currentPlayerIndex = 0,
-//      drawPile = List.empty,
-//      discardPile = List(topCard),
-//      isReversed = false,
-//      allCards = List(playableCard, topCard)
-//    )
-//
-//    val unoTui = new UnoTui(gameState)
-//    unoTui.gameShouldExit = false
-//
-//    val outputStream = new java.io.ByteArrayOutputStream()
-//    Console.withOut(outputStream) {
-//      unoTui.update()
-//    }
-//    val output = outputStream.toString
-//
-//    assert(output.contains("Player 1's turn!"))
-//
-//    assert(output.contains(s"Top Card: ${topCard.toString}"))
-//
-//    assert(output.contains("0 - NumberCard(yellow, 3)"))
-//  }
+  "update should call display when gameShouldExit is false" in {
+    val playableCard = NumberCard("red", 5)
+    val topCard = NumberCard("red", 3)
+
+    val gameState = GameState(
+      players = List(PlayerHand(List(playableCard))),
+      currentPlayerIndex = 0,
+      drawPile = List.fill(5)(NumberCard("blue", 1)),
+      discardPile = List(topCard),
+      isReversed = false,
+      allCards = List(playableCard, topCard)
+    )
+
+    val unoTui = new UnoTui(gameState)
+    unoTui.gameShouldExit = false
+
+    val outputStream = new java.io.ByteArrayOutputStream()
+    Console.withOut(outputStream) {
+      unoTui.update()
+    }
+    val output = outputStream.toString
+
+    // Verify key elements appear in the output (order doesn't matter)
+    assert(output.contains("Player 1's turn!"))
+
+    // More flexible card verification - just check the card appears somewhere
+    assert(output.contains("NumberCard(red, 3)"), "Top card should be displayed")
+    assert(output.contains("NumberCard(red, 5)"), "Player's card should be displayed")
+
+    // Verify the display structure
+    assert(output.contains("Top Card:"), "Should show top card label")
+    assert(output.contains("Your Cards:"), "Should show player's cards label")
+    assert(output.contains("0 - "), "Should show card index")
+  }
+
+  "shouldExit should return the value of gameShouldExit" in {
+    val gameState = GameState(
+      players = List(PlayerHand(List(NumberCard("red", 3)))),
+      currentPlayerIndex = 0,
+      drawPile = List.fill(5)(NumberCard("blue", 4)),
+      discardPile = List(NumberCard("yellow", 2)),
+      isReversed = false,
+      allCards = List()
+    )
+
+    val unoTui = new UnoTui(gameState)
+
+    unoTui.gameShouldExit = false
+    assert(!unoTui.shouldExit, "shouldExit should return false when gameShouldExit is false")
+
+    unoTui.gameShouldExit = true
+    assert(unoTui.shouldExit, "shouldExit should return true when gameShouldExit is true")
+  }
+
 
   "update should not call display if gameShouldExit is true" in {
     val playerHand = PlayerHand(List(NumberCard("red", 3)))

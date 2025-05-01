@@ -103,7 +103,7 @@ class UnoTui(var game: GameState) extends Observer {
                 game = game.playCard(wild)
 
               case _ =>
-                if (selectedColor.isDefined &&
+                if (selectedColor.isDefined && 
                   chosenCard.color.toLowerCase != selectedColor.get.toLowerCase &&
                   !chosenCard.isInstanceOf[WildCard]) {
                   println(s"Invalid play! The color must be ${selectedColor.get}. Try again.")

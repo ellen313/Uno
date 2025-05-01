@@ -377,6 +377,12 @@ class GameStateSpec extends AnyWordSpec {
         val topCard = Some(NumberCard("red", 9))
         dummyGameState.isValidPlay(card, topCard) shouldBe false
       }
+
+      "reject a card with an invalid wildcard type and top card" in {
+        val topCard = NumberCard("blue", 5)
+        val invalidWildCard = WildCard("unknown")
+        dummyGameState.isValidPlay(invalidWildCard, Some(topCard)) shouldBe false
+      }
     }
 
     //notifyObservers

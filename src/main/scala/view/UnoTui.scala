@@ -29,9 +29,15 @@ class UnoTui(var game: GameState) extends Observer {
       .map { case (_, index) => s"Player ${index + 1}" }
       .mkString(", ")
 
-    if (playersWhoSaidUno.nonEmpty) {
-      println(s"$playersWhoSaidUno said UNO")
-    }
+    game.players.zipWithIndex
+      .filter { case (player, _) => player.hasSaidUno }
+      .foreach { case (_, index) =>
+        if (index == game.currentPlayerIndex) {
+          println("You said 'UNO'!")
+        } else {
+          println(s"Player ${index + 1} said UNO")
+        }
+      }
 
     print("Top Card: ")
     printCard(topCard)
@@ -103,7 +109,7 @@ class UnoTui(var game: GameState) extends Observer {
                 game = game.playCard(wild)
 
               case _ =>
-                if (selectedColor.isDefined && 
+                if (selectedColor.isDefined &&
                   chosenCard.color.toLowerCase != selectedColor.get.toLowerCase &&
                   !chosenCard.isInstanceOf[WildCard]) {
                   println(s"Invalid play! The color must be ${selectedColor.get}. Try again.")

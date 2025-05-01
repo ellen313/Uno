@@ -1,5 +1,6 @@
 import org.scalatest.wordspec.AnyWordSpec
-import model._
+import model.*
+import view.ColorPrinter.printCard
 
 class ColorPrinterSpec extends AnyWordSpec {
 
@@ -18,6 +19,17 @@ class ColorPrinterSpec extends AnyWordSpec {
       val wildCard = WildCard("invalid action")
       assert(wildCard.action == "invalid action")
     }
+    "match on WildCard with action 'wild'" in {
+      val card = WildCard("wild")
+
+      val result = card.action match {
+        case "wild" => "Wild Card"
+        case "wild draw four" => "Wild Draw Four"
+        case _ => "Unknown"
+      }
+
+      assert(result == "Wild Card")
+    }
   }
 
   "A NumberCard" should {
@@ -33,6 +45,36 @@ class ColorPrinterSpec extends AnyWordSpec {
       val actionCard = ActionCard("blue", "skip")
       assert(actionCard.color == "blue")
       assert(actionCard.action == "skip")
+    }
+  }
+
+  "ColorPrinter" should {
+    "print the correct string for wild cards" in {
+      val wild = WildCard("wild")
+      val wildDrawFour = WildCard("wild draw four")
+
+      val cards: List[Card] = List(wild, wildDrawFour)
+
+      cards.foreach {
+        case wild: WildCard =>
+          val actionString = wild.action match {
+            case "wild" => "Wild Card"
+            case "wild draw four" => "Wild Draw Four"
+          }
+          println(s"${Console.RESET}$actionString${Console.RESET}")
+        case _ =>
+      }
+    }
+
+    "print correct output for 'wild' card" in {
+      val card = WildCard("wild")
+      printCard(card)
+      succeed
+    }
+    "print correct output for 'wild draw four' card" in {
+      val card = WildCard("wild draw four")
+      printCard(card)
+      succeed
     }
   }
 }

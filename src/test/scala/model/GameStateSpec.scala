@@ -385,6 +385,28 @@ class GameStateSpec extends AnyWordSpec {
         val invalidWildCard = WildCard("unknown")
         dummyGameState.isValidPlay(invalidWildCard, Some(topCard)) shouldBe false
       }
+
+      "should trigger sayUno when player has one card left after playing a valid card" in {
+        val startingCards = List(
+          NumberCard("red", 3),
+          NumberCard("blue", 5)
+        )
+        val playerHand = PlayerHand(startingCards)
+        val gameState = GameState(
+          players = List(playerHand),
+          currentPlayerIndex = 0,
+          allCards = Nil,
+          isReversed = false,
+          discardPile = List(NumberCard("red", 7)),
+          drawPile = Nil
+        )
+
+        val updatedGameState = gameState.playCard(NumberCard("red", 3))
+        val updatedPlayer = updatedGameState.players.head
+
+        updatedPlayer.cards should have size 1
+        updatedPlayer.hasSaidUno shouldBe true
+      }
     }
 
     //notifyObservers

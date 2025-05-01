@@ -15,6 +15,25 @@ class GameStateSpec extends AnyWordSpec {
       drawPile = List()
     )
 
+    val redOne = NumberCard("red", 1)
+    val redTwo = NumberCard("red", 2)
+    val blueOne = NumberCard("blue", 1)
+    val skipRed = ActionCard("red", "skip")
+    val reverseBlue = ActionCard("blue", "reverse")
+    val drawTwoGreen = ActionCard("green", "draw two")
+    val wild = WildCard("wild")
+    val wildDrawFour = WildCard("wild draw four")
+
+    def baseState(players: Int = 3): GameState = {
+      GameState(
+        players = List.fill(players)(PlayerHand(List.empty, false)),
+        currentPlayerIndex = 0,
+        allCards = List(redOne, redTwo, blueOne, skipRed, reverseBlue, drawTwoGreen, wild, wildDrawFour),
+        discardPile = List(redOne),
+        drawPile = List(redTwo, blueOne, skipRed, reverseBlue, drawTwoGreen, wild, wildDrawFour)
+      )
+    }
+
     //nextPlayer
     "return the previous player when isReversed is true" in {
       val player1 = PlayerHand(List(), hasSaidUno = false)
@@ -143,6 +162,38 @@ class GameStateSpec extends AnyWordSpec {
         newDrawPile.size shouldBe 1
       }
     }
+
+    //playCard
+
+    "GameState.playCard" should {
+
+      "return unchanged state if any player has empty hand" in {
+        val state = baseState().copy(players = List(
+          PlayerHand(List(redOne), false),
+          PlayerHand(List.empty, false) // Leere Hand
+        ))
+        state.playCard(redOne) shouldBe state
+      }
+
+      "stop drawing after max iterations" in {
+        val state = baseState().copy(
+          players = List(PlayerHand(List(blueOne), false)),
+          drawPile = List.fill(10)(blueOne) // Alle unspielbar
+        )
+        val result = state.playCard(blueOne)
+        result.discardPile should contain(blueOne)
+      }
+
+      "update UNO status when player has UNO" in {
+        val state = baseState().copy(
+          players = List(PlayerHand(List(redOne), true)) // Hat UNO gesagt
+        )
+        val result = state.playCard(redOne)
+        result.players.head.hasSaidUno shouldBe false
+      }
+
+    }
+
 
     //isValidPlay
     "isValidPlay" should {

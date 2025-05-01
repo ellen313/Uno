@@ -7,17 +7,19 @@ import scala.io.StdIn.readLine
 
 class UnoTui(var game: GameState) extends Observer {
 
-  private var gameShouldExit = false
+  var gameShouldExit = false
   var selectedColor: Option[String] = None
 
   game.addObserver(this)
 
   def display(): Unit = {
 
-    if (gameShouldExit) return
+    if (game.players.isEmpty || gameShouldExit) return
 
     val currentPlayer = game.players(game.currentPlayerIndex)
-    val topCard = game.discardPile.last
+    val topCard = game.discardPile.lastOption.getOrElse {
+      print("Discard pile empty"); return
+    }
 
     println("\n--------------------------------------------------------------------")
     println(s"Player ${game.currentPlayerIndex + 1}'s turn!")
@@ -48,7 +50,7 @@ class UnoTui(var game: GameState) extends Observer {
     }
   }
 
-  def chooseWildColor(): Unit = {
+  def chooseWildColor(inputFunc: () => String = () => readLine()): Unit = {
     val colors = List("red", "green", "blue", "yellow")
     var validColor = false
     while (!validColor) {
@@ -56,7 +58,7 @@ class UnoTui(var game: GameState) extends Observer {
       colors.zipWithIndex.foreach { case (color, index) =>
         println(s"$index - $color")
       }
-      val colorInput = readLine().trim
+      val colorInput = inputFunc().trim
       try {
         val colorIndex = colorInput.toInt
         if (colorIndex >= 0 && colorIndex < colors.length) {
@@ -151,7 +153,7 @@ class UnoTui(var game: GameState) extends Observer {
     }
   }
 
-  private def drawCardForPlayer(currentPlayer: PlayerHand): GameState = {
+  def drawCardForPlayer(currentPlayer: PlayerHand): GameState = {
     val (drawnCard, updatedHand, updatedDrawPile, updatedDiscardPile) = game.drawCard(currentPlayer, game.drawPile, game.discardPile)
     println(s"You drew: $drawnCard")
     game.copy(
@@ -175,6 +177,6 @@ class UnoTui(var game: GameState) extends Observer {
   def shouldExit: Boolean = gameShouldExit
 
   override def update(): Unit = {
-    display()
+    if (!gameShouldExit) display()
   }
 }

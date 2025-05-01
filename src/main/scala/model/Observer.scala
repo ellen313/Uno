@@ -11,6 +11,8 @@ trait Observable {
 
   def notifyObservers(): Unit =
     observers.foreach(_.update())
+
+  def getObservers: List[Observer] = observers
 }
 
 trait Observer {

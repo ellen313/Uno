@@ -2,7 +2,7 @@ package model
 
 import scala.annotation.targetName
 
-case class PlayerHand(cards: List[Card], hasSaidUno: Boolean = false) {
+case class PlayerHand(cards: List[Card], var hasSaidUno: Boolean = false) {
   
   @targetName("addCard")
     def +(card: Card): PlayerHand = {

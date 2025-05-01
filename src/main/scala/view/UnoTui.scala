@@ -127,7 +127,7 @@ class UnoTui(var game: GameState) extends Observer {
 
             if (!updatedPlayer.hasSaidUno && updatedPlayer.cards.length == 1) {
               println("You said 'UNO'!")
-              game = game.playerSaysUno((game.currentPlayerIndex + game.players.length - 1) % game.players.length)
+              this.game = game.playerSaysUno((game.currentPlayerIndex + game.players.length - 1) % game.players.length)
             }
 
             checkForWinner()

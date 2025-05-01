@@ -1,17 +1,13 @@
 package view
 
-
-import controller.GameBoard
-import model.*
 import org.scalatest.matchers.should.Matchers.*
 import org.scalatest.wordspec.AnyWordSpec
 
 import scala.*
-import scala.collection.immutable.List
-//import org.mockito.Mockito._
-//import org.mockito.ArgumentMatchers._
 import model.*
 import view.*
+
+import java.io.ByteArrayOutputStream
 
 
 class UnoTuiSpec extends AnyWordSpec {
@@ -36,6 +32,27 @@ class UnoTuiSpec extends AnyWordSpec {
       assert(unoTui.game eq gameState)
       assert(!unoTui.gameShouldExit)
       assert(unoTui.selectedColor.isEmpty)
+    }
+
+    "Game should print message when discard pile is empty" in {
+      val gameState = GameState(
+        players = List(PlayerHand(List())),
+        currentPlayerIndex = 0,
+        drawPile = List(NumberCard("red", 5)),
+        discardPile = List(),
+        isReversed = false,
+        allCards = List()
+      )
+
+      val unoTui = new UnoTui(gameState)
+
+      val stream = new java.io.ByteArrayOutputStream()
+      Console.withOut(stream) {
+        unoTui.display()
+      }
+
+      val output = stream.toString
+      assert(output.contains("Discard pile empty"))
     }
 
     "display should return early if game should exit" in {
@@ -193,8 +210,8 @@ class UnoTuiSpec extends AnyWordSpec {
         override def display(): Unit = {
           val playable = game.players(game.currentPlayerIndex)
             .cards.exists(card =>
-            game.isValidPlay(card, Some(game.discardPile.last), selectedColor)
-          )
+              game.isValidPlay(card, Some(game.discardPile.last), selectedColor)
+            )
           if (!playable) println("No playable Card! You have to draw a Card...")
         }
       }
@@ -264,6 +281,140 @@ class UnoTuiSpec extends AnyWordSpec {
       assert(output.contains("Invalid input"))
       assert(unoTui.selectedColor.contains("green"))
     }
+
+    "chooseWildColor should reject invalid color choice and accept a valid one" in {
+      val gameState = GameState(
+        players = List(PlayerHand(List())),
+        currentPlayerIndex = 0,
+        drawPile = List(),
+        discardPile = List(),
+        isReversed = false,
+        allCards = List()
+      )
+
+      val unoTui = new UnoTui(gameState)
+
+      val output = new ByteArrayOutputStream()
+      val inputs = Iterator("5", "2")
+
+      Console.withOut(output) {
+        unoTui.chooseWildColor(() => inputs.next())
+      }
+
+      val outputStr = output.toString
+      assert(outputStr.contains("Invalid color choice. Please try again."))
+      assert(outputStr.contains("Wild Card color changed to: blue"))
+    }
+
+//    "playerSaysUno should mark the previous player as having said UNO and display confirmation" in {
+//      val player1 = PlayerHand(List(NumberCard("red", 1)))
+//      val player2 = PlayerHand(List(NumberCard("blue", 2), NumberCard("green", 5)))
+//
+//      val initialGame = GameState(
+//        players = List(player1, player2),
+//        currentPlayerIndex = 1,
+//        drawPile = List(NumberCard("blue", 5)),
+//        discardPile = List(NumberCard("blue", 5)),
+//        isReversed = false,
+//        allCards = List()
+//      )
+//
+//      val unoTui = new UnoTui(initialGame)
+//
+//      val output = new ByteArrayOutputStream()
+//      Console.withOut(output) {
+//        unoTui.handleCardSelection("0")
+//        unoTui.display()
+//      }
+//
+//      val outputStr = output.toString
+//      assert(outputStr.contains("Player 2 said UNO"))
+//
+//      val updatedPlayer = unoTui.game.players.head
+//      assert(updatedPlayer.hasSaidUno)
+//    }
+
+    "Invalid input should show error message without game interaction" in {
+      val validCard = NumberCard("red", 1)
+      val initialHand = PlayerHand(List(validCard))
+
+      val gameState = GameState(
+        players = List(initialHand),
+        currentPlayerIndex = 0,
+        drawPile = List.fill(5)(NumberCard("blue", 2)),
+        discardPile = List(NumberCard("red", 5)),
+        isReversed = false,
+        allCards = List()
+      )
+
+      val unoTui = new UnoTui(gameState)
+
+      val invalidInput = "invalid"
+      val outputStream = new java.io.ByteArrayOutputStream()
+
+      Console.withOut(outputStream) {
+        unoTui.handleCardSelection(invalidInput)
+      }
+
+      val output = outputStream.toString
+      assert(output.contains("Invalid input! Please select a valid index or type 'draw'"))
+
+      assert(unoTui.game.players.head.cards.contains(validCard),
+        "Spieler sollte noch seine ursprüngliche Karte haben")
+      assert(unoTui.game.discardPile.size == 1,
+        "Ablagestapel sollte unverändert sein")
+      assert(unoTui.game.drawPile.size == 5,
+        "Nachziehstapel sollte unverändert sein")
+    }
+
+    "handleCardSelection should exit early if gameShouldExit is true" in {
+      val gameState = GameState(
+        players = List(PlayerHand(List(NumberCard("red", 1)))),
+        currentPlayerIndex = 0,
+        drawPile = List(),
+        discardPile = List(NumberCard("red", 5)),
+        isReversed = false,
+        allCards = List()
+      )
+
+      val unoTui = new UnoTui(gameState)
+      unoTui.gameShouldExit = true
+
+      val stream = new java.io.ByteArrayOutputStream()
+      Console.withOut(stream) {
+        unoTui.handleCardSelection("0")
+      }
+      val output = stream.toString
+      assert(output.isEmpty)
+    }
+
+    "handleCardSelection should call chooseWildColor and play wild card" in {
+      val gameState = GameState(
+        players = List(PlayerHand(List(WildCard("wild draw two")))),
+        currentPlayerIndex = 0,
+        drawPile = List.fill(5)(NumberCard("yellow", 4)),
+        discardPile = List(NumberCard("blue", 2)),
+        isReversed = false,
+        allCards = List()
+      )
+
+      val unoTui = new UnoTui(gameState)
+
+      val input = new java.io.ByteArrayInputStream("2\n".getBytes())
+      val output = new java.io.ByteArrayOutputStream()
+
+      Console.withIn(input) {
+        Console.withOut(output) {
+          unoTui.handleCardSelection("0")
+        }
+      }
+
+      val outputStr = output.toString
+      assert(outputStr.contains("Played: WildCard"))
+      assert(unoTui.selectedColor.contains("blue"))
+
+    }
+
 
     "handleCardSelection should handle draw command" in {
       val gameState = GameState(
@@ -346,5 +497,58 @@ class UnoTuiSpec extends AnyWordSpec {
       val output = stream.toString
       assert(output.contains("Invalid index! Please select a valid card."))
     }
+  }
+
+//  "update should call display if gameShouldExit is false" in {
+//    val playableCard = NumberCard("yellow", 3)
+//    val topCard = NumberCard("yellow", 4)
+//
+//    val gameState = GameState(
+//      players = List(PlayerHand(List(playableCard))),
+//      currentPlayerIndex = 0,
+//      drawPile = List.empty,
+//      discardPile = List(topCard),
+//      isReversed = false,
+//      allCards = List(playableCard, topCard)
+//    )
+//
+//    val unoTui = new UnoTui(gameState)
+//    unoTui.gameShouldExit = false
+//
+//    val outputStream = new java.io.ByteArrayOutputStream()
+//    Console.withOut(outputStream) {
+//      unoTui.update()
+//    }
+//    val output = outputStream.toString
+//
+//    assert(output.contains("Player 1's turn!"))
+//
+//    assert(output.contains(s"Top Card: ${topCard.toString}"))
+//
+//    assert(output.contains("0 - NumberCard(yellow, 3)"))
+//  }
+
+  "update should not call display if gameShouldExit is true" in {
+    val playerHand = PlayerHand(List(NumberCard("red", 3)))
+    val gameState = GameState(
+      players = List(playerHand),
+      currentPlayerIndex = 0,
+      drawPile = List(),
+      discardPile = List(NumberCard("yellow", 4)),
+      isReversed = false,
+      allCards = List()
+    )
+
+    val unoTui = new UnoTui(gameState)
+
+    unoTui.gameShouldExit = true
+
+    val output = new ByteArrayOutputStream()
+    Console.withOut(output) {
+      unoTui.update()
+    }
+
+    val outputStr = output.toString
+    assert(outputStr.isEmpty)
   }
 }

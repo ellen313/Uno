@@ -150,7 +150,7 @@ class UnoTui(var game: GameState) extends Observer {
         }
     }
   }
-
+  
   private def showHand(playerHand: PlayerHand): Unit = {
     println("Your Cards:")
     playerHand.cards.zipWithIndex.foreach { case (card, index) =>

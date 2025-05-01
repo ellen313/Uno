@@ -7,7 +7,7 @@ import scala.*
 import model.*
 import view.*
 
-import java.io.ByteArrayOutputStream
+import java.io.{ByteArrayOutputStream, PrintStream}
 
 
 class UnoTuiSpec extends AnyWordSpec {
@@ -122,28 +122,6 @@ class UnoTuiSpec extends AnyWordSpec {
       assert(output.contains("Top Card:"))
     }
 
-//    "display should show players who said UNO" in {
-//      val playerWithUno = PlayerHand(List(NumberCard("red", 1)))
-//      playerWithUno.hasSaidUno = true
-//      val gameState = GameState(
-//        players = List(playerWithUno, PlayerHand(List.empty)),
-//        currentPlayerIndex = 0,
-//        drawPile = List(NumberCard("yellow", 4)),
-//        discardPile = List(NumberCard("red", 5)),
-//        isReversed = false,
-//        allCards = List()
-//      )
-//
-//      val unoTui = new UnoTui(gameState)
-//
-//      val stream = new java.io.ByteArrayOutputStream()
-//      Console.withOut(stream) {
-//        unoTui.display()
-//      }
-//      val output = stream.toString
-//      assert(output.contains("Player 1 said UNO"))
-//    }
-
     "display should show selected color when defined" in {
       val gameState = GameState(
         players = List(
@@ -193,6 +171,50 @@ class UnoTuiSpec extends AnyWordSpec {
       assert(output.contains("1 - "))
     }
 
+    
+    // -------- Uno Test ------------ //
+    
+    
+    "should announce UNO when playing second-to-last card" in {
+      // Setup with player going from 2 cards to 1
+      val cards = List(
+        NumberCard("red", 1), // Will be played
+        NumberCard("red", 2)  // Will remain (triggering UNO)
+      )
+      val topCard = NumberCard("red", 3) // Matching color
+
+      val gameState = GameState(
+        players = List(PlayerHand(cards)),
+        currentPlayerIndex = 0,
+        drawPile = List.empty,
+        discardPile = List(topCard),
+        isReversed = false,
+        allCards = cards :+ topCard
+      )
+
+      val unoTui = new UnoTui(gameState)
+
+      // Capture output
+      val outputStream = new java.io.ByteArrayOutputStream()
+      Console.withOut(outputStream) {
+        unoTui.handleCardSelection("0") // Play first card (red 1)
+      }
+      val output = outputStream.toString
+
+      // Verify UNO announcement
+      assert(output.contains("You said 'UNO'!"),
+        "Must show UNO announcement when going to one card")
+
+      // Verify game state
+      assert(unoTui.game.players.head.cards.size == 1,
+        "Player should have one card remaining")
+      assert(unoTui.game.players.head.hasSaidUno,
+        "Player should have UNO status")
+    }
+
+    
+    
+    
     "display should handle case when no playable cards exist" in {
       val gameState = GameState(
         players = List(

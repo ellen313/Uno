@@ -1,7 +1,8 @@
-package view
+package aview
 
 import model.*
-import view.ColorPrinter.*
+import util.Observer
+import aview.ColorPrinter.*
 
 import scala.io.StdIn.readLine
 
@@ -17,9 +18,7 @@ class UnoTui(var game: GameState) extends Observer {
     if (game.players.isEmpty || gameShouldExit) return
 
     val currentPlayer = game.players(game.currentPlayerIndex)
-    val topCard = game.discardPile.lastOption.getOrElse {
-      print("Discard pile empty"); return
-    }
+    val topCard = game.discardPile.lastOption.getOrElse(return)
 
     println("\n--------------------------------------------------------------------")
     println(s"Player ${game.currentPlayerIndex + 1}'s turn!")
@@ -117,11 +116,11 @@ class UnoTui(var game: GameState) extends Observer {
                   return
                 }
 
-                //if (!game.isValidPlay(chosenCard, Some(topCard), selectedColor)) {
-                //  println("Invalid card! Please select a valid card.")
-                //  display()
-                //  return
-                //}
+//                if (!game.isValidPlay(chosenCard, Some(topCard), selectedColor)) {
+//                  println("Invalid card! Please select a valid card.")
+//                  display()
+//                  return
+//                }
 
                 println(s"Played: $chosenCard")
                 game = game.playCard(chosenCard)
@@ -131,10 +130,10 @@ class UnoTui(var game: GameState) extends Observer {
 
             val updatedPlayer = game.players((game.currentPlayerIndex + game.players.length - 1) % game.players.length)
 
-            //if (!updatedPlayer.hasSaidUno && updatedPlayer.cards.length == 1) {
-            //  println("You said 'UNO'!")
-            //  this.game = game.playerSaysUno((game.currentPlayerIndex + game.players.length - 1) % game.players.length)
-            //}
+//            if (!updatedPlayer.hasSaidUno && updatedPlayer.cards.length == 1) {
+//              println("You said 'UNO'!")
+//              this.game = game.playerSaysUno((game.currentPlayerIndex + game.players.length - 1) % game.players.length)
+//            }
 
             checkForWinner()
             println("Turn complete.")

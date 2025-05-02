@@ -1,3 +1,4 @@
+import controller.Main
 import org.scalatest.wordspec.AnyWordSpec
 
 class MainSpec extends AnyWordSpec {

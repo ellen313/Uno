@@ -1,4 +1,5 @@
-import model._
+import controller.GameBoard
+import model.*
 // testing the card class
 val numCard = NumberCard("red", 5)
 val actionCard = ActionCard("blue", "draw two")

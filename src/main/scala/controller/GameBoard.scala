@@ -4,7 +4,7 @@ import model.*
 
 import scala.util.Random
 
-case class GameBoard(drawPile: List[Card], discardPile: List[Card]) {
+case class GameBoard(var game: GameState, drawPile: List[Card], discardPile: List[Card]) {
   
   def createDeckWithAllCards(): List[Card] = {
     val numberCards = for {
@@ -49,7 +49,7 @@ case class GameBoard(drawPile: List[Card], discardPile: List[Card]) {
     }
     val drawPile = if (shuffledCards.isEmpty) List.empty[Card] else shuffledCards.tail
 
-    GameBoard(drawPile, discardPile)
+    GameBoard(game, drawPile, discardPile)
   }
   
 }

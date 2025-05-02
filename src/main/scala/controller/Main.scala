@@ -1,7 +1,7 @@
 package controller
 
 import model.*
-import view.*
+import aview.*
 
 import scala.annotation.tailrec
 import scala.io.StdIn.readLine
@@ -17,8 +17,17 @@ object Main {
 
     val players = numberPlayers.getOrElse(readValidInt("How many players? (2-10): ", min = 2, max = 10))
 
+    val tempGameState = GameState(
+      players = List.empty[PlayerHand],
+      currentPlayerIndex = 0,
+      allCards = List.empty[Card],
+      isReversed = false,
+      drawPile = List.empty[Card],
+      discardPile = List.empty[Card]
+    )
+
     // Initialize empty GameBoard, PlayerHands, and GameState
-    val initialGameBoard = GameBoard(List.empty[Card], List.empty[Card]).shuffleDeck()
+    val initialGameBoard = GameBoard(tempGameState, List.empty[Card], List.empty[Card]).shuffleDeck()
 
     val playerHands = List.fill(players)(PlayerHand(List.empty[Card]))
     var gameState = GameState(players = playerHands,
@@ -28,6 +37,8 @@ object Main {
       drawPile = initialGameBoard.drawPile,
       discardPile = initialGameBoard.discardPile,
     )
+
+    initialGameBoard.game = gameState
 
     gameState = gameState.dealInitialCards(cardsPerPlayer)
     println("Let's start the Game!")

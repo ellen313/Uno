@@ -1,6 +1,6 @@
 import org.scalatest.wordspec.AnyWordSpec
 import model.*
-import view.ColorPrinter.printCard
+import aview.ColorPrinter.printCard
 
 class ColorPrinterSpec extends AnyWordSpec {
 

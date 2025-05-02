@@ -1,4 +1,4 @@
-package model
+package util
 
 trait Observable {
   private var observers: List[Observer] = List()

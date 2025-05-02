@@ -1,13 +1,15 @@
 package controller
 
 import controller.GameBoard
-import model.Card
+import model.{Card, GameState}
 import org.scalatest.matchers.should.Matchers.*
 import org.scalatest.wordspec.AnyWordSpec
 
 class GameBoardSpec extends AnyWordSpec {
 
-  class EmptyDeckGameBoard extends GameBoard(Nil, Nil) {
+  class EmptyDeckGameBoard extends GameBoard (GameState(Nil, 0, Nil, isReversed = false, Nil, Nil),
+    Nil, Nil
+  ) {
     override def createDeckWithAllCards(): List[Card] = Nil
   }
 

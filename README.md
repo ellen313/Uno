@@ -1,5 +1,4 @@
-[![Coverage Status](https://coveralls.io/repos/github/bgmpkr/Uno/badge.svg?branch=main)](https://coveralls.io/github/bgmpkr/Uno?branch=main)
-
+[![Coverage Status](https://coveralls.io/repos/github/bgmpkr/Uno/badge.svg?branch=develop)](https://coveralls.io/github/bgmpkr/Uno?branch=develop)
 ## sbt project compiled with Scala 3
 
 ### Usage

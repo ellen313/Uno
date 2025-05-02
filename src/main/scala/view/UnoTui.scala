@@ -117,11 +117,11 @@ class UnoTui(var game: GameState) extends Observer {
                   return
                 }
 
-                if (!game.isValidPlay(chosenCard, Some(topCard), selectedColor)) {
-                  println("Invalid card! Please select a valid card.")
-                  display()
-                  return
-                }
+                //if (!game.isValidPlay(chosenCard, Some(topCard), selectedColor)) {
+                //  println("Invalid card! Please select a valid card.")
+                //  display()
+                //  return
+                //}
 
                 println(s"Played: $chosenCard")
                 game = game.playCard(chosenCard)
@@ -131,10 +131,10 @@ class UnoTui(var game: GameState) extends Observer {
 
             val updatedPlayer = game.players((game.currentPlayerIndex + game.players.length - 1) % game.players.length)
 
-            if (!updatedPlayer.hasSaidUno && updatedPlayer.cards.length == 1) {
-              println("You said 'UNO'!")
-              this.game = game.playerSaysUno((game.currentPlayerIndex + game.players.length - 1) % game.players.length)
-            }
+            //if (!updatedPlayer.hasSaidUno && updatedPlayer.cards.length == 1) {
+            //  println("You said 'UNO'!")
+            //  this.game = game.playerSaysUno((game.currentPlayerIndex + game.players.length - 1) % game.players.length)
+            //}
 
             checkForWinner()
             println("Turn complete.")

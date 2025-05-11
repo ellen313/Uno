@@ -1,7 +1,5 @@
 package controller
 
-import controller.GameBoard
-import model.{Card, GameState}
 import org.scalatest.matchers.should.Matchers.*
 import org.scalatest.wordspec.AnyWordSpec
 

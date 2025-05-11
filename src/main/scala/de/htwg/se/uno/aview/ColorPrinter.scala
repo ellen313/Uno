@@ -1,5 +1,3 @@
-package aview
-
 import model.*
 // $COVERAGE-OFF$
 object ColorPrinter {

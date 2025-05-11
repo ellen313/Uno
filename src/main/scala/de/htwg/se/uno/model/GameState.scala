@@ -1,5 +1,3 @@
-package model
-
 import util.Observable
 
 case class GameState( players: List[PlayerHand], currentPlayerIndex: Int,

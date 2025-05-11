@@ -1,7 +1,6 @@
 package model
 import org.scalatest.matchers.should.Matchers.*
 import org.scalatest.wordspec.AnyWordSpec
-import util.{Observable, Observer}
 
 class ObserverSpec extends AnyWordSpec {
   "An Observable" when {

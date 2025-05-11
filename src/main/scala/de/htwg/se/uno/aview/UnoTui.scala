@@ -1,5 +1,3 @@
-package aview
-
 import model.*
 import util.Observer
 import aview.ColorPrinter.*

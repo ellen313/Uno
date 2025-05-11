@@ -1,4 +1,4 @@
-import model._
+
 //this worksheet is used to test the methods from PlayerHand.scala
 
 val redThree = NumberCard("red", 3)

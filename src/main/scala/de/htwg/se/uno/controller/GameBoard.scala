@@ -1,5 +1,3 @@
-package controller
-
 import model.*
 
 import scala.util.Random

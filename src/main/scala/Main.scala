@@ -1,8 +1,3 @@
-package controller
-
-import model.*
-import aview.*
-
 import scala.annotation.tailrec
 import scala.io.StdIn.readLine
 

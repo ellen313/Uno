@@ -1,4 +1,3 @@
-package model
 import scala.util.Random
 
 sealed trait Card{def color: String} //Card as superclass 

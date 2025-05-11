@@ -1,3 +1,5 @@
+package de.htwg.se.uno.util
+
 trait Observable {
   private var observers: List[Observer] = List()
 

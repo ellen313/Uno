@@ -1,4 +1,4 @@
-import model.*
+import de.htwg.se.uno.model.*
 
 import scala.util.Random
 

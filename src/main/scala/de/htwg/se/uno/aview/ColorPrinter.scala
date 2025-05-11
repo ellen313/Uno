@@ -1,4 +1,6 @@
-import model.*
+package de.htwg.se.uno.aview
+
+import de.htwg.se.uno.model.*
 // $COVERAGE-OFF$
 object ColorPrinter {
   //ansi escape codes

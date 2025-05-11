@@ -1,4 +1,6 @@
-import util.Observable
+package de.htwg.se.uno.model
+
+import de.htwg.se.uno.util.Observable
 
 case class GameState( players: List[PlayerHand], currentPlayerIndex: Int,
                       allCards: List[Card], isReversed: Boolean = false,

@@ -1,6 +1,8 @@
-import model.*
-import util.Observer
-import aview.ColorPrinter.*
+package de.htwg.se.uno.aview
+
+import de.htwg.se.uno.model.*
+import de.htwg.se.uno.util.Observer
+import de.htwg.se.uno.aview.ColorPrinter.*
 
 import scala.io.StdIn.readLine
 

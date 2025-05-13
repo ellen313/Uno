@@ -25,8 +25,9 @@ object Main {
     )
 
     // Initialize empty GameBoard, PlayerHands, and GameState
-    val initialGameBoard = GameBoard(tempGameState, List.empty[Card], List.empty[Card]).shuffleDeck()
-
+    GameBoard.resetInstance()
+    val initialGameBoard = GameBoard(tempGameState, List.empty[Card], List.empty[Card])
+    
     val playerHands = List.fill(players)(PlayerHand(List.empty[Card]))
     var gameState = GameState(players = playerHands,
       currentPlayerIndex = 0,
@@ -36,13 +37,13 @@ object Main {
       discardPile = initialGameBoard.discardPile,
     )
 
-    initialGameBoard.game = gameState
+    initialGameBoard.gameState = gameState
 
     gameState = gameState.dealInitialCards(cardsPerPlayer)
     println("Let's start the Game!")
     Thread.sleep(2000)
 
-    val tui = new UnoTui(gameState)
+    val tui = new UnoTui(initialGameBoard)
     tui.display()
 
     gameState

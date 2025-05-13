@@ -5,7 +5,7 @@ import scala.util.Random
 import de.htwg.se.uno.util.{Observable, Observer}
 import de.htwg.se.uno.controller.command.*
 
-case class GameBoard(var gameState: GameState, drawPile: List[Card], discardPile: List[Card]) extends Observable {
+class GameBoard(var gameState: GameState, var drawPile: List[Card], var discardPile: List[Card]) extends Observable {
 
   def state: GameState = gameState
 
@@ -46,13 +46,20 @@ case class GameBoard(var gameState: GameState, drawPile: List[Card], discardPile
     val allCards = createDeckWithAllCards()
     val shuffledCards = Random.shuffle(allCards)
 
-    val discardPile = shuffledCards.headOption match {
+    /*val discardPile = shuffledCards.headOption match {
       case Some(card) => List(card)
       case None => List.empty[Card]
     }
     val drawPile = if (shuffledCards.isEmpty) List.empty[Card] else shuffledCards.tail
 
-    GameBoard(gameState, drawPile, discardPile)
+    GameBoard(gameState, drawPile, discardPile)**/
+
+    val newDiscardPile = shuffledCards.headOption.toList
+    val newDrawPile = shuffledCards.drop(1)
+
+    this.drawPile = newDrawPile
+    this.discardPile = newDiscardPile
+    this
   }
 
   def executeCommand(command: Command): Unit = {
@@ -71,5 +78,26 @@ case class GameBoard(var gameState: GameState, drawPile: List[Card], discardPile
   def isValidPlay(card: Card, topCard: Card, chosenColor: Option[String]): Boolean = {
     gameState.isValidPlay(card, Some(topCard), chosenColor)
   }
-  
+}
+
+object GameBoard {
+  private var instance:GameBoard  = null
+  def getInstance(gameState: GameState, drawPile: List[Card], discardPile: List[Card]): GameBoard = {
+    if (instance == null) {
+      instance = new GameBoard(gameState, drawPile, discardPile)
+    } else{
+      instace.get.gameState = gameState
+      instance.get.drawPile =  drawPile
+      instance.get.discardPile = discardPile
+    }
+    instance.get
+  }
+
+  def resetInstance(): Unit= {
+    instance = None
+  }
+
+  //apply() makes Code more readable
+  def apply(gameState: GameState, drawPile: List[Card], discardPile: List[Card]): GameBoard =
+    getInstance(gameState, drawPile, discardPile)
 }

@@ -2,9 +2,11 @@ package de.htwg.se.uno.model
 
 import de.htwg.se.uno.util.Observable
 
+import scala.annotation.tailrec
+
 case class GameState( players: List[PlayerHand], currentPlayerIndex: Int,
                       allCards: List[Card], isReversed: Boolean = false,
-                      discardPile: List[Card], drawPile: List[Card])
+                      discardPile: List[Card], drawPile: List[Card], selectedColor: Option[String] = None)
   extends Observable  {
 
   def nextPlayer(): GameState= {
@@ -111,50 +113,18 @@ case class GameState( players: List[PlayerHand], currentPlayerIndex: Int,
     val finalGameState = card match {
       //------------ skip ------------
       case ActionCard(_, "skip") =>
-        //val firstSkipState = baseGameState.nextPlayer(baseGameState)
-        //val secondSkipState = firstSkipState.nextPlayer(firstSkipState)
-        //secondSkipState
-
         baseGameState.nextPlayer().nextPlayer()
 
       //------------ reverse ------------
       case ActionCard(_, "reverse") =>
-        //val newGameState = baseGameState.copy(isReversed = !baseGameState.isReversed)
-        //val nextAfterReverse = newGameState.nextPlayer(newGameState)
-        //nextAfterReverse
-
         baseGameState.copy(isReversed = !baseGameState.isReversed).nextPlayer()
 
       //------------ draw two ------------
       case ActionCard(_, "draw two") =>
-        //val nextPlayerIndex = baseGameState.nextPlayer(baseGameState).currentPlayerIndex
-        //val updatedDrawPile = baseGameState.drawPile
-        //val updatedDiscardPile = baseGameState.discardPile
-        //updatedGameState
-
         baseGameState.handleDrawCards(2)
 
       //------------ wild draw four ------------
       case WildCard("wild draw four") =>
-        //        val nextPlayerIndex = baseGameState.nextPlayer(baseGameState).currentPlayerIndex
-        //
-        //        val updatedDrawPile = baseGameState.drawPile
-        //        val updatedDiscardPile = baseGameState.discardPile
-        //
-        //        val (updatedNextPlayerHand, updatedGameBoard) = (1 to 4).foldLeft((baseGameState.players(nextPlayerIndex),
-        //          (baseGameState.drawPile, baseGameState.discardPile))) {
-        //          case ((hand, (drawPile, discardPile)), _) =>
-        //            val (drawnCard, updatedHand, updatedDrawPile, updatedDiscardPile) = drawCard(hand, drawPile, discardPile)
-        //            (updatedHand, (updatedDrawPile, updatedDiscardPile))
-        //        }
-        //
-        //        val updatedGameState = baseGameState.copy(
-        //          players = baseGameState.players.updated(nextPlayerIndex, updatedNextPlayerHand),
-        //          drawPile = updatedDrawPile,
-        //          discardPile = updatedDiscardPile,
-        //          currentPlayerIndex = nextPlayerIndex
-        //        )
-        //        updatedGameState
         baseGameState.handleDrawCards(4)
 
       //------------ default ------------
@@ -214,6 +184,63 @@ case class GameState( players: List[PlayerHand], currentPlayerIndex: Int,
         }
     }
   }
+
+  def setSelectedColor(color: String): GameState = {
+    this.copy(selectedColor = Some(color))
+  }
+
+  def inputHandler(input: String): InputResult = {
+    val currentPlayer = players(currentPlayerIndex)
+
+    input match {
+      case s"play wild:$index:$color" =>
+        try {
+          val cardIndex = index.toInt
+          if (cardIndex < 0 || cardIndex >= currentPlayer.cards.length)
+            return Failure("Invalid card index.")
+
+          currentPlayer.cards(cardIndex) match {
+            case wild: WildCard =>
+              val playedCard = WildCard(wild.action) // z. B. "wild" oder "wild draw four"
+              val updatedGame = 
+                setSelectedColor(color)           // <- Du brauchst diese Methode im GameState!
+                playCard(playedCard)
+              Success(updatedGame)
+
+            case _ =>
+              Failure("Selected card is not a wild card.")
+          }
+        } catch {
+          case _: NumberFormatException =>
+            Failure("Card index must be a number.")
+        }
+
+      case s"play card:$index" =>
+        try {
+          val cardIndex = index.toInt
+          if (cardIndex < 0 || cardIndex >= currentPlayer.cards.length)
+            return Failure("Invalid card index.")
+
+          val card = currentPlayer.cards(cardIndex)
+          val topCard = discardPile.lastOption
+
+          if (!isValidPlay(card, topCard)) {
+            Failure("Invalid card! Please select a valid card.")
+          } else {
+            val updatedGame = playCard(card)
+            Success(updatedGame)
+          }
+
+        } catch {
+          case _: NumberFormatException =>
+            Failure("Card index must be a number.")
+        }
+
+      case _ =>
+        Failure("Unknown input command.")
+    }
+  }
+
 
   override def notifyObservers(): Unit = {
     super.notifyObservers()

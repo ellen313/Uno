@@ -7,7 +7,7 @@ class UnoStates(var gameState: GameState) {
 
   def setState(state: GamePhase): Unit = currentState = state
   def state: GamePhase = currentState
-  
+
   def playCard(): Unit = currentState = currentState.playCard()
   def drawCard(): Unit = currentState = currentState.drawCard()
   def nextPlayer(): Unit = currentState = currentState.nextPlayer()
@@ -18,5 +18,8 @@ class UnoStates(var gameState: GameState) {
     if (currentState.isValidPlay) currentState = currentState.playCard()
     else println("Invalid play.")
   }
-}
   
+  var selectedColor: Option[String] = None
+  def setSelectedColor(color: String): Unit = selectedColor = Some(color)
+}
+

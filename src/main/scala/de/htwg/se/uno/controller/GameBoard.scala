@@ -1,9 +1,14 @@
+package de.htwg.se.uno.controller
+
 import de.htwg.se.uno.model.*
-
 import scala.util.Random
+import de.htwg.se.uno.util.{Observable, Observer}
+import de.htwg.se.uno.controller.command.*
 
-case class GameBoard(var game: GameState, drawPile: List[Card], discardPile: List[Card]) {
-  
+case class GameBoard(var gameState: GameState, drawPile: List[Card], discardPile: List[Card]) extends Observable {
+
+  def state: GameState = gameState
+
   def createDeckWithAllCards(): List[Card] = {
     val numberCards = for {
       // 1x0 and 2x1-9 for each color
@@ -47,7 +52,24 @@ case class GameBoard(var game: GameState, drawPile: List[Card], discardPile: Lis
     }
     val drawPile = if (shuffledCards.isEmpty) List.empty[Card] else shuffledCards.tail
 
-    GameBoard(game, drawPile, discardPile)
+    GameBoard(gameState, drawPile, discardPile)
+  }
+
+  def executeCommand(command: Command): Unit = {
+    command.execute()
+    gameState.notifyObservers()
+  }
+
+  def checkForWinner(): Option[Int] = {
+    gameState.players.zipWithIndex.find(_._1.cards.isEmpty).map(_._2)
+  }
+
+  def addObserver(observer: Observer): Unit = {
+    super.addObserver(observer)
+  }
+
+  def isValidPlay(card: Card, topCard: Card, chosenColor: Option[String]): Boolean = {
+    gameState.isValidPlay(card, Some(topCard), chosenColor)
   }
   
 }

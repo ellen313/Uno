@@ -17,5 +17,5 @@ case class PlayCardState(context: UnoStates, card: Card) extends GamePhase {
     val topCard = context.gameState.discardPile.lastOption
     context.gameState.isValidPlay(card, topCard)
   }
-  override def name: String = "PlayCardState"
+  //override def name: String = "PlayCardState"
 }

@@ -17,18 +17,18 @@ class UnoTui(val controller: GameBoard) extends Observer {
 
   def display(): Unit = {
 
-    if (controller.players.isEmpty || gameShouldExit) return
+    if (controller.gameState.players.isEmpty || gameShouldExit) return
 
-    val currentPlayer = controller.players(controller.currentPlayerIndex)
-    val topCard = controller.discardPile.lastOption.getOrElse(return)
+    val currentPlayer = controller.gameState.players(controller.gameState.currentPlayerIndex)
+    val topCard = controller.gameState.discardPile.lastOption.getOrElse(return)
 
     println("\n--------------------------------------------------------------------")
-    println(s"Player ${controller.currentPlayerIndex + 1}'s turn!")
+    println(s"Player ${controller.gameState.currentPlayerIndex + 1}'s turn!")
 
     // UNO Call Anzeige
-    val unoPlayers = controller.players.zipWithIndex.filter(_._1.hasSaidUno)
+    val unoPlayers = controller.gameState.players.zipWithIndex.filter(_._1.hasSaidUno)
     unoPlayers.foreach { case (_, idx) =>
-        if (idx == controller.currentPlayerIndex) println("You said 'UNO'!")
+        if (idx == controller.gameState.currentPlayerIndex) println("You said 'UNO'!")
         else println(s"Player ${idx + 1} said UNO")
       }
 
@@ -63,7 +63,6 @@ class UnoTui(val controller: GameBoard) extends Observer {
           case None => println("No card was drawn.")
         }
         display()
-
 
       case _ =>
         try {

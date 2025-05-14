@@ -119,43 +119,14 @@ case class GameState( players: List[PlayerHand], currentPlayerIndex: Int,
     val updatedHand = currentPlayerHand.removeCard(card)
     val updatedDiscardPile = card :: discardPile
 
-    val baseGameState = this.copy(
+    this.copy(
       players = players.updated(currentPlayerIndex, updatedHand),
       discardPile = updatedDiscardPile
     )
 
-    //---------------------------------------------- special card ------------------------------------------------------
-    val finalGameState = card match {
-      //------------ skip ------------
-      case ActionCard(_, "skip") =>
-        baseGameState.nextPlayer().nextPlayer()
-
-      //------------ reverse ------------
-      case ActionCard(_, "reverse") =>
-        baseGameState.copy(isReversed = !baseGameState.isReversed).nextPlayer()
-
-      //------------ draw two ------------
-      case ActionCard(_, "draw two") =>
-        baseGameState.handleDrawCards(2).nextPlayer()
-
-      //------------ wild draw four ------------
-      case WildCard("wild draw four") =>
-        baseGameState.handleDrawCards(4).nextPlayer()
-
-      //------------ default ------------
-      case _ =>
-        baseGameState.nextPlayer()
-    }
-
-    val finalHand = if (updatedHand.hasUno) updatedHand.sayUno() else updatedHand.resetUnoStatus()
-    val updatedPlayers = finalGameState.players.updated(currentPlayerIndex, finalHand)
-    val updatedFinalGameState = finalGameState.copy(players = updatedPlayers)
-
-    updatedFinalGameState.notifyObservers()
-    updatedFinalGameState
   }
 
-  private def handleDrawCards(count: Int): GameState = {
+  def handleDrawCards(count: Int): GameState = {
     val nextPlayerIndex = if (isReversed) {
       (currentPlayerIndex - 1 + players.length) % players.length
     } else {
@@ -180,24 +151,22 @@ case class GameState( players: List[PlayerHand], currentPlayerIndex: Int,
       case None => true
       case Some(tCard) =>
         (card, tCard) match {
+          case (NumberCard(color, number), NumberCard(topColor, topNumber)) =>
+            color == topColor || number == topNumber
 
-          case (WildCard("wild draw four"), WildCard("wild draw four")) => false
+          case (NumberCard(color, _), ActionCard(topColor, _)) =>
+            color == topColor
+
+          case (ActionCard(color, _), NumberCard(topColor, _)) =>
+            color == topColor
+
+          case (ActionCard(color, action), ActionCard(topColor, topAction)) =>
+            color == topColor || action == topAction
+
           case (WildCard("wild"), _) => true
           case (WildCard("wild draw four"), _) => true
           case (_, WildCard("wild")) => true
           case (_, WildCard("wild draw four")) => true
-
-
-          case (ActionCard(color, "draw two"), ActionCard(topColor, "draw two")) => color == topColor
-
-          case (NumberCard(color, number), NumberCard(topColor, topNumber)) =>
-            color == topColor || number == topNumber
-
-          case (NumberCard(color, _), ActionCard(topColor, _)) => color == topColor
-          case (ActionCard(color, _), NumberCard(topColor, _)) => color == topColor
-
-          case (ActionCard(color, action), ActionCard(topColor, topAction)) =>
-            color == topColor || action == topAction
 
           case _ => false
         }

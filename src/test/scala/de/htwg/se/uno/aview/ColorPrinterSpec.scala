@@ -40,6 +40,11 @@ class ColorPrinterSpec extends AnyWordSpec {
       assert(numberCard.color == "red")
       assert(numberCard.number == 5)
     }
+    "handle yellow card" in {
+      val numberCard = NumberCard("yellow", 5)
+      assert(numberCard.color == "yellow")
+      assert(numberCard.number == 5)
+    }
   }
 
   "An ActionCard" should {

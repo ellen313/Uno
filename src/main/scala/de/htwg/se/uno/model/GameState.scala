@@ -2,6 +2,7 @@ package de.htwg.se.uno.model
 
 import de.htwg.se.uno.util.Observable
 
+import scala.::
 import scala.annotation.tailrec
 
 case class GameState( players: List[PlayerHand], currentPlayerIndex: Int,
@@ -79,7 +80,7 @@ case class GameState( players: List[PlayerHand], currentPlayerIndex: Int,
     }
 
     val currentPlayerHand = players(currentPlayerIndex)
-    val topCard = discardPile.lastOption
+    val topCard = discardPile.headOption
 
     if (!isValidPlay(card, topCard)) {
       var updatedPlayerHand = currentPlayerHand
@@ -99,10 +100,24 @@ case class GameState( players: List[PlayerHand], currentPlayerIndex: Int,
         updatedDiscardPile = newDiscardPile
         playableCardFound = isValidPlay(drawnCard, topCard)
       }
+
+      val updatedGameState = this.copy(
+        players = players.updated(currentPlayerIndex, updatedPlayerHand),
+        drawPile = updatedDrawPile,
+        discardPile = updatedDiscardPile
+      )
+
+      // if no playable card found go on to next player
+//      if (!playableCardFound) {
+//        return this.nextPlayer()
+//      }
+
+      return updatedGameState.nextPlayer()
     }
 
+
     val updatedHand = currentPlayerHand.removeCard(card)
-    val updatedDiscardPile = discardPile :+ card
+    val updatedDiscardPile = card :: discardPile
 
     val baseGameState = this.copy(
       players = players.updated(currentPlayerIndex, updatedHand),
@@ -121,11 +136,11 @@ case class GameState( players: List[PlayerHand], currentPlayerIndex: Int,
 
       //------------ draw two ------------
       case ActionCard(_, "draw two") =>
-        baseGameState.handleDrawCards(2)
+        baseGameState.handleDrawCards(2).nextPlayer()
 
       //------------ wild draw four ------------
       case WildCard("wild draw four") =>
-        baseGameState.handleDrawCards(4)
+        baseGameState.handleDrawCards(4).nextPlayer()
 
       //------------ default ------------
       case _ =>
@@ -133,26 +148,30 @@ case class GameState( players: List[PlayerHand], currentPlayerIndex: Int,
     }
 
     val finalHand = if (updatedHand.hasUno) updatedHand.sayUno() else updatedHand.resetUnoStatus()
-    val updatedFinalGameState = finalGameState.copy(
-      players = finalGameState.players.updated(currentPlayerIndex, finalHand))
+    val updatedPlayers = finalGameState.players.updated(currentPlayerIndex, finalHand)
+    val updatedFinalGameState = finalGameState.copy(players = updatedPlayers)
 
     updatedFinalGameState.notifyObservers()
     updatedFinalGameState
   }
 
   private def handleDrawCards(count: Int): GameState = {
-    val nextPlayerIndex = nextPlayer().currentPlayerIndex
-
-    val (updatedNextPlayerHand, updatedDrawPile, updatedDiscardPile) = (1 to count).foldLeft((players(nextPlayerIndex), drawPile, discardPile)) {
-      case ((hand, drawPile, discardPile), _) =>
-        val (drawnCard, updatedHand, updatedDrawPile, updatedDiscardPile) = drawCard(hand, drawPile, discardPile)
-        (updatedHand, updatedDrawPile, updatedDiscardPile)
+    val nextPlayerIndex = if (isReversed) {
+      (currentPlayerIndex - 1 + players.length) % players.length
+    } else {
+      (currentPlayerIndex + 1) % players.length
     }
+
+    val (updatedHand, updatedDrawPile, _) =
+      (1 to count).foldLeft((players(nextPlayerIndex), drawPile, discardPile)) {
+        case ((hand, draw, _), _) =>
+          val (_, newHand, newDraw, _) = drawCard(hand, draw, Nil)  // discardPile irrelevant
+          (newHand, newDraw, Nil)
+      }
+
     this.copy(
-      players = players.updated(nextPlayerIndex, updatedNextPlayerHand),
-      drawPile = updatedDrawPile,
-      discardPile = updatedDiscardPile,
-      currentPlayerIndex = nextPlayerIndex
+      players = players.updated(nextPlayerIndex, updatedHand),
+      drawPile = updatedDrawPile
     )
   }
 
@@ -201,9 +220,9 @@ case class GameState( players: List[PlayerHand], currentPlayerIndex: Int,
 
           currentPlayer.cards(cardIndex) match {
             case wild: WildCard =>
-              val playedCard = WildCard(wild.action) // z. B. "wild" oder "wild draw four"
+              val playedCard = WildCard(wild.action)
               val updatedGame = 
-                setSelectedColor(color)           // <- Du brauchst diese Methode im GameState!
+                setSelectedColor(color)
                 playCard(playedCard)
               Success(updatedGame)
 

@@ -1,6 +1,8 @@
+package de.htwg.se.uno.aview
+
 import org.scalatest.wordspec.AnyWordSpec
-import model.*
-import aview.ColorPrinter.printCard
+import de.htwg.se.uno.model.*
+import de.htwg.se.uno.aview.ColorPrinter.printCard
 
 class ColorPrinterSpec extends AnyWordSpec {
 

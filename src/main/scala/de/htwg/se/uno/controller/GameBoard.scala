@@ -7,7 +7,18 @@ import de.htwg.se.uno.controller.command.*
 
 case class GameBoard(var gameState: GameState, drawPile: List[Card], discardPile: List[Card]) extends Observable {
 
+  // Methods for command pattern
   def state: GameState = gameState
+
+  def players: List[PlayerHand] = gameState.players
+
+  def currentPlayerIndex: Int = gameState.currentPlayerIndex
+
+  def selectedColor: Option[String] = gameState.selectedColor
+
+  def setSelectedColor(color: String): Unit = {
+    gameState = gameState.copy(selectedColor = Some(color))
+  }
 
   def createDeckWithAllCards(): List[Card] = {
     val numberCards = for {
@@ -64,8 +75,8 @@ case class GameBoard(var gameState: GameState, drawPile: List[Card], discardPile
     gameState.players.zipWithIndex.find(_._1.cards.isEmpty).map(_._2)
   }
 
-  def addObserver(observer: Observer): Unit = {
-    super.addObserver(observer)
+  override def addObserver(observer: Observer): Unit = {
+     super.addObserver(observer)
   }
 
   def isValidPlay(card: Card, topCard: Card, chosenColor: Option[String]): Boolean = {

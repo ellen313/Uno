@@ -5,7 +5,11 @@ import scala.util.Random
 import de.htwg.se.uno.util.{Observable, Observer}
 import de.htwg.se.uno.controller.command.*
 
-case class GameBoard(var gameState: GameState, drawPile: List[Card], discardPile: List[Card]) extends Observable {
+object GameBoard extends Observable {
+
+  var gameState: GameState = _
+  var drawPile: List[Card] = Nil
+  var discardPile: List[Card] = Nil
 
   // Methods for command pattern
   def state: GameState = gameState
@@ -20,50 +24,51 @@ case class GameBoard(var gameState: GameState, drawPile: List[Card], discardPile
     gameState = gameState.copy(selectedColor = Some(color))
   }
 
+  def init_state(state: GameState): Unit = {
+    this.gameState = state
+    shuffleDeck()
+  }
+
+  def setGameState(state: GameState): Unit = {
+    gameState = state
+    notifyObservers()
+  }
+
+  def init_board(players: List[PlayerHand]): Unit = {
+    gameState = GameState(
+      players = players,
+      currentPlayerIndex = 0,
+      allCards = List.empty[Card],
+      isReversed = false,
+      drawPile = List.empty[Card],
+      discardPile = List.empty[Card],
+      selectedColor = None
+    )
+    shuffleDeck()
+  }
+
   def createDeckWithAllCards(): List[Card] = {
     val numberCards = for {
       // 1x0 and 2x1-9 for each color
       number <- 0 to 9
       color <- List("yellow", "red", "blue", "green")
-    } yield {
-      if (number == 0) {
-        List(NumberCard(color, number))
-      } else {
-        List(
-          NumberCard(color, number), //1. card
-          NumberCard(color, number) //2. card
-        )
-      }
-    }
-    val allNumberCards = numberCards.flatten.toList
+      count = if (number == 0) 1 else 2
+    } yield Card("number")
 
-    val actionCards = List("draw two", "skip", "reverse").flatMap { action => //24 cards
-      List(
-        ActionCard("red", action),
-        ActionCard("red", action),
-        ActionCard("blue", action),
-        ActionCard("blue", action),
-        ActionCard("green", action),
-        ActionCard("green", action),
-        ActionCard("yellow", action),
-        ActionCard("yellow", action)
-      )
-    }
-    val wildCards = List.fill(4)(WildCard("wild")) ++ List.fill(4)(WildCard("wild draw four")) //8 cards
-    allNumberCards ++ actionCards ++ wildCards // 108 cards
+    val actionCards = for {
+      _ <- 1 to 2
+      action <- Card.actions
+      color <- Card.colors
+    } yield Card("action")
+      val wildCards = List.fill(4)(WildCard("wild")) ++ List.fill(4)(WildCard("wild draw four"))
+
+      numberCards.toList ++ actionCards.toList ++ wildCards
   }
 
-  def shuffleDeck(): GameBoard = {
-    val allCards = createDeckWithAllCards()
-    val shuffledCards = Random.shuffle(allCards)
-
-    val discardPile = shuffledCards.headOption match {
-      case Some(card) => List(card)
-      case None => List.empty[Card]
-    }
-    val drawPile = if (shuffledCards.isEmpty) List.empty[Card] else shuffledCards.tail
-
-    GameBoard(gameState, drawPile, discardPile)
+  def shuffleDeck(): Unit = {
+    val shuffled = Random.shuffle(createDeckWithAllCards())
+    discardPile = shuffled.headOption.toList
+    drawPile = shuffled.drop(1)
   }
 
   def executeCommand(command: Command): Unit = {
@@ -81,6 +86,12 @@ case class GameBoard(var gameState: GameState, drawPile: List[Card], discardPile
 
   def isValidPlay(card: Card, topCard: Card, selectedColor: Option[String]): Boolean = {
     gameState.isValidPlay(card, Some(topCard), selectedColor)
+  }
+
+  def reset(): Unit = {
+    gameState = null
+    drawPile = Nil
+    discardPile = Nil
   }
   
 }

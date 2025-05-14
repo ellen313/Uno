@@ -10,13 +10,11 @@ case class PlayerHand(cards: List[Card], var hasSaidUno: Boolean = false) {
   }
   def containsCard(card: Card): Boolean = cards.contains(card)
   
-  //remove a card from players hand
   def removeCard(card: Card): PlayerHand = {
     val (before, after) = cards.span(_ != card)
     copy(cards = before ++ after.drop(1), hasSaidUno = false)
   }
-
-  //check if player can say 'Uno'
+  
   def hasUno: Boolean = cards.length == 1
 
   def sayUno(): PlayerHand = {
@@ -26,11 +24,9 @@ case class PlayerHand(cards: List[Card], var hasSaidUno: Boolean = false) {
   def resetUnoStatus(): PlayerHand = {
     copy(hasSaidUno = false)
   }
-
-  //if hand is empty
+  
   def isEmpty: Boolean = cards.isEmpty
-
-  //display cards on players hand
+  
   def displayHand(): Unit = {
     cards.foreach {
       case NumberCard(color, number) =>

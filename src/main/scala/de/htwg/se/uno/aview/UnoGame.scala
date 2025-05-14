@@ -6,52 +6,37 @@ import de.htwg.se.uno.model.*
 import de.htwg.se.uno.controller.GameBoard
 
 object UnoGame {
-  def runUno(numberPlayers: Option[Int] = None, cardsPerPlayer: Int = 7): GameBoard = {
+  def runUno(numberPlayers: Option[Int] = None, cardsPerPlayer: Int = 7): UnoTui = {
     println("Welcome to UNO!")
 
     val players = numberPlayers.getOrElse(readValidInt("How many players? (2-10): ", min = 2, max = 10))
 
-    // Initialize the game with a full shuffled deck
-    val initialGameBoard = GameBoard(
-      GameState(
-        players = List.empty[PlayerHand],
-        currentPlayerIndex = 0,
-        allCards = List.empty[Card],
-        isReversed = false,
-        drawPile = List.empty[Card],
-        discardPile = List.empty[Card],
-        selectedColor = None
-      ),
-      drawPile = List.empty[Card],
-      discardPile = List.empty[Card]
-    ).shuffleDeck()
-
-    // Deal cards to players
-    val (newDrawPile, playerHands) = dealCards(initialGameBoard.drawPile, players, cardsPerPlayer)
+    val fullDeck = scala.util.Random.shuffle(GameBoard.createDeckWithAllCards())
+    val (newDrawPile, playerHands) = dealCards(fullDeck, players, cardsPerPlayer)
 
     // Put first card to discard pile
-    val (newDrawPileAfterFirstCard, firstCard) = newDrawPile match {
-      case head :: tail => (tail, head)
+    val (firstCard, newDrawPileAfterFirstCard) = newDrawPile match {
+      case head :: tail => (head, tail)
       case Nil => throw new IllegalStateException("No cards left in draw pile")
     }
 
     val gameState = GameState(
       players = playerHands,
       currentPlayerIndex = 0,
-      allCards = List.empty[Card],
+      allCards = fullDeck,
       isReversed = false,
       drawPile = newDrawPileAfterFirstCard,
-      discardPile = List(firstCard)
+      discardPile = List.empty[Card]
     )
 
-    val gameBoard = new GameBoard(gameState, newDrawPileAfterFirstCard, List(firstCard))
+    GameBoard.setGameState(gameState)
     println("Let's start the Game!")
     Thread.sleep(2000)
 
-    val tui = new UnoTui(gameBoard)
+    val tui = new UnoTui()
     tui.display()
 
-    gameBoard
+    tui
   }
 
   private def dealCards(drawPile: List[Card], playerCount: Int, cardsPerPlayer: Int): (List[Card], List[PlayerHand]) = {
@@ -62,8 +47,8 @@ object UnoGame {
         val (newPile, newPlayers) = players.foldLeft((remainingPile, List.empty[PlayerHand])) {
           case ((pile, acc), player) =>
             pile match {
-              case card :: rest =>
-                (rest, acc :+ PlayerHand(player.cards :+ card))
+              case card :: tail =>
+                (tail, acc :+ PlayerHand(player.cards :+ card))
               case Nil =>
                 throw new IllegalStateException("Not enough cards in draw pile")
             }

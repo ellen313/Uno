@@ -8,27 +8,28 @@ import de.htwg.se.uno.aview.ColorPrinter.*
 
 import scala.io.StdIn.readLine
 
-class UnoTui(val controller: GameBoard) extends Observer {
+class UnoTui extends Observer {
 
-  var gameShouldExit = false
+  private var gameShouldExit = false
+
   var selectedColor: Option[String] = None
 
-  controller.addObserver(this)
+  GameBoard.addObserver(this)
 
   def display(): Unit = {
 
-    if (controller.gameState.players.isEmpty || gameShouldExit) return
+    if (GameBoard.gameState.players.isEmpty || gameShouldExit) return
 
-    val currentPlayer = controller.gameState.players(controller.gameState.currentPlayerIndex)
-    val topCard = controller.gameState.discardPile.lastOption.getOrElse(return)
+    val currentPlayer = GameBoard.gameState.players(GameBoard.gameState.currentPlayerIndex)
+    val topCard = GameBoard.gameState.discardPile.lastOption.getOrElse(return)
 
     println("\n--------------------------------------------------------------------")
-    println(s"Player ${controller.gameState.currentPlayerIndex + 1}'s turn!")
+    println(s"Player ${GameBoard.gameState.currentPlayerIndex + 1}'s turn!")
 
     // UNO Call Anzeige
-    val unoPlayers = controller.gameState.players.zipWithIndex.filter(_._1.hasSaidUno)
+    val unoPlayers = GameBoard.gameState.players.zipWithIndex.filter(_._1.hasSaidUno)
     unoPlayers.foreach { case (_, idx) =>
-        if (idx == controller.gameState.currentPlayerIndex) println("You said 'UNO'!")
+        if (idx == GameBoard.gameState.currentPlayerIndex) println("You said 'UNO'!")
         else println(s"Player ${idx + 1} said UNO")
       }
 
@@ -38,9 +39,9 @@ class UnoTui(val controller: GameBoard) extends Observer {
 
     showHand(currentPlayer)
 
-    if (!currentPlayer.cards.exists(card => controller.isValidPlay(card, topCard, controller.selectedColor))) {
+    if (!currentPlayer.cards.exists(card => GameBoard.isValidPlay(card, topCard, GameBoard.selectedColor))) {
       println("No playable Card! You have to draw a card...")
-      controller.executeCommand(DrawCardCommand(controller))
+      GameBoard.executeCommand(DrawCardCommand())
       gameShouldExit = false
       display()
     } else {
@@ -51,12 +52,15 @@ class UnoTui(val controller: GameBoard) extends Observer {
   def handleInput(input: String): Unit = {
     if (gameShouldExit) return
 
-    val currentPlayer = controller.players(controller.currentPlayerIndex)
+    val currentPlayer = GameBoard.players(GameBoard.currentPlayerIndex)
 
     input match {
+      case "exit" =>
+        println("Thanks for playing.")
+        gameShouldExit = true
       case "draw" =>
-        val drawCommand = DrawCardCommand(controller)
-        controller.executeCommand(drawCommand)
+        val drawCommand = DrawCardCommand()
+        GameBoard.executeCommand(drawCommand)
 
         drawCommand.drawnCard match {
           case Some(card) => println(s"You drew: $card")
@@ -72,14 +76,14 @@ class UnoTui(val controller: GameBoard) extends Observer {
 
             if (chosenCard.isInstanceOf[WildCard]) {
               val color = chooseWildColor()
-              controller.setSelectedColor(color)
+              GameBoard.setSelectedColor(color)
             }
 
-            controller.executeCommand(PlayCardCommand(controller, chosenCard))
+            GameBoard.executeCommand(PlayCardCommand(chosenCard))
 
-            val updatedPlayer = controller.players(controller.currentPlayerIndex)
+            val updatedPlayer = GameBoard.players(GameBoard.currentPlayerIndex)
             if (updatedPlayer.cards.length == 1 && !updatedPlayer.hasSaidUno) {
-              controller.executeCommand(UnoCalledCommand(controller, null))
+              GameBoard.executeCommand(UnoCalledCommand(null))
               println("You said 'UNO'!")
             }
 
@@ -128,7 +132,7 @@ class UnoTui(val controller: GameBoard) extends Observer {
   }
 
   def checkForWinner(): Unit = {
-    controller.checkForWinner() match {
+    GameBoard.checkForWinner() match {
       case Some(idx) =>
         println(s"Player ${idx + 1} wins! Game over.")
         gameShouldExit = true

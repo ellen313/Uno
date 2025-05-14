@@ -3,9 +3,9 @@ package de.htwg.se.uno.controller.command
 import de.htwg.se.uno.model.*
 import de.htwg.se.uno.controller.GameBoard
 
-case class PlayCardCommand(var gameBoard: GameBoard, card: Card) extends Command {
+case class PlayCardCommand(card: Card) extends Command {
   override def execute(): Unit = {
-    val state = gameBoard.gameState
+    val state = GameBoard.gameState
     val playerIndex = state.currentPlayerIndex
     val currentPlayer = state.players(playerIndex)
 
@@ -47,7 +47,7 @@ case class PlayCardCommand(var gameBoard: GameBoard, card: Card) extends Command
       val finalPlayers = updatedGameState.players.updated(playerIndex, finalHand)
       updatedGameState = updatedGameState.copy(players = finalPlayers)
 
-      gameBoard.gameState = updatedGameState
+      GameBoard.gameState = updatedGameState
       updatedGameState.notifyObservers()
 
     } else {

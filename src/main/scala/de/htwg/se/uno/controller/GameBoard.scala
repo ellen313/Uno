@@ -79,8 +79,8 @@ case class GameBoard(var gameState: GameState, drawPile: List[Card], discardPile
      super.addObserver(observer)
   }
 
-  def isValidPlay(card: Card, topCard: Card, chosenColor: Option[String]): Boolean = {
-    gameState.isValidPlay(card, Some(topCard), chosenColor)
+  def isValidPlay(card: Card, topCard: Card, selectedColor: Option[String]): Boolean = {
+    gameState.isValidPlay(card, Some(topCard), selectedColor)
   }
   
 }

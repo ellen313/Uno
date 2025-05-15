@@ -1,0 +1,122 @@
+package de.htwg.se.uno.model.state
+
+import org.scalatest.wordspec.AnyWordSpec
+import org.scalatest.matchers.should.Matchers
+import de.htwg.se.uno.model.*
+
+class PlayCardStateSpec extends AnyWordSpec with Matchers {
+
+  "PlayCardState" should {
+
+    "play a normal card and move to PlayerTurnState" in {
+      val card = NumberCard("red", 5)
+      val player = PlayerHand(List(card))
+      val gameState = GameState(List(player), 0, List(), isReversed = false, List(card), List())
+      val context = new UnoStates(gameState)
+
+      val state = PlayCardState(context, card)
+      val nextState = state.playCard()
+
+      nextState shouldBe a[PlayerTurnState]
+    }
+
+    "play a skip card and skip the next player" in {
+      val card = ActionCard("red", "skip")
+      val players = List(PlayerHand(List(card)), PlayerHand(Nil), PlayerHand(Nil))
+      val gameState = GameState(players, 0, List(), false, List(card), List())
+      val context = new UnoStates(gameState)
+
+      val state = PlayCardState(context, card)
+      val result = state.playCard()
+
+      result shouldBe a[PlayerTurnState]
+      context.gameState.currentPlayerIndex shouldBe 2
+    }
+
+    "play a reverse card and toggle isReversed" in {
+      val card = ActionCard("blue", "reverse")
+      val players = List(PlayerHand(List(card)), PlayerHand(Nil))
+      val gameState = GameState(players, 0, List(), false, List(card), List())
+      val context = new UnoStates(gameState)
+
+      val state = PlayCardState(context, card)
+      val result = state.playCard()
+
+      result shouldBe a[PlayerTurnState]
+      context.gameState.isReversed shouldBe true
+    }
+
+    "play a wild card and change to next player" in {
+      val card = WildCard("wild")
+      val players = List(PlayerHand(List(card)), PlayerHand(Nil))
+      val gameState = GameState(players, 0, List(), false, List(card), List())
+      val context = new UnoStates(gameState)
+
+      val state = PlayCardState(context, card)
+      val result = state.playCard()
+
+      result shouldBe a[PlayerTurnState]
+      context.gameState.currentPlayerIndex shouldBe 1
+    }
+
+    "drawCard should return itself and print" in {
+      val card = NumberCard("red", 1)
+      val context = new UnoStates(GameState(List(PlayerHand(List(card))), 0, Nil, false, Nil, Nil))
+      val state = PlayCardState(context, card)
+
+      state.drawCard() shouldBe state
+    }
+
+    "dealInitialCards should return itself and print" in {
+      val card = NumberCard("red", 1)
+      val context = new UnoStates(GameState(List(PlayerHand(List(card))), 0, Nil, false, Nil, Nil))
+      val state = PlayCardState(context, card)
+
+      state.dealInitialCards() shouldBe state
+    }
+
+    "checkForWinner should return GameOverState" in {
+      val card = NumberCard("red", 1)
+      val context = new UnoStates(GameState(List(PlayerHand(List(card))), 0, Nil, false, Nil, Nil))
+      val state = PlayCardState(context, card)
+
+      state.checkForWinner() shouldBe a[GameOverState]
+    }
+
+    "playerSaysUno should return UnoCalledState" in {
+      val card = NumberCard("red", 1)
+      val context = new UnoStates(GameState(List(PlayerHand(List(card))), 0, Nil, false, Nil, Nil))
+      val state = PlayCardState(context, card)
+
+      state.playerSaysUno() shouldBe a[UnoCalledState]
+    }
+
+    "nextPlayer should return PlayerTurnState" in {
+      val card = NumberCard("red", 1)
+      val context = new UnoStates(GameState(List(PlayerHand(List(card))), 0, Nil, false, Nil, Nil))
+      val state = PlayCardState(context, card)
+
+      state.nextPlayer() shouldBe a[PlayerTurnState]
+    }
+
+    "isValidPlay should return true if card matches" in {
+      val card = NumberCard("red", 1)
+      val top = NumberCard("red", 2)
+      val gameState = GameState(List(PlayerHand(List(card))), 0, Nil, false, List(top), Nil)
+      val context = new UnoStates(gameState)
+
+      val state = PlayCardState(context, card)
+      state.isValidPlay shouldBe true
+    }
+
+    "isValidPlay should return false if card does not match" in {
+      val card = NumberCard("green", 5)
+      val top = NumberCard("red", 2)
+      val gameState = GameState(List(PlayerHand(List(card))), 0, Nil, false, List(top), Nil)
+      val context = new UnoStates(gameState)
+
+      val state = PlayCardState(context, card)
+      state.isValidPlay shouldBe false
+    }
+  }
+}

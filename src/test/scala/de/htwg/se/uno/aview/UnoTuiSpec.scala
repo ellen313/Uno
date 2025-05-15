@@ -632,4 +632,29 @@ class UnoTuiSpec extends AnyWordSpec {
     val outputStr = output.toString
     assert(outputStr.isEmpty)
   }
+  "detect and handle winner correctly" in {
+    val unoTui = new UnoTui()
+    unoTui.setShouldExit(false)
+
+    val winningPlayer = PlayerHand(List.empty)
+    val otherPlayer = PlayerHand(List(NumberCard("red", 1)))
+    val gameState = GameState(
+      players = List(winningPlayer, otherPlayer),
+      currentPlayerIndex = 0,
+      allCards = Nil,
+      isReversed = false,
+      discardPile = List(NumberCard("blue", 2)),
+      drawPile = Nil,
+      selectedColor = None
+    )
+
+    val out = new ByteArrayOutputStream()
+    Console.withOut(new PrintStream(out)) {
+      GameBoard.initGame(gameState)
+      unoTui.checkForWinner()
+    }
+
+    unoTui.shouldExit shouldBe true
+    out.toString should include("Player 1 wins! Game over.")
+  }
 }

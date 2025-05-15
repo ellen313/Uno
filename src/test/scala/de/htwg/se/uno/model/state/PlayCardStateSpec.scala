@@ -160,5 +160,34 @@ class PlayCardStateSpec extends AnyWordSpec with Matchers {
       }
       noException should be thrownBy stateWildDrawFour.playCard()
     }
+
+
+    "handle penalty cards correctly when game is reversed" in {
+      val card = ActionCard("red", "draw two")
+      val players = List(
+        PlayerHand(List(card)),
+        PlayerHand(List(NumberCard("blue", 1))),
+        PlayerHand(List(NumberCard("green", 2)))
+      )
+      val drawPile = List(NumberCard("yellow", 3), NumberCard("red", 4))
+      val gameState = GameState(
+        players = players,
+        currentPlayerIndex = 0,
+        allCards = players.flatMap(_.cards) ++ drawPile,
+        isReversed = true,
+        discardPile = List(card),
+        drawPile = drawPile,
+        selectedColor = None
+      )
+      val context = new UnoStates(gameState)
+
+      val state = PlayCardState(context, card)
+      val result = state.playCard()
+
+      result shouldBe a[PlayerTurnState]
+      context.gameState.currentPlayerIndex shouldBe 2
+      context.gameState.players(2).cards should have size 3
+      context.gameState.drawPile shouldBe empty
+    }
   }
 }

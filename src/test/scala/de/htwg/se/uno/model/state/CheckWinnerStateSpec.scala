@@ -5,7 +5,7 @@ import org.scalatest.matchers.should.Matchers
 import org.scalatest.wordspec.AnyWordSpec
 
 class CheckWinnerStateSpec extends AnyWordSpec with Matchers {
-  
+
   class GameStateWithWinner(players: List[PlayerHand]) extends GameState(
     players = players,
     currentPlayerIndex = 0,
@@ -16,7 +16,7 @@ class CheckWinnerStateSpec extends AnyWordSpec with Matchers {
   ) {
     override def checkForWinner(): Option[Int] = Some(0)
   }
-  
+
   class GameStateWithoutWinner(players: List[PlayerHand]) extends GameState(
     players = players,
     currentPlayerIndex = 0,
@@ -56,6 +56,65 @@ class CheckWinnerStateSpec extends AnyWordSpec with Matchers {
       val newState = unoStates.state.checkForWinner()
 
       newState shouldBe a [PlayerTurnState]
+    }
+
+    "return itself when playCard is called" in {
+      val gameState = new GameStateWithoutWinner(List())
+      val unoStates = new UnoStates(gameState)
+      val checkWinnerState = CheckWinnerState(unoStates)
+      unoStates.setState(checkWinnerState)
+
+      val result = checkWinnerState.playCard()
+      result shouldBe checkWinnerState
+    }
+
+    "return itself when drawCard is called" in {
+      val gameState = new GameStateWithoutWinner(List())
+      val unoStates = new UnoStates(gameState)
+      val checkWinnerState = CheckWinnerState(unoStates)
+      unoStates.setState(checkWinnerState)
+
+      val result = checkWinnerState.drawCard()
+      result shouldBe checkWinnerState
+    }
+
+    "return itself when nextPlayer is called" in {
+      val gameState = new GameStateWithoutWinner(List())
+      val unoStates = new UnoStates(gameState)
+      val checkWinnerState = CheckWinnerState(unoStates)
+      unoStates.setState(checkWinnerState)
+
+      val result = checkWinnerState.nextPlayer()
+      result shouldBe checkWinnerState
+    }
+
+    "return itself when dealInitialCards is called" in {
+      val gameState = new GameStateWithoutWinner(List())
+      val unoStates = new UnoStates(gameState)
+      val checkWinnerState = CheckWinnerState(unoStates)
+      unoStates.setState(checkWinnerState)
+
+      val result = checkWinnerState.dealInitialCards()
+      result shouldBe checkWinnerState
+    }
+
+    "return itself when playerSaysUno is called" in {
+      val gameState = new GameStateWithoutWinner(List())
+      val unoStates = new UnoStates(gameState)
+      val checkWinnerState = CheckWinnerState(unoStates)
+      unoStates.setState(checkWinnerState)
+
+      val result = checkWinnerState.playerSaysUno()
+      result shouldBe checkWinnerState
+    }
+
+    "return false for isValidPlay" in {
+      val gameState = new GameStateWithoutWinner(List())
+      val unoStates = new UnoStates(gameState)
+      val checkWinnerState = CheckWinnerState(unoStates)
+      unoStates.setState(checkWinnerState)
+
+      checkWinnerState.isValidPlay shouldBe false
     }
   }
 }

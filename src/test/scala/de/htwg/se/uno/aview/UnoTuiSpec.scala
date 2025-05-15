@@ -26,8 +26,8 @@ class UnoTuiSpec extends AnyWordSpec {
         isReversed = false,
         allCards = List()
       )
-
-      GameBoard.init_state(gameState)
+      
+      GameBoard.initGame(gameState)
       val unoTui = new UnoTui()
 
       assert(GameBoard.gameState eq gameState)
@@ -47,8 +47,8 @@ class UnoTuiSpec extends AnyWordSpec {
         isReversed = false,
         allCards = List()
       )
-
-      GameBoard.init_state(gameState)
+      
+      GameBoard.initGame(gameState)
       val unoTui = new UnoTui()
       unoTui.setShouldExit(true)
 
@@ -71,7 +71,7 @@ class UnoTuiSpec extends AnyWordSpec {
         allCards = List()
       )
 
-      GameBoard.init_state(gameState)
+      GameBoard.initGame(gameState)
       val unoTui = new UnoTui()
       
       val stream = new java.io.ByteArrayOutputStream()
@@ -94,7 +94,7 @@ class UnoTuiSpec extends AnyWordSpec {
         allCards = List()
       )
 
-      GameBoard.init_state(gameState)
+      GameBoard.initGame(gameState)
       val unoTui = new UnoTui()
 
       val stream = new java.io.ByteArrayOutputStream()
@@ -118,8 +118,8 @@ class UnoTuiSpec extends AnyWordSpec {
         isReversed = false,
         allCards = List()
       )
-
-      GameBoard.init_state(gameState)
+      
+      GameBoard.initGame(gameState)
       val unoTui = new UnoTui()
       
       unoTui.selectedColor = Some("blue")
@@ -144,8 +144,8 @@ class UnoTuiSpec extends AnyWordSpec {
         isReversed = false,
         allCards = List()
       )
-      
-      GameBoard.init_state(gameState)
+
+      GameBoard.initGame(gameState)
       val unoTui = new UnoTui()
 
       val stream = new java.io.ByteArrayOutputStream()
@@ -170,8 +170,8 @@ class UnoTuiSpec extends AnyWordSpec {
         isReversed = false,
         allCards = List()
       )
-      
-      GameBoard.init_state(gameState)
+
+      GameBoard.initGame(gameState)
       val unoTui = new UnoTui(){
         override def display(): Unit = {
           val playable = gameState.players(gameState.currentPlayerIndex)
@@ -204,7 +204,7 @@ class UnoTuiSpec extends AnyWordSpec {
         allCards = List()
       )
 
-      GameBoard.init_state(gameState)
+      GameBoard.initGame(gameState)
       val unoTui = new UnoTui()
 
       val inputs = Iterator("invalid", "1")
@@ -234,8 +234,8 @@ class UnoTuiSpec extends AnyWordSpec {
         isReversed = false,
         allCards = List()
       )
-
-      GameBoard.init_state(gameState)
+      
+      GameBoard.initGame(gameState)
       val unoTui = new UnoTui()
 
       val inputs = Iterator("invalid", "1")
@@ -260,7 +260,7 @@ class UnoTuiSpec extends AnyWordSpec {
         allCards = List()
       )
 
-      GameBoard.init_state(gameState)
+      GameBoard.initGame(gameState)
       val unoTui = new UnoTui()
 
       val output = new ByteArrayOutputStream()
@@ -287,8 +287,8 @@ class UnoTuiSpec extends AnyWordSpec {
         isReversed = false,
         allCards = List()
       )
-
-      GameBoard.init_state(gameState)
+      
+      GameBoard.initGame(gameState)
       val unoTui = new UnoTui()
 
       val invalidInput = "invalid"
@@ -319,7 +319,7 @@ class UnoTuiSpec extends AnyWordSpec {
         allCards = List()
       )
 
-      GameBoard.init_state(gameState)
+      GameBoard.initGame(gameState)
       val unoTui = new UnoTui()
       unoTui.setShouldExit(true)
 
@@ -341,8 +341,8 @@ class UnoTuiSpec extends AnyWordSpec {
         isReversed = false,
         allCards = List()
       )
-
-      GameBoard.init_state(gameState)
+      
+      GameBoard.initGame(gameState)
       val unoTui = new UnoTui()
 
       val input = new java.io.ByteArrayInputStream("2\n".getBytes())
@@ -372,8 +372,8 @@ class UnoTuiSpec extends AnyWordSpec {
         isReversed = false,
         allCards = List()
       )
-      
-      GameBoard.init_state(gameState)
+
+      GameBoard.initGame(gameState)
       val unoTui = new UnoTui(){
         override def display(): Unit = {}
       }
@@ -399,7 +399,7 @@ class UnoTuiSpec extends AnyWordSpec {
 
       assert(gameState.isValidPlay(playableCard, Some(topCard), None))
       
-      GameBoard.init_state(gameState)
+      GameBoard.initGame(gameState)
       val unoTui = new UnoTui()
 
       val outputStream = new java.io.ByteArrayOutputStream()
@@ -428,7 +428,7 @@ class UnoTuiSpec extends AnyWordSpec {
         allCards = List(wrongCard, wildCard)
       )
 
-      GameBoard.init_state(gameState)
+      GameBoard.initGame(gameState)
       val unoTui = new UnoTui()
       unoTui.selectedColor = Some("red")
 
@@ -462,7 +462,7 @@ class UnoTuiSpec extends AnyWordSpec {
         allCards = List()
       )
       
-      GameBoard.init_state(gameState)
+      GameBoard.initGame(gameState)
       
       val updatedGame = GameState(
         players = List(
@@ -506,7 +506,7 @@ class UnoTuiSpec extends AnyWordSpec {
         allCards = cards :+ topCard
       )
 
-      GameBoard.init_state(gameState)
+      GameBoard.initGame(gameState)
       val unoTui = new UnoTui()
       
       // 2. Output erfassen
@@ -535,7 +535,7 @@ class UnoTuiSpec extends AnyWordSpec {
         allCards = List()
       )
 
-      GameBoard.init_state(gameState)
+      GameBoard.initGame(gameState)
       val unoTui = new UnoTui()
       
       val stream = new java.io.ByteArrayOutputStream()
@@ -560,7 +560,7 @@ class UnoTuiSpec extends AnyWordSpec {
       allCards = List(playableCard, topCard)
     )
 
-    GameBoard.init_state(gameState)
+    GameBoard.initGame(gameState)
     val unoTui = new UnoTui()
     unoTui.setShouldExit(false)
 
@@ -594,7 +594,7 @@ class UnoTuiSpec extends AnyWordSpec {
       allCards = List()
     )
 
-    GameBoard.init_state(gameState)
+    GameBoard.initGame(gameState)
     val unoTui = new UnoTui()
     
     unoTui.setShouldExit(false)
@@ -618,7 +618,7 @@ class UnoTuiSpec extends AnyWordSpec {
       allCards = List()
     )
 
-    GameBoard.init_state(gameState)
+    GameBoard.initGame(gameState)
     val unoTui = new UnoTui()
     
     unoTui.setShouldExit(true)

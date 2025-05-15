@@ -25,8 +25,13 @@ object GameBoard extends Observable {
   }
 
   def initGame(state: GameState): Unit = {
-    updateState(state)
-    shuffleDeck()
+    val (discard, draw) = shuffleDeck()
+    val initializedState = state.copy(
+      drawPile = draw,
+      discardPile = discard,
+      allCards = discard ++ draw
+    )
+    updateState(initializedState)
   }
 
   // Methods for command pattern
@@ -83,7 +88,7 @@ object GameBoard extends Observable {
   }
 
   def reset(): Unit = {
-    _gameState = null
+    _gameState = None
   }
   
 }

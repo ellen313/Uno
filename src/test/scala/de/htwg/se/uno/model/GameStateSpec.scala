@@ -432,5 +432,182 @@ class GameStateSpec extends AnyWordSpec {
         wasNotified shouldBe true
       }
     }
+
+    "dealInitialCards" should {
+      "deal the correct number of cards to each player and update draw and discard piles accordingly" in {
+        val playerCount = 3
+        val cardsPerPlayer = 2
+
+        val cards = List(
+          NumberCard("red", 1),
+          NumberCard("blue", 2),
+          NumberCard("green", 3),
+          NumberCard("yellow", 4),
+          ActionCard("red", "skip"),
+          WildCard("wild")
+        )
+
+        val players = List.fill(playerCount)(PlayerHand(List.empty, hasSaidUno = false))
+        val initialState = GameState(
+          players = players,
+          currentPlayerIndex = 0,
+          allCards = cards,
+          isReversed = false,
+          discardPile = List(),
+          drawPile = cards
+        )
+
+        val afterDeal = initialState.dealInitialCards(cardsPerPlayer)
+
+        afterDeal.players.foreach { playerHand =>
+          playerHand.cards.size shouldBe cardsPerPlayer
+        }
+
+        afterDeal.drawPile.size shouldBe (cards.size - cardsPerPlayer * playerCount)
+
+        afterDeal.discardPile shouldBe empty
+      }
+    }
+
+    "handleDrawCards" should {
+      "make the next player draw the correct number of cards when isReversed is false" in {
+        val player1 = PlayerHand(List(NumberCard("red", 1)), false)
+        val player2 = PlayerHand(List(NumberCard("blue", 2)), false)
+        val player3 = PlayerHand(List(NumberCard("green", 3)), false)
+
+        val drawCards = List(
+          NumberCard("yellow", 4),
+          NumberCard("yellow", 5),
+          NumberCard("yellow", 6),
+          NumberCard("yellow", 7)
+        )
+
+        val gameState = GameState(
+          players = List(player1, player2, player3),
+          currentPlayerIndex = 0,
+          allCards = drawCards,
+          isReversed = false,
+          discardPile = List(NumberCard("red", 9)),
+          drawPile = drawCards
+        )
+
+        val count = 3
+        val updatedState = gameState.handleDrawCards(count)
+
+        val updatedPlayer = updatedState.players(1)
+
+        updatedPlayer.cards.size shouldBe (player2.cards.size + count)
+        updatedState.drawPile.size shouldBe (drawCards.size - count)
+        updatedState.discardPile shouldBe gameState.discardPile
+      }
+
+      "make the previous player draw the correct number of cards when isReversed is true" in {
+        val player1 = PlayerHand(List(NumberCard("red", 1)), false)
+        val player2 = PlayerHand(List(NumberCard("blue", 2)), false)
+        val player3 = PlayerHand(List(NumberCard("green", 3)), false)
+
+        val drawCards = List(
+          NumberCard("yellow", 4),
+          NumberCard("yellow", 5),
+          NumberCard("yellow", 6),
+          NumberCard("yellow", 7)
+        )
+
+        val gameState = GameState(
+          players = List(player1, player2, player3),
+          currentPlayerIndex = 0,
+          allCards = drawCards,
+          isReversed = true,
+          discardPile = List(NumberCard("red", 9)),
+          drawPile = drawCards
+        )
+
+        val count = 2
+        val updatedState = gameState.handleDrawCards(count)
+
+        val updatedPlayer = updatedState.players(2)
+
+        updatedPlayer.cards.size shouldBe (player3.cards.size + count)
+        updatedState.drawPile.size shouldBe (drawCards.size - count)
+        updatedState.discardPile shouldBe gameState.discardPile
+      }
+    }
+
+    "inputHandler" should {
+      val wildCard = WildCard("wild")
+      val normalCard = NumberCard("red", 5)
+      val invalidCard = NumberCard("blue", 2)
+
+      val player = PlayerHand(List(wildCard, normalCard, invalidCard), false)
+      val initialState = GameState(
+        players = List(player),
+        currentPlayerIndex = 0,
+        allCards = List.empty,
+        isReversed = false,
+        discardPile = List(NumberCard("green", 3)),
+        drawPile = List.empty,
+        selectedColor = None
+      )
+      "fail when playing wild card with invalid index" in {
+        val result = initialState.inputHandler("play wild:10:red")
+        result shouldBe a[Failure]
+      }
+
+      "fail when playing wild card on non-wild card" in {
+        val result = initialState.inputHandler("play wild:1:red")
+        result shouldBe a[Failure]
+      }
+
+      "play a valid normal card" in {
+        val validState = initialState.copy(discardPile = List(NumberCard("red", 3)))
+        val result = validState.inputHandler("play card:1")
+
+        result match {
+          case Success(newState) =>
+            newState.players.head.cards.size shouldBe (player.cards.size - 1)
+          case Failure(msg) =>
+            fail(s"Unexpected failure: $msg")
+        }
+      }
+
+      "fail when playing invalid normal card" in {
+        val invalidState = initialState.copy(discardPile = List(NumberCard("green", 3)))
+        val result = invalidState.inputHandler("play card:1")
+        result shouldBe a[Failure]
+      }
+
+      "fail on unknown command" in {
+        val result = initialState.inputHandler("foobar")
+        result shouldBe a[Failure]
+      }
+
+      "fail if card index is not a number" in {
+        val result = initialState.inputHandler("play card:abc")
+        result shouldBe a[Failure]
+      }
+
+      "handle play wild command correctly and set selected color" in {
+        val wildCard = WildCard("wild")
+        val player = PlayerHand(List(wildCard), hasSaidUno = false)
+        val gameState = GameState(
+          players = List(player),
+          currentPlayerIndex = 0,
+          allCards = List(wildCard),
+          isReversed = false,
+          discardPile = List(),
+          drawPile = List()
+        )
+
+        val result = gameState.inputHandler("play wild:0:red")
+
+        result match {
+          case Success(updatedGameState) =>
+            updatedGameState.selectedColor shouldBe Some("red")
+            updatedGameState.players(0).cards should not contain wildCard
+          case Failure(msg) =>
+            fail(s"Expected Success but got Failure: $msg")
+        }
+      }
+    }
   }
 }

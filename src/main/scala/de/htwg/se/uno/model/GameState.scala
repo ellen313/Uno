@@ -71,7 +71,7 @@ case class GameState( players: List[PlayerHand], currentPlayerIndex: Int,
     (drawnCard, updatedPlayerHand, updatedDrawPile, discardPile)
   }
 
-  def playCard(card: Card): GameState = {
+  def playCard(card: Card, chosenColor: Option[String] = None): GameState = {
     if (players.exists(_.cards.isEmpty)) return this
 
     val topCard = discardPile.headOption
@@ -94,6 +94,11 @@ case class GameState( players: List[PlayerHand], currentPlayerIndex: Int,
 //        updatedDrawPile = newDrawPile
 //        updatedDiscardPile = newDiscardPile
 //        playableCardFound = isValidPlay(drawnCard, topCard)
+    }
+
+    val newSelectedColor = card match {
+      case WildCard(_) | WildCard("wild draw four") => chosenColor
+      case _ => None
     }
 
     val updatedHand = players(currentPlayerIndex).removeCard(card)
@@ -139,8 +144,8 @@ case class GameState( players: List[PlayerHand], currentPlayerIndex: Int,
 //        })
 //
 //        if (isFirstTurnException) return true
-
         (card, tCard) match {
+
           case (ActionCard(_, "draw two"), ActionCard(_, "draw two")) => false
           case (WildCard("wild draw four"), WildCard("wild draw four")) => false
 

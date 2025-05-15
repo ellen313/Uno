@@ -30,17 +30,17 @@ object GameBoard extends Observable {
   }
 
   // Methods for command pattern
-  def state: GameState = gameState
-
-  def players: List[PlayerHand] = gameState.players
-
-  def currentPlayerIndex: Int = gameState.currentPlayerIndex
-
-  def selectedColor: Option[String] = gameState.selectedColor
-
-  def setSelectedColor(color: String): Unit = {
-    updateState(gameState.copy(selectedColor = Some(color)))
-  }
+//  def state: GameState = gameState
+//
+//  def players: List[PlayerHand] = gameState.players
+//
+//  def currentPlayerIndex: Int = gameState.currentPlayerIndex
+//
+//  def selectedColor: Option[String] = gameState.selectedColor
+//
+//  def setSelectedColor(color: String): Unit = {
+//    updateState(gameState.copy(selectedColor = Some(color)))
+//  }
 
   def createDeckWithAllCards(): List[Card] = {
     val numberCards = for {

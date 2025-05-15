@@ -4,6 +4,7 @@ import scala.annotation.tailrec
 import scala.io.StdIn.readLine
 import de.htwg.se.uno.model.*
 import de.htwg.se.uno.controller.GameBoard
+import de.htwg.se.uno.controller.command.UnoCalledCommand
 
 object UnoGame {
   def runUno(numberPlayers: Option[Int] = None, cardsPerPlayer: Int = 7): UnoTui = {
@@ -70,6 +71,13 @@ object UnoGame {
       return
     }
 
+    val name = GameBoard.gameState.currentPlayerIndex
+    val currentPlayer = GameBoard.gameState.players(GameBoard.gameState.currentPlayerIndex)
+    if (currentPlayer.cards.length == 1 && !currentPlayer.hasSaidUno) {
+      GameBoard.executeCommand(UnoCalledCommand(null))
+      println(s"${name} said UNO!")
+    }
+
     val input = readLine().trim
     input match {
       case "exit" =>
@@ -79,9 +87,7 @@ object UnoGame {
       case _ =>
         tui.handleInput(input)
 
-        GameBoard.updateState(GameBoard.gameState.nextPlayer())
-
-//        tui.display()
+        tui.display()
         inputLoop(tui)
     }
   }

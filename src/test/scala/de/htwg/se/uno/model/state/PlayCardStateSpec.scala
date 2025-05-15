@@ -118,5 +118,47 @@ class PlayCardStateSpec extends AnyWordSpec with Matchers {
       val state = PlayCardState(context, card)
       state.isValidPlay shouldBe false
     }
+
+    "cover draw two and wild draw four cases without exception" in {
+      val drawTwoCard = ActionCard("red", "draw two")
+      val wildDrawFourCard = WildCard("wild draw four")
+
+      val player1 = PlayerHand(List(drawTwoCard, wildDrawFourCard))
+      val player2 = PlayerHand(Nil)
+
+      val dummyPenaltyCards = List.fill(20)(NumberCard("green", 1))
+
+      val allCards = player1.cards ++ player2.cards ++ dummyPenaltyCards :+ drawTwoCard :+ wildDrawFourCard
+
+      val stateDrawTwo = {
+        val gameState = GameState(
+          players = List(player1, player2),
+          currentPlayerIndex = 0,
+          allCards = allCards,
+          isReversed = false,
+          discardPile = List(drawTwoCard),
+          drawPile = dummyPenaltyCards,
+          selectedColor = None
+        )
+        val context = new UnoStates(gameState)
+        PlayCardState(context, drawTwoCard)
+      }
+      noException should be thrownBy stateDrawTwo.playCard()
+
+      val stateWildDrawFour = {
+        val gameState = GameState(
+          players = List(player1, player2),
+          currentPlayerIndex = 0,
+          allCards = allCards,
+          isReversed = false,
+          discardPile = List(wildDrawFourCard),
+          drawPile = dummyPenaltyCards,
+          selectedColor = Some("blue")
+        )
+        val context = new UnoStates(gameState)
+        PlayCardState(context, wildDrawFourCard)
+      }
+      noException should be thrownBy stateWildDrawFour.playCard()
+    }
   }
 }

@@ -14,6 +14,7 @@ case class GameState( players: List[PlayerHand], currentPlayerIndex: Int,
     } else {
       (currentPlayerIndex + 1) % playerCount
     }
+    println(s"Next Player Index: $nextIndex")
     this.copy(currentPlayerIndex = nextIndex)
   }
 
@@ -142,6 +143,9 @@ case class GameState( players: List[PlayerHand], currentPlayerIndex: Int,
         (card, tCard) match {
           case (ActionCard(_, "draw two"), ActionCard(_, "draw two")) => false
           case (WildCard("wild draw four"), WildCard("wild draw four")) => false
+
+          case (ActionCard(color, "draw two"), NumberCard(topColor, _)) =>
+            color == topColor
 
           case (NumberCard(color, number), NumberCard(topColor, topNumber)) =>
             color == topColor || number == topNumber

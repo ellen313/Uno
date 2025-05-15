@@ -51,6 +51,7 @@ class UnoTui extends Observer {
   def handleInput(input: String): Unit = {
     if (gameShouldExit) return
 
+    val state = GameBoard.gameState
     val currentPlayer = GameBoard.players(GameBoard.currentPlayerIndex)
 
     input match {
@@ -66,35 +67,37 @@ class UnoTui extends Observer {
       case _ =>
         try {
           val index = input.toInt
-          if (index >= 0 && index < currentPlayer.cards.length) {
-            val chosenCard = currentPlayer.cards(index)
-
-            if (chosenCard.isInstanceOf[WildCard]) {
-              val color = chooseWildColor()
-              GameBoard.setSelectedColor(color)
-            }
-
-            GameBoard.executeCommand(PlayCardCommand(chosenCard))
-
-            val updatedPlayer = GameBoard.players(GameBoard.currentPlayerIndex)
-            if (updatedPlayer.cards.length == 1 && !updatedPlayer.hasSaidUno) {
-              GameBoard.executeCommand(UnoCalledCommand(null))
-              println("You said 'UNO'!")
-            }
-
-            checkForWinner()
-            println("Turn complete.")
-            display()
+          if (index < 0 || index >= currentPlayer.cards.length) {
+            println("Invalid index! Index out of bounds.")
           } else {
-            println("Invalid index! Please select a valid card.")
+            val selectedCard = currentPlayer.cards(index)
+            val state = GameBoard.gameState
+
+            if (state.isValidPlay(selectedCard, state.discardPile.headOption, state.selectedColor)) {
+              val command = PlayCardCommand(selectedCard)
+              GameBoard.executeCommand(command)
+
+              val updatedPlayer = GameBoard.players(GameBoard.currentPlayerIndex)
+              if (updatedPlayer.cards.length == 1 && !updatedPlayer.hasSaidUno) {
+                GameBoard.executeCommand(UnoCalledCommand(null))
+                println("You said 'UNO'!")
+              }
+
+              checkForWinner()
+              println("Turn complete.")
+              display()
+            } else {
+              println(s"Invalid play. You cannot play ${selectedCard} on top of ${state.discardPile.head}")
+            }
           }
+
         } catch {
         case _: NumberFormatException =>
           println("Invalid input! Please select a valid index or type 'draw':")
       }
     }
 
-    display()
+    //display()
   }
 
   def chooseWildColor(inputFunc: () => String = () => readLine()): String = {

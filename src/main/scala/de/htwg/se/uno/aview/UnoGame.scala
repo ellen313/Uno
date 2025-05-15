@@ -75,13 +75,13 @@ object UnoGame {
       case "exit" =>
         println("Game exited.")
         System.exit(0)
-        
+
       case _ =>
         tui.handleInput(input)
-        
+
         GameBoard.updateState(GameBoard.gameState.nextPlayer())
-        
-        tui.display()
+
+//        tui.display()
         inputLoop(tui)
     }
   }

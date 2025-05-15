@@ -30,9 +30,13 @@ case class PlayCardCommand(card: Card) extends Command {
           newState.nextPlayer()
       }
 
-      GameBoard.updateState(transitionedState)
+      println(s"Before update: currentPlayerIndex = ${newState.currentPlayerIndex}")
+      println(s"After transition: currentPlayerIndex = ${transitionedState.currentPlayerIndex}")
+
+      GameBoard.updateState(transitionedState) // HIER wird der neue currentPlayerIndex gesetzt
       transitionedState.notifyObservers()
     } else {
+      validPlay = false
       println("Invalid play. Try again")
     }
   }

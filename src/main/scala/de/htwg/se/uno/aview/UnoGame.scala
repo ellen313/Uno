@@ -15,7 +15,7 @@ object UnoGame {
     val (newDrawPile, playerHands) = dealCards(fullDeck, players, cardsPerPlayer)
 
     // Put first card to discard pile
-    val (firstCard, newDrawPileAfterFirstCard) = newDrawPile match {
+    val (firstCard, remainingDrawPile) = newDrawPile match {
       case head :: tail => (head, tail)
       case Nil => throw new IllegalStateException("No cards left in draw pile")
     }
@@ -25,17 +25,17 @@ object UnoGame {
       currentPlayerIndex = 0,
       allCards = fullDeck,
       isReversed = false,
-      drawPile = newDrawPileAfterFirstCard,
-      discardPile = List.empty[Card]
+      drawPile = remainingDrawPile,
+      discardPile = List(firstCard)
     )
 
-    GameBoard.setGameState(gameState)
+    GameBoard.initGame(gameState)
     println("Let's start the Game!")
     Thread.sleep(2000)
 
     val tui = new UnoTui()
     tui.display()
-
+    inputLoop(tui)
     tui
   }
 
@@ -63,7 +63,8 @@ object UnoGame {
 
   @tailrec
   def inputLoop(tui: UnoTui): Unit = {
-    if (tui.shouldExit) {
+    val currentState = GameBoard.gameState
+    if (currentState.players.exists(_.cards.isEmpty)) {
       println("Game over. GG!")
       System.exit(0)
       return
@@ -73,12 +74,15 @@ object UnoGame {
     input match {
       case "exit" =>
         println("Game exited.")
+        System.exit(0)
+        
       case _ =>
         tui.handleInput(input)
-        if (!tui.shouldExit) inputLoop(tui)
-        else {
-          System.exit(0)
-        }
+        
+        GameBoard.updateState(GameBoard.gameState.nextPlayer())
+        
+        tui.display()
+        inputLoop(tui)
     }
   }
 

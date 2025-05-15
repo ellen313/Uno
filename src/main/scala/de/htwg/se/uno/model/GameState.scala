@@ -2,9 +2,6 @@ package de.htwg.se.uno.model
 
 import de.htwg.se.uno.util.Observable
 
-import scala.::
-import scala.annotation.tailrec
-
 case class GameState( players: List[PlayerHand], currentPlayerIndex: Int,
                       allCards: List[Card], isReversed: Boolean = false,
                       discardPile: List[Card], drawPile: List[Card], selectedColor: Option[String] = None)
@@ -74,56 +71,38 @@ case class GameState( players: List[PlayerHand], currentPlayerIndex: Int,
   }
 
   def playCard(card: Card): GameState = {
+    if (players.exists(_.cards.isEmpty)) return this
 
-    if (players.exists(_.cards.isEmpty)) {
-      return this
-    }
-
-    val currentPlayerHand = players(currentPlayerIndex)
     val topCard = discardPile.headOption
-
     if (!isValidPlay(card, topCard)) {
-      var updatedPlayerHand = currentPlayerHand
-      var updatedDrawPile = drawPile
-      var updatedDiscardPile = discardPile
-      var playableCardFound = false
-
-      val maxIterations = 10
-      var iterationCount = 0
-
-      while (!playableCardFound && updatedDrawPile.nonEmpty && iterationCount < maxIterations) {
-        iterationCount += 1
-        val (drawnCard, newHand, newDrawPile, newDiscardPile) =
-          drawCard(updatedPlayerHand, updatedDrawPile, updatedDiscardPile)
-        updatedPlayerHand = newHand
-        updatedDrawPile = newDrawPile
-        updatedDiscardPile = newDiscardPile
-        playableCardFound = isValidPlay(drawnCard, topCard)
-      }
-
-      val updatedGameState = this.copy(
-        players = players.updated(currentPlayerIndex, updatedPlayerHand),
-        drawPile = updatedDrawPile,
-        discardPile = updatedDiscardPile
-      )
-
-      // if no playable card found go on to next player
-//      if (!playableCardFound) {
-//        return this.nextPlayer()
-//      }
-
-      return updatedGameState.nextPlayer()
+      println("Invalid play.")
+      return this
+//      var updatedPlayerHand = currentPlayerHand
+//      var updatedDrawPile = drawPile
+//      var updatedDiscardPile = discardPile
+//      var playableCardFound = false
+//
+//      val maxIterations = 10
+//      var iterationCount = 0
+//
+//      while (!playableCardFound && updatedDrawPile.nonEmpty && iterationCount < maxIterations) {
+//        iterationCount += 1
+//        val (drawnCard, newHand, newDrawPile, newDiscardPile) =
+//          drawCard(updatedPlayerHand, updatedDrawPile, updatedDiscardPile)
+//        updatedPlayerHand = newHand
+//        updatedDrawPile = newDrawPile
+//        updatedDiscardPile = newDiscardPile
+//        playableCardFound = isValidPlay(drawnCard, topCard)
     }
 
-
-    val updatedHand = currentPlayerHand.removeCard(card)
+    val updatedHand = players(currentPlayerIndex).removeCard(card)
     val updatedDiscardPile = card :: discardPile
 
     this.copy(
       players = players.updated(currentPlayerIndex, updatedHand),
-      discardPile = updatedDiscardPile
+      discardPile = updatedDiscardPile,
+      selectedColor = if (card.isInstanceOf[WildCard]) selectedColor else None,
     )
-
   }
 
   def handleDrawCards(count: Int): GameState = {
@@ -149,8 +128,21 @@ case class GameState( players: List[PlayerHand], currentPlayerIndex: Int,
   def isValidPlay(card: Card, topCard: Option[Card], selectedColor: Option[String] = None): Boolean = {
     topCard match {
       case None => true
+
       case Some(tCard) =>
+//        // top Card wildcard or +2
+//        val isFirstTurnException = GameBoard.turnCount <= 1 && (tCard match {
+//          case WildCard(_) => true
+//          case ActionCard(_, "draw two") => true
+//          case _ => false
+//        })
+//
+//        if (isFirstTurnException) return true
+
         (card, tCard) match {
+          case (ActionCard(_, "draw two"), ActionCard(_, "draw two")) => false
+          case (WildCard("wild draw four"), WildCard("wild draw four")) => false
+
           case (NumberCard(color, number), NumberCard(topColor, topNumber)) =>
             color == topColor || number == topNumber
 

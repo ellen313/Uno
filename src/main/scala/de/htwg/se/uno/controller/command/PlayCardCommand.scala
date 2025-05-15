@@ -4,54 +4,36 @@ import de.htwg.se.uno.model.*
 import de.htwg.se.uno.controller.GameBoard
 
 case class PlayCardCommand(card: Card) extends Command {
+  private var validPlay: Boolean = false
+
   override def execute(): Unit = {
     val state = GameBoard.gameState
-    val playerIndex = state.currentPlayerIndex
-    val currentPlayer = state.players(playerIndex)
 
-    if (state.isValidPlay(card, state.discardPile.lastOption, state.selectedColor)) {
+    if (state.isValidPlay(card, state.discardPile.headOption, state.selectedColor)) {
+      validPlay = true
+      val newState = state.playCard(card)
 
-      val updatedHand = currentPlayer.removeCard(card)
-
-      val updatedPlayers = state.players.updated(playerIndex, updatedHand)
-
-      val newDiscardPile = state.discardPile :+ card
-
-      var updatedGameState = state.copy(
-        players = updatedPlayers,
-        discardPile = newDiscardPile,
-        selectedColor = if (card.isInstanceOf[WildCard]) state.selectedColor else None // WildColor nur bei Wild behalten
-      )
-
-     card match {
+      val transitionedState = card match {
         case ActionCard(_, "skip") =>
-          updatedGameState = updatedGameState.nextPlayer().nextPlayer()
+          newState.nextPlayer().nextPlayer()
 
         case ActionCard(_, "reverse") =>
-          updatedGameState = updatedGameState.copy(isReversed = !updatedGameState.isReversed).nextPlayer()
+          newState.copy(isReversed = !newState.isReversed).nextPlayer()
 
         case ActionCard(_, "draw two") =>
-          updatedGameState = updatedGameState.handleDrawCards(2).nextPlayer()
+          newState.handleDrawCards(2).nextPlayer()
 
         case WildCard("wild draw four") =>
-          updatedGameState = updatedGameState.handleDrawCards(4).nextPlayer()
+          newState.handleDrawCards(4).nextPlayer()
 
         case _ =>
-          updatedGameState = updatedGameState.nextPlayer()
+          newState.nextPlayer()
       }
 
-      val finalHand =
-        if (updatedHand.hasUno) updatedHand.sayUno()
-        else updatedHand.resetUnoStatus()
-
-      val finalPlayers = updatedGameState.players.updated(playerIndex, finalHand)
-      updatedGameState = updatedGameState.copy(players = finalPlayers)
-
-      GameBoard.gameState = updatedGameState
-      updatedGameState.notifyObservers()
-
+      GameBoard.updateState(transitionedState)
+      transitionedState.notifyObservers()
     } else {
-      println("Invalid play")
+      println("Invalid play. Try again")
     }
   }
 }

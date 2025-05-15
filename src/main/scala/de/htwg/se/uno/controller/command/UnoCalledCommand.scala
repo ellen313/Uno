@@ -7,7 +7,7 @@ case class UnoCalledCommand(context: UnoStates) extends Command {
   override def execute(): Unit = {
     val idx = GameBoard.gameState.currentPlayerIndex
     val updatedGame = GameBoard.gameState.playerSaysUno(idx)
-    GameBoard.gameState = updatedGame
+    GameBoard.updateState(updatedGame)
 
     val player = updatedGame.players(idx)
     if (player.cards.isEmpty && player.hasSaidUno) {

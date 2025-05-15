@@ -7,9 +7,27 @@ import de.htwg.se.uno.controller.command.*
 
 object GameBoard extends Observable {
 
-  var gameState: GameState = _
-  var drawPile: List[Card] = Nil
-  var discardPile: List[Card] = Nil
+  private var _gameState: Option[GameState] = None
+
+  val fullDeck: List[Card] = createDeckWithAllCards()
+
+  val (discardPile, drawPile) = {
+    val shuffled = Random.shuffle(fullDeck)
+    (shuffled.headOption.toList, shuffled.tail)
+  }
+
+  def gameState: GameState = _gameState.getOrElse(
+    throw new IllegalStateException("GameState not initialized")
+  )
+
+  def updateState(newState: GameState): Unit = {
+    _gameState = Some(newState)
+  }
+
+  def initGame(state: GameState): Unit = {
+    updateState(state)
+    shuffleDeck()
+  }
 
   // Methods for command pattern
   def state: GameState = gameState
@@ -21,37 +39,14 @@ object GameBoard extends Observable {
   def selectedColor: Option[String] = gameState.selectedColor
 
   def setSelectedColor(color: String): Unit = {
-    gameState = gameState.copy(selectedColor = Some(color))
-  }
-
-  def init_state(state: GameState): Unit = {
-    this.gameState = state
-    shuffleDeck()
-  }
-
-  def setGameState(state: GameState): Unit = {
-    gameState = state
-    notifyObservers()
-  }
-
-  def init_board(players: List[PlayerHand]): Unit = {
-    gameState = GameState(
-      players = players,
-      currentPlayerIndex = 0,
-      allCards = List.empty[Card],
-      isReversed = false,
-      drawPile = List.empty[Card],
-      discardPile = List.empty[Card],
-      selectedColor = None
-    )
-    shuffleDeck()
+    updateState(gameState.copy(selectedColor = Some(color)))
   }
 
   def createDeckWithAllCards(): List[Card] = {
     val numberCards = for {
       // 1x0 and 2x1-9 for each color
       number <- 0 to 9
-      color <- List("yellow", "red", "blue", "green")
+      color <- Card.colors
       count = if (number == 0) 1 else 2
     } yield Card("number")
 
@@ -65,10 +60,9 @@ object GameBoard extends Observable {
       numberCards.toList ++ actionCards.toList ++ wildCards
   }
 
-  def shuffleDeck(): Unit = {
+  def shuffleDeck(): (List[Card], List[Card]) = {
     val shuffled = Random.shuffle(createDeckWithAllCards())
-    discardPile = shuffled.headOption.toList
-    drawPile = shuffled.drop(1)
+    (shuffled.headOption.toList, shuffled.tail)
   }
 
   def executeCommand(command: Command): Unit = {
@@ -89,9 +83,7 @@ object GameBoard extends Observable {
   }
 
   def reset(): Unit = {
-    gameState = null
-    drawPile = Nil
-    discardPile = Nil
+    _gameState = null
   }
   
 }

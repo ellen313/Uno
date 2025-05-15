@@ -9,12 +9,14 @@ case class DrawCardCommand() extends Command {
   override def execute(): Unit = {
     val game = GameBoard.gameState
     val currentPlayer = game.players(game.currentPlayerIndex)
-    val (drawnCard, updatedPlayerHand, updatedDrawPile, updatedDiscardPile) =
+    val (cardDrawn, updatedPlayerHand, updatedDrawPile, updatedDiscardPile) =
       game.drawCard(
         playerHand = currentPlayer,
         drawPile = game.drawPile,
         discardPile = game.discardPile
       )
+      
+    drawnCard = Some(cardDrawn)  
 
     val updatedPlayers = game.players.updated(
       game.currentPlayerIndex, updatedPlayerHand
@@ -26,7 +28,7 @@ case class DrawCardCommand() extends Command {
       discardPile = updatedDiscardPile
     )
 
-    GameBoard.gameState = newGameState
+    GameBoard.updateState(newGameState)
 
     GameBoard.gameState.notifyObservers()
   }

@@ -3,15 +3,14 @@ package de.htwg.se.uno.aview
 import de.htwg.se.uno.model.*
 import de.htwg.se.uno.util.Observer
 import de.htwg.se.uno.controller.GameBoard
-import de.htwg.se.uno.controller.command.{DrawCardCommand, PlayCardCommand, UnoCalledCommand, ColorWishCommand}
+import de.htwg.se.uno.controller.command.{DrawCardCommand, PlayCardCommand, UnoCalledCommand}
 import de.htwg.se.uno.aview.ColorPrinter.*
 
 import scala.io.StdIn.readLine
 
 class UnoTui extends Observer {
 
-  private var gameShouldExit = false
-
+  var gameShouldExit = false
   var selectedColor: Option[String] = None
 
   GameBoard.addObserver(this)
@@ -21,12 +20,12 @@ class UnoTui extends Observer {
     if (GameBoard.gameState.players.isEmpty || gameShouldExit) return
 
     val currentPlayer = GameBoard.gameState.players(GameBoard.gameState.currentPlayerIndex)
-    val topCard = GameBoard.gameState.discardPile.lastOption.getOrElse(return)
+    val topCard = GameBoard.gameState.discardPile.headOption.getOrElse(return)
 
     println("\n--------------------------------------------------------------------")
     println(s"Player ${GameBoard.gameState.currentPlayerIndex + 1}'s turn!")
 
-    // UNO Call Anzeige
+    // UNO Call display
     val unoPlayers = GameBoard.gameState.players.zipWithIndex.filter(_._1.hasSaidUno)
     unoPlayers.foreach { case (_, idx) =>
         if (idx == GameBoard.gameState.currentPlayerIndex) println("You said 'UNO'!")
@@ -55,9 +54,6 @@ class UnoTui extends Observer {
     val currentPlayer = GameBoard.players(GameBoard.currentPlayerIndex)
 
     input match {
-      case "exit" =>
-        println("Thanks for playing.")
-        gameShouldExit = true
       case "draw" =>
         val drawCommand = DrawCardCommand()
         GameBoard.executeCommand(drawCommand)
@@ -66,7 +62,6 @@ class UnoTui extends Observer {
           case Some(card) => println(s"You drew: $card")
           case None => println("No card was drawn.")
         }
-        display()
 
       case _ =>
         try {
@@ -92,14 +87,14 @@ class UnoTui extends Observer {
             display()
           } else {
             println("Invalid index! Please select a valid card.")
-            display()
           }
         } catch {
         case _: NumberFormatException =>
           println("Invalid input! Please select a valid index or type 'draw':")
-          display()
       }
     }
+
+    display()
   }
 
   def chooseWildColor(inputFunc: () => String = () => readLine()): String = {

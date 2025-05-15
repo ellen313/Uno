@@ -19,33 +19,34 @@ class GameBoardSpec extends AnyWordSpec {
       drawPile = List.empty,
       discardPile = List.empty
     )
-
-    val gameBoard = GameBoard(gameState, List.empty, List.empty)
+    
+    GameBoard.init_state(gameState)
+    
 
     "return the correct players and currentPlayerIndex" in {
-      gameBoard.players should have size 2
-      gameBoard.currentPlayerIndex shouldBe 0
+      GameBoard.players should have size 2
+      GameBoard.currentPlayerIndex shouldBe 0
     }
 
     "allow setting and getting the selected color" in {
-      gameBoard.selectedColor shouldBe None
-      gameBoard.setSelectedColor("green")
-      gameBoard.selectedColor shouldBe Some("green")
+      GameBoard.selectedColor shouldBe None
+      GameBoard.setSelectedColor("green")
+      GameBoard.selectedColor shouldBe Some("green")
     }
 
     "correctly validate a valid play" in {
       val card = NumberCard("red", 3)
       val topCard = NumberCard("red", 5)
-      gameBoard.isValidPlay(card, topCard, None) shouldBe true
+      GameBoard.isValidPlay(card, topCard, None) shouldBe true
     }
 
     "identify no winner if players have cards" in {
-      gameBoard.checkForWinner() shouldBe None
+      GameBoard.checkForWinner() shouldBe None
     }
 
     "identify the winning player when they have no cards" in {
       val winningState = gameState.copy(players = List(PlayerHand(Nil), player2))
-      val winningBoard = gameBoard.copy(gameState = winningState)
+      val winningBoard = GameBoard.copy(gameState = winningState)
       winningBoard.checkForWinner() shouldBe Some(0)
     }
 
@@ -54,7 +55,7 @@ class GameBoardSpec extends AnyWordSpec {
       val testCommand = new Command {
         override def execute(): Unit = wasExecuted = true
       }
-      gameBoard.executeCommand(testCommand)
+      GameBoard.executeCommand(testCommand)
       wasExecuted shouldBe true
     }
   }

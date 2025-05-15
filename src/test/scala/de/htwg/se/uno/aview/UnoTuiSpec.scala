@@ -27,11 +27,11 @@ class UnoTuiSpec extends AnyWordSpec {
         allCards = List()
       )
 
-      val controller = GameBoard(gameState, drawPile = List.empty[Card], discardPile = List.empty[Card])
-      val unoTui = new UnoTui(controller)
+      GameBoard.init_state(gameState)
+      val unoTui = new UnoTui()
 
-      assert(unoTui.controller.gameState eq gameState)
-      assert(!unoTui.gameShouldExit)
+      assert(GameBoard.gameState eq gameState)
+      assert(!unoTui.shouldExit)
       assert(unoTui.selectedColor.isEmpty)
     }
 
@@ -48,9 +48,10 @@ class UnoTuiSpec extends AnyWordSpec {
         allCards = List()
       )
 
-      val controller = GameBoard(gameState, drawPile = List.empty[Card], discardPile = List.empty[Card])
-      val unoTui = new UnoTui(controller)
-      unoTui.gameShouldExit = true
+      GameBoard.init_state(gameState)
+      val unoTui = new UnoTui()
+      unoTui.setShouldExit(true)
+
 
       // Simulate displaying without throwing exceptions
       val stream = new java.io.ByteArrayOutputStream()
@@ -70,9 +71,9 @@ class UnoTuiSpec extends AnyWordSpec {
         allCards = List()
       )
 
-      val controller = GameBoard(gameState, drawPile = List.empty[Card], discardPile = List.empty[Card])
-      val unoTui = new UnoTui(controller)
-
+      GameBoard.init_state(gameState)
+      val unoTui = new UnoTui()
+      
       val stream = new java.io.ByteArrayOutputStream()
       Console.withOut(stream) {
         unoTui.display()
@@ -93,8 +94,8 @@ class UnoTuiSpec extends AnyWordSpec {
         allCards = List()
       )
 
-      val controller = GameBoard(gameState, drawPile = List.empty[Card], discardPile = List.empty[Card])
-      val unoTui = new UnoTui(controller)
+      GameBoard.init_state(gameState)
+      val unoTui = new UnoTui()
 
       val stream = new java.io.ByteArrayOutputStream()
       Console.withOut(stream) {
@@ -118,8 +119,9 @@ class UnoTuiSpec extends AnyWordSpec {
         allCards = List()
       )
 
-      val controller = GameBoard(gameState, drawPile = List.empty[Card], discardPile = List.empty[Card])
-      val unoTui = new UnoTui(controller)
+      GameBoard.init_state(gameState)
+      val unoTui = new UnoTui()
+      
       unoTui.selectedColor = Some("blue")
 
       val stream = new java.io.ByteArrayOutputStream()
@@ -142,9 +144,9 @@ class UnoTuiSpec extends AnyWordSpec {
         isReversed = false,
         allCards = List()
       )
-
-      val controller = GameBoard(gameState, drawPile = List.empty[Card], discardPile = List.empty[Card])
-      val unoTui = new UnoTui(controller)
+      
+      GameBoard.init_state(gameState)
+      val unoTui = new UnoTui()
 
       val stream = new java.io.ByteArrayOutputStream()
       Console.withOut(stream) {
@@ -168,10 +170,9 @@ class UnoTuiSpec extends AnyWordSpec {
         isReversed = false,
         allCards = List()
       )
-
-
-      val controller = GameBoard(gameState, drawPile = List.empty[Card], discardPile = List.empty[Card])
-      val unoTui = new UnoTui(controller) {
+      
+      GameBoard.init_state(gameState)
+      val unoTui = new UnoTui(){
         override def display(): Unit = {
           val playable = gameState.players(gameState.currentPlayerIndex)
             .cards.exists(card =>
@@ -203,8 +204,8 @@ class UnoTuiSpec extends AnyWordSpec {
         allCards = List()
       )
 
-      val controller = GameBoard(gameState, drawPile = List.empty[Card], discardPile = List.empty[Card])
-      val unoTui = new UnoTui(controller)
+      GameBoard.init_state(gameState)
+      val unoTui = new UnoTui()
 
       val inputs = Iterator("invalid", "1")
       val Input = () => inputs.next()
@@ -234,8 +235,8 @@ class UnoTuiSpec extends AnyWordSpec {
         allCards = List()
       )
 
-      val controller = GameBoard(gameState, drawPile = List.empty[Card], discardPile = List.empty[Card])
-      val unoTui = new UnoTui(controller)
+      GameBoard.init_state(gameState)
+      val unoTui = new UnoTui()
 
       val inputs = Iterator("invalid", "1")
       val Input = () => inputs.next()
@@ -259,8 +260,8 @@ class UnoTuiSpec extends AnyWordSpec {
         allCards = List()
       )
 
-      val controller = GameBoard(gameState, drawPile = List.empty[Card], discardPile = List.empty[Card])
-      val unoTui = new UnoTui(controller)
+      GameBoard.init_state(gameState)
+      val unoTui = new UnoTui()
 
       val output = new ByteArrayOutputStream()
       val inputs = Iterator("5", "2")
@@ -287,8 +288,8 @@ class UnoTuiSpec extends AnyWordSpec {
         allCards = List()
       )
 
-      val controller = GameBoard(gameState, drawPile = List.empty[Card], discardPile = List.empty[Card])
-      val unoTui = new UnoTui(controller)
+      GameBoard.init_state(gameState)
+      val unoTui = new UnoTui()
 
       val invalidInput = "invalid"
       val outputStream = new java.io.ByteArrayOutputStream()
@@ -300,11 +301,11 @@ class UnoTuiSpec extends AnyWordSpec {
       val output = outputStream.toString
       assert(output.contains("Invalid input! Please select a valid index or type 'draw'"))
 
-      assert(unoTui.controller.gameState.players.head.cards.contains(validCard),
+      assert(GameBoard.gameState.players.head.cards.contains(validCard),
         "Spieler sollte noch seine ursprüngliche Karte haben")
-      assert(unoTui.controller.gameState.discardPile.size == 1,
+      assert(GameBoard.gameState.discardPile.size == 1,
         "Ablagestapel sollte unverändert sein")
-      assert(unoTui.controller.gameState.drawPile.size == 5,
+      assert(GameBoard.gameState.drawPile.size == 5,
         "Nachziehstapel sollte unverändert sein")
     }
 
@@ -318,9 +319,10 @@ class UnoTuiSpec extends AnyWordSpec {
         allCards = List()
       )
 
-      val controller = GameBoard(gameState, drawPile = List.empty[Card], discardPile = List.empty[Card])
-      val unoTui = new UnoTui(controller)
-      unoTui.gameShouldExit = true
+      GameBoard.init_state(gameState)
+      val unoTui = new UnoTui()
+      unoTui.setShouldExit(true)
+
 
       val stream = new java.io.ByteArrayOutputStream()
       Console.withOut(stream) {
@@ -340,8 +342,8 @@ class UnoTuiSpec extends AnyWordSpec {
         allCards = List()
       )
 
-      val controller = GameBoard(gameState, drawPile = List.empty[Card], discardPile = List.empty[Card])
-      val unoTui = new UnoTui(controller)
+      GameBoard.init_state(gameState)
+      val unoTui = new UnoTui()
 
       val input = new java.io.ByteArrayInputStream("2\n".getBytes())
       val output = new java.io.ByteArrayOutputStream()
@@ -370,16 +372,16 @@ class UnoTuiSpec extends AnyWordSpec {
         isReversed = false,
         allCards = List()
       )
-
-      val controller = GameBoard(gameState, drawPile = List.empty[Card], discardPile = List.empty[Card])
-      val unoTui = new UnoTui(controller) {
+      
+      GameBoard.init_state(gameState)
+      val unoTui = new UnoTui(){
         override def display(): Unit = {}
       }
 
       unoTui.handleInput("draw")
 
-      assert(unoTui.controller.gameState.currentPlayerIndex == 1)
-      assert(unoTui.controller.gameState.players.head.cards.length == 3)
+      assert(GameBoard.gameState.currentPlayerIndex == 1)
+      assert(GameBoard.gameState.players.head.cards.length == 3)
     }
 
     "should show error when selecting an invalid card index" in {
@@ -396,9 +398,9 @@ class UnoTuiSpec extends AnyWordSpec {
       )
 
       assert(gameState.isValidPlay(playableCard, Some(topCard), None))
-
-      val controller = GameBoard(gameState, drawPile = List.empty[Card], discardPile = List.empty[Card])
-      val unoTui = new UnoTui(controller)
+      
+      GameBoard.init_state(gameState)
+      val unoTui = new UnoTui()
 
       val outputStream = new java.io.ByteArrayOutputStream()
       Console.withOut(outputStream) {
@@ -410,7 +412,7 @@ class UnoTuiSpec extends AnyWordSpec {
 
       assert(output.contains("Invalid index! Please select a valid card."))
       assert(!output.contains("No cards left"))
-      assert(unoTui.controller.gameState.players.head.cards.contains(playableCard))
+      assert(GameBoard.gameState.players.head.cards.contains(playableCard))
     }
 
     "should show error when chosen card doesn't match selected color after wild card" in {
@@ -426,8 +428,8 @@ class UnoTuiSpec extends AnyWordSpec {
         allCards = List(wrongCard, wildCard)
       )
 
-      val controller = GameBoard(gameState, drawPile = List.empty[Card], discardPile = List.empty[Card])
-      val unoTui = new UnoTui(controller)
+      GameBoard.init_state(gameState)
+      val unoTui = new UnoTui()
       unoTui.selectedColor = Some("red")
 
       val displayOutput = new java.io.ByteArrayOutputStream()
@@ -459,9 +461,9 @@ class UnoTuiSpec extends AnyWordSpec {
         isReversed = false,
         allCards = List()
       )
-
-      val controller = GameBoard(gameState, drawPile = List.empty[Card], discardPile = List.empty[Card])
-
+      
+      GameBoard.init_state(gameState)
+      
       val updatedGame = GameState(
         players = List(
           PlayerHand(List(NumberCard("red", 1))),
@@ -474,13 +476,13 @@ class UnoTuiSpec extends AnyWordSpec {
         allCards = List()
       )
 
-      val unoTui = new UnoTui(controller) {
+      val unoTui = new UnoTui(){
         override def display(): Unit = {}
       }
       unoTui.handleInput("0")
 
-      assert(unoTui.controller.gameState.currentPlayerIndex == 1)
-      assert(unoTui.controller.gameState.discardPile.last == NumberCard("red", 1))
+      assert(GameBoard.gameState.currentPlayerIndex == 1)
+      assert(GameBoard.gameState.discardPile.last == NumberCard("red", 1))
     }
 
     "should trigger UNO announcement when playing down to one card" in {
@@ -504,9 +506,9 @@ class UnoTuiSpec extends AnyWordSpec {
         allCards = cards :+ topCard
       )
 
-      val controller = GameBoard(gameState, drawPile = List.empty[Card], discardPile = List.empty[Card])
-      val unoTui = new UnoTui(controller)
-
+      GameBoard.init_state(gameState)
+      val unoTui = new UnoTui()
+      
       // 2. Output erfassen
       val outputStream = new java.io.ByteArrayOutputStream()
       Console.withOut(outputStream) {
@@ -516,8 +518,8 @@ class UnoTuiSpec extends AnyWordSpec {
 
       // 3. Direkte Überprüfung des Codeblocks
       //assert(output.contains("said UNO"),
-      assert(unoTui.controller.gameState.players.head.hasSaidUno, "Spieler sollte UNO-Status haben")
-      assert(unoTui.controller.gameState.players.head.cards.size == 1, "Sollte eine Karte haben")
+      assert(GameBoard.gameState.players.head.hasSaidUno, "Spieler sollte UNO-Status haben")
+      assert(GameBoard.gameState.players.head.cards.size == 1, "Sollte eine Karte haben")
     }
 
     "handleCardSelection should reject invalid card selection" in {
@@ -533,9 +535,9 @@ class UnoTuiSpec extends AnyWordSpec {
         allCards = List()
       )
 
-      val controller = GameBoard(gameState, drawPile = List.empty[Card], discardPile = List.empty[Card])
-      val unoTui = new UnoTui(controller)
-
+      GameBoard.init_state(gameState)
+      val unoTui = new UnoTui()
+      
       val stream = new java.io.ByteArrayOutputStream()
       Console.withOut(stream) {
         unoTui.handleInput("999")
@@ -558,9 +560,10 @@ class UnoTuiSpec extends AnyWordSpec {
       allCards = List(playableCard, topCard)
     )
 
-    val controller = GameBoard(gameState, drawPile = List.empty[Card], discardPile = List.empty[Card])
-    val unoTui = new UnoTui(controller)
-    unoTui.gameShouldExit = false
+    GameBoard.init_state(gameState)
+    val unoTui = new UnoTui()
+    unoTui.setShouldExit(false)
+
 
     val outputStream = new java.io.ByteArrayOutputStream()
     Console.withOut(outputStream) {
@@ -591,13 +594,15 @@ class UnoTuiSpec extends AnyWordSpec {
       allCards = List()
     )
 
-    val controller = GameBoard(gameState, drawPile = List.empty[Card], discardPile = List.empty[Card])
-    val unoTui = new UnoTui(controller)
+    GameBoard.init_state(gameState)
+    val unoTui = new UnoTui()
+    
+    unoTui.setShouldExit(false)
 
-    unoTui.gameShouldExit = false
     assert(!unoTui.shouldExit, "shouldExit should return false when gameShouldExit is false")
+    
+    unoTui.setShouldExit(true)
 
-    unoTui.gameShouldExit = true
     assert(unoTui.shouldExit, "shouldExit should return true when gameShouldExit is true")
   }
 
@@ -613,10 +618,11 @@ class UnoTuiSpec extends AnyWordSpec {
       allCards = List()
     )
 
-    val controller = GameBoard(gameState, drawPile = List.empty[Card], discardPile = List.empty[Card])
-    val unoTui = new UnoTui(controller)
+    GameBoard.init_state(gameState)
+    val unoTui = new UnoTui()
+    
+    unoTui.setShouldExit(true)
 
-    unoTui.gameShouldExit = true
 
     val output = new ByteArrayOutputStream()
     Console.withOut(output) {

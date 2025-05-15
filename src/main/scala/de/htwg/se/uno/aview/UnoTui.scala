@@ -142,5 +142,10 @@ class UnoTui extends Observer {
 
   def shouldExit: Boolean = gameShouldExit
 
+  def setShouldExit(value: Boolean): Unit = {
+    gameShouldExit = value
+  }
+
+
   override def update(): Unit = if (!gameShouldExit) display()
 }

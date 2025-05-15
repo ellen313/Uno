@@ -4,8 +4,7 @@ import org.scalatest.wordspec.AnyWordSpec
 import de.htwg.se.uno.model.state.*
 
 class UnoStatesSpec extends AnyWordSpec with Matchers {
-
-    // Dummy-GamePhase, die einfach sich selbst zurückgibt bei jedem Aufruf
+  
     class DummyState extends GamePhase {
         override def playCard(): GamePhase = this
         override def drawCard(): GamePhase = this
@@ -81,8 +80,7 @@ class UnoStatesSpec extends AnyWordSpec with Matchers {
         "tryPlayCard calls playCard if isValidPlay is true" in {
             val gameState = GameState(List(), 0, List(), false, List(), List())
             val unoStates = new UnoStates(gameState)
-
-            // Override DummyState to track if playCard was called
+          
             var played = false
             val dummy = new DummyState {
                 override def playCard(): GamePhase = {

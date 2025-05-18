@@ -5,6 +5,7 @@ import scala.io.StdIn.readLine
 import de.htwg.se.uno.model.*
 import de.htwg.se.uno.controller.GameBoard
 import de.htwg.se.uno.controller.command.UnoCalledCommand
+import de.htwg.se.uno.model.state.UnoStates
 
 object UnoGame {
   def runUno(numberPlayers: Option[Int] = None, cardsPerPlayer: Int = 7): UnoTui = {
@@ -34,7 +35,9 @@ object UnoGame {
     println("Let's start the Game!")
     Thread.sleep(2000)
 
-    val tui = new UnoTui()
+    val initialGameState = GameBoard.gameState
+    val context = new UnoStates(initialGameState)
+    val tui = new UnoTui(context)
     tui.display()
     inputLoop(tui)
     tui

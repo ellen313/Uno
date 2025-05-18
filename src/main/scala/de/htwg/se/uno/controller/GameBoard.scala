@@ -18,6 +18,7 @@ object GameBoard extends Observable {
 
   def gameState: GameState = _gameState.getOrElse(
     throw new IllegalStateException("GameState not initialized")
+    //Try
   )
 
   def updateState(newState: GameState): Unit = {

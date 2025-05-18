@@ -132,46 +132,57 @@ case class GameState( players: List[PlayerHand], currentPlayerIndex: Int,
   }
 
   def isValidPlay(card: Card, topCard: Option[Card], selectedColor: Option[String] = None): Boolean = {
-    topCard match {
-      case None => true
 
-      case Some(tCard) =>
-//        // top Card wildcard or +2
-//        val isFirstTurnException = GameBoard.turnCount <= 1 && (tCard match {
-//          case WildCard(_) => true
-//          case ActionCard(_, "draw two") => true
-//          case _ => false
-//        })
-//
-//        if (isFirstTurnException) return true
-        (card, tCard) match {
+    selectedColor match {
+      case Some(color) =>
+        card match {
+          case WildCard(_) => true
+          case ActionCard(c, _) => c == color
+          case NumberCard(c, _) => c == color
+        }
+      case None =>
 
-          case (ActionCard(_, "draw two"), ActionCard(_, "draw two")) => false
-          case (WildCard("wild draw four"), WildCard("wild draw four")) => false
+        topCard match {
+          case None => true
 
-          case (ActionCard(color, "draw two"), NumberCard(topColor, _)) =>
-            color == topColor
+          case Some(tCard) =>
+            (card, tCard) match {
 
-          case (NumberCard(color, number), NumberCard(topColor, topNumber)) =>
-            color == topColor || number == topNumber
+              case (ActionCard(_, "draw two"), ActionCard(_, "draw two")) => false
+              case (WildCard("wild draw four"), WildCard("wild draw four")) => false
 
-          case (NumberCard(color, _), ActionCard(topColor, _)) =>
-            color == topColor
+              case (ActionCard(color, "draw two"), NumberCard(topColor, _)) =>
+                color == topColor || selectedColor.contains(color)
 
-          case (ActionCard(color, _), NumberCard(topColor, _)) =>
-            color == topColor
+              case (NumberCard(color, number), NumberCard(topColor, topNumber)) =>
+                color == topColor || number == topNumber || selectedColor.contains(color)
 
-          case (ActionCard(color, action), ActionCard(topColor, topAction)) =>
-            color == topColor || action == topAction
+              case (NumberCard(color, _), ActionCard(topColor, _)) =>
+                color == topColor || selectedColor.contains(color)
 
-          case (WildCard("wild"), _) => true
-          case (WildCard("wild draw four"), _) => true
-          case (_, WildCard("wild")) => true
-          case (_, WildCard("wild draw four")) => true
+              case (ActionCard(color, _), NumberCard(topColor, _)) =>
+                color == topColor || selectedColor.contains(color)
 
-          case _ => false
+              case (ActionCard(color, action), ActionCard(topColor, topAction)) =>
+                color == topColor || action == topAction || selectedColor.contains(color)
+
+              case (WildCard("wild"), _) => true
+              case (WildCard("wild draw four"), _) => true
+              case (_, WildCard("wild")) => true
+              case (_, WildCard("wild draw four")) => true
+
+              case _ => false
+            }
         }
     }
+  }
+
+  def drawCardAndReturnDrawn(): (GameState, Card) = {
+    val card = drawPile.head
+    val updatedPlayer = players(currentPlayerIndex) + card
+    val updatedPlayers = players.updated(currentPlayerIndex, updatedPlayer)
+    val newState = this.copy(drawPile = drawPile.tail, players = updatedPlayers)
+    (newState, card)
   }
 
   def setSelectedColor(color: String): GameState = {

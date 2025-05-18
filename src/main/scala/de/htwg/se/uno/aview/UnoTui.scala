@@ -3,14 +3,15 @@ package de.htwg.se.uno.aview
 import de.htwg.se.uno.model.*
 import de.htwg.se.uno.util.Observer
 import de.htwg.se.uno.controller.GameBoard
-import de.htwg.se.uno.controller.command.{DrawCardCommand, PlayCardCommand, UnoCalledCommand}
+import de.htwg.se.uno.controller.command.*
 import de.htwg.se.uno.aview.ColorPrinter.*
+import de.htwg.se.uno.model.state.UnoStates
 
 import scala.io.StdIn.readLine
 
-class UnoTui extends Observer {
+class UnoTui(context: UnoStates) extends Observer {
 
-  var gameShouldExit = false
+  private var gameShouldExit = false
   var selectedColor: Option[String] = None
 
   GameBoard.addObserver(this)
@@ -26,7 +27,6 @@ class UnoTui extends Observer {
     println("\n--------------------------------------------------------------------")
     println(s"Player ${state.currentPlayerIndex + 1}'s turn!")
 
-    // UNO Call display
     val unoPlayers = state.players.zipWithIndex.filter(_._1.hasSaidUno)
     unoPlayers.foreach { case (_, idx) =>
         if (idx == state.currentPlayerIndex) println("You said 'UNO'!")
@@ -49,37 +49,54 @@ class UnoTui extends Observer {
     }
   }
 
-  def handleInput(input: String): Boolean = {
+  def handleInput(input: String): Unit = {
     val state = GameBoard.gameState
     val currentPlayer = state.players(state.currentPlayerIndex)
 
-    if (input == "draw") {
-      GameBoard.executeCommand(DrawCardCommand())
-      println("You drew a card.")
-      true
-    } else {
-      try {
-        val index = input.toInt
-        if (index < 0 || index >= currentPlayer.cards.length) {
-          println("Invalid index! Index out of bounds.")
-          false
+    input match {
+      case "draw" =>
+        val (newState, drawnCard) = state.drawCardAndReturnDrawn()
+        println(s"You drew: $drawnCard")
+
+        if (newState.isValidPlay(drawnCard, newState.discardPile.headOption, newState.selectedColor)) {
+          println("Playing drawn card...")
+          GameBoard.updateState(newState)
+
+          val chosenColor =
+            if (drawnCard.isInstanceOf[WildCard]) Some(chooseWildColor())
+            else None
+
+          GameBoard.executeCommand(PlayCardCommand(drawnCard, chosenColor))
         } else {
-          val selectedCard = currentPlayer.cards(index)
-          if (state.isValidPlay(selectedCard, state.discardPile.headOption, state.selectedColor)) {
-            GameBoard.executeCommand(PlayCardCommand(selectedCard))
-            true
-          } else {
-            println(s"Invalid play. You cannot play ${selectedCard} on top of ${state.discardPile.head}")
-            false
-          }
+          println("Card cannot be played, turn ends.")
+          val skipped = newState.nextPlayer()
+          GameBoard.updateState(skipped)
+          skipped.notifyObservers()
         }
-      } catch {
-        case _: NumberFormatException =>
-          println("Invalid input! Please select a valid index or type 'draw':")
-          false
-      }
+
+      case _ =>
+        try {
+          val index = input.toInt
+          if (index < 0 || index >= currentPlayer.cards.length) {
+            println("Invalid index.")
+          } else {
+            val chosenCard = currentPlayer.cards(index)
+
+            val chosenColor =
+              if (chosenCard.isInstanceOf[WildCard]) Some(chooseWildColor())
+              else None
+
+            GameBoard.executeCommand(PlayCardCommand(chosenCard, chosenColor))
+          }
+        } catch {
+          case _: NumberFormatException =>
+            println("Invalid input. Use card index or 'draw'.")
+        }
     }
-  }  
+
+    checkUno()
+    checkForWinner()
+  }
 
   def chooseWildColor(inputFunc: () => String = () => readLine()): String = {
     val colors = List("red", "green", "blue", "yellow")
@@ -125,6 +142,15 @@ class UnoTui extends Observer {
     gameShouldExit = value
   }
 
+  private def checkUno(): Unit = {
+    val state = GameBoard.gameState
+    val updatedPlayer = state.players(state.currentPlayerIndex)
+
+    if (updatedPlayer.cards.length == 1 && !updatedPlayer.hasSaidUno) {
+      GameBoard.executeCommand(UnoCalledCommand(context))
+      println("You said 'UNO'!")
+    }
+  }
 
   override def update(): Unit = if (!gameShouldExit) display()
 }

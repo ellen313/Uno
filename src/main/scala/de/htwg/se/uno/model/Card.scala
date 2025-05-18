@@ -18,7 +18,7 @@ object Card {
   val colors = List("red", "blue", "green", "yellow")
   val actions = List("draw two", "reverse", "skip")
   val wildActions = List("wild", "wild draw four")
-  
+
   def apply(kind: String) = kind match {
     case "number"  => createNumberCard()
     case "action"  => createActionCard()

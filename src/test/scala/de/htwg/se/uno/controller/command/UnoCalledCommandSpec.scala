@@ -9,7 +9,7 @@ class UnoCalledCommandSpec extends AnyWordSpec with Matchers {
 
   "UnoCalledCommand" should {
 
-    "set GameOverState when current player has no cards and has said UNO" in {
+    "set GameOverPhase when current player has no cards and has said UNO" in {
       val player = PlayerHand(cards = List(), hasSaidUno = true)
       val players = List(player)
 
@@ -53,7 +53,7 @@ class UnoCalledCommandSpec extends AnyWordSpec with Matchers {
 
       command.execute()
 
-      unoStates.state.getClass.getSimpleName shouldBe "GameOverState"
+      unoStates.state.getClass.getSimpleName shouldBe "GameOverPhase"
     }
 
     "update game state and not change state if player still has cards or hasn't said UNO" in {
@@ -76,7 +76,7 @@ class UnoCalledCommandSpec extends AnyWordSpec with Matchers {
 
       command.execute()
       
-      unoStates.state.getClass.getSimpleName should not be "GameOverState"
+      unoStates.state.getClass.getSimpleName should not be "GameOverPhase"
     }
   }
 }

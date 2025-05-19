@@ -2,42 +2,42 @@ package de.htwg.se.uno.model.state
 
 import de.htwg.se.uno.model.*
 
-case class PlayCardState(context: UnoStates, card: Card) extends GamePhase {
+case class PlayCardPhase(context: UnoPhases, card: Card) extends GamePhase {
 
   override def playCard(): GamePhase = {
     context.gameState = context.gameState.playCard(card)
-    context.setState(PlayerTurnState(context))
+    context.setState(PlayerTurnPhase(context))
 
     val finalGameState = card match {
       //------------ skip ------------
       case ActionCard(_, "skip") =>
         context.gameState = context.gameState.nextPlayer().nextPlayer()
-        PlayerTurnState(context)
+        PlayerTurnPhase(context)
 
       //------------ reverse ------------
       case ActionCard(_, "reverse") =>
         context.gameState = context.gameState.copy(isReversed = !context.gameState.isReversed)
-        PlayerTurnState(context)
+        PlayerTurnPhase(context)
 
       //------------ draw two ------------
       case ActionCard(_, "draw two") =>
         context.gameState = handlePenaltyCards(context.gameState, 2).nextPlayer()
-        PlayerTurnState(context)
+        PlayerTurnPhase(context)
 
       //------------ wild draw four ------------
       case WildCard("wild draw four") =>
         context.gameState = handlePenaltyCards(context.gameState, 4).nextPlayer()
-        PlayerTurnState(context)
+        PlayerTurnPhase(context)
 
       //------------ wild card ------------    
       case WildCard("wild") =>
         context.gameState = context.gameState.nextPlayer()
-        PlayerTurnState(context)    
+        PlayerTurnPhase(context)    
 
       //------------ default ------------
       case _ =>
         context.gameState = context.gameState.nextPlayer()
-        PlayerTurnState(context)
+        PlayerTurnPhase(context)
     }
 
     checkUnoStatus(context)
@@ -64,23 +64,23 @@ case class PlayCardState(context: UnoStates, card: Card) extends GamePhase {
     )
   }
 
-  private def checkUnoStatus(context: UnoStates): Unit = {
+  private def checkUnoStatus(context: UnoPhases): Unit = {
     val currentPlayer = context.gameState.currentPlayerIndex
     if (context.gameState.players(currentPlayer).cards.size == 1) {
-      context.setState(UnoCalledState(context))
+      context.setState(UnoCalledPhase(context))
     }
   }
 
-  override def nextPlayer(): GamePhase = PlayerTurnState(context)
+  override def nextPlayer(): GamePhase = PlayerTurnPhase(context)
 
   override def dealInitialCards(): GamePhase = {
     println("Cannot deal cards during PlayCardState")
     this
   }
 
-  override def checkForWinner(): GamePhase = GameOverState(context)
+  override def checkForWinner(): GamePhase = GameOverPhase(context)
 
-  override def playerSaysUno(): GamePhase = UnoCalledState(context)
+  override def playerSaysUno(): GamePhase = UnoCalledPhase(context)
 
   override def drawCard(): GamePhase = {
     println("Cannot draw a card during PlayCardState")

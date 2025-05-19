@@ -3,7 +3,7 @@ import org.scalatest.wordspec.AnyWordSpec
 import de.htwg.se.uno.model._
 import de.htwg.se.uno.model.state._
 
-class PlayerTurnStateSpec extends AnyWordSpec with Matchers {
+class PlayerTurnPhaseSpec extends AnyWordSpec with Matchers {
 
   "PlayerTurnState" should {
 
@@ -12,8 +12,8 @@ class PlayerTurnStateSpec extends AnyWordSpec with Matchers {
         override def nextPlayer(): GameState = this.copy(currentPlayerIndex = (currentPlayerIndex + 1) % 4)
       }
 
-      val unoStates = new UnoStates(dummyGameState)
-      val state = PlayerTurnState(unoStates)
+      val unoStates = new UnoPhases(dummyGameState)
+      val state = PlayerTurnPhase(unoStates)
       unoStates.setState(state)
 
       val newState = state.nextPlayer()
@@ -23,38 +23,38 @@ class PlayerTurnStateSpec extends AnyWordSpec with Matchers {
     }
 
     "return this on playCard" in {
-      val unoStates = new UnoStates(GameState(List(), 0, List(), false, List(), List()))
-      val state = PlayerTurnState(unoStates)
+      val unoStates = new UnoPhases(GameState(List(), 0, List(), false, List(), List()))
+      val state = PlayerTurnPhase(unoStates)
       state.playCard() shouldBe state
     }
 
     "return this on drawCard" in {
-      val unoStates = new UnoStates(GameState(List(), 0, List(), false, List(), List()))
-      val state = PlayerTurnState(unoStates)
+      val unoStates = new UnoPhases(GameState(List(), 0, List(), false, List(), List()))
+      val state = PlayerTurnPhase(unoStates)
       state.drawCard() shouldBe state
     }
 
     "return this on dealInitialCards" in {
-      val unoStates = new UnoStates(GameState(List(), 0, List(), false, List(), List()))
-      val state = PlayerTurnState(unoStates)
+      val unoStates = new UnoPhases(GameState(List(), 0, List(), false, List(), List()))
+      val state = PlayerTurnPhase(unoStates)
       state.dealInitialCards() shouldBe state
     }
 
     "return this on checkForWinner" in {
-      val unoStates = new UnoStates(GameState(List(), 0, List(), false, List(), List()))
-      val state = PlayerTurnState(unoStates)
+      val unoStates = new UnoPhases(GameState(List(), 0, List(), false, List(), List()))
+      val state = PlayerTurnPhase(unoStates)
       state.checkForWinner() shouldBe state
     }
 
     "return this on playerSaysUno" in {
-      val unoStates = new UnoStates(GameState(List(), 0, List(), false, List(), List()))
-      val state = PlayerTurnState(unoStates)
+      val unoStates = new UnoPhases(GameState(List(), 0, List(), false, List(), List()))
+      val state = PlayerTurnPhase(unoStates)
       state.playerSaysUno() shouldBe state
     }
 
     "isValidPlay should be false" in {
-      val unoStates = new UnoStates(GameState(List(), 0, List(), false, List(), List()))
-      val state = PlayerTurnState(unoStates)
+      val unoStates = new UnoPhases(GameState(List(), 0, List(), false, List(), List()))
+      val state = PlayerTurnPhase(unoStates)
       state.isValidPlay shouldBe false
     }
   }

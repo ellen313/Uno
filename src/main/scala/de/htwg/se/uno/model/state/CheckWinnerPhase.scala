@@ -1,12 +1,12 @@
 package de.htwg.se.uno.model.state
 
-case class CheckWinnerState(context: UnoStates) extends GamePhase {
+case class CheckWinnerPhase(context: UnoPhases) extends GamePhase {
   override def checkForWinner(): GamePhase = {
     context.gameState.checkForWinner() match {
       case Some(_) =>
-        context.setState(GameOverState(context))
+        context.setState(GameOverPhase(context))
       case None =>
-        context.setState(PlayerTurnState(context))
+        context.setState(PlayerTurnPhase(context))
     }
     context.state
   }

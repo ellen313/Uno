@@ -2,13 +2,13 @@ package de.htwg.se.uno.model.state
 
 import de.htwg.se.uno.model.*
 
-case class StartState(context: UnoStates) extends GamePhase {
+case class StartPhase(context: UnoPhases) extends GamePhase {
   override def playCard(): GamePhase = this
   override def drawCard(): GamePhase = this
   override def nextPlayer(): GamePhase = this
   override def dealInitialCards(): GamePhase = {
     context.gameState = context.gameState.dealInitialCards(7)
-    context.setState(PlayerTurnState(context))
+    context.setState(PlayerTurnPhase(context))
     context.state
   }
   override def checkForWinner(): GamePhase = this

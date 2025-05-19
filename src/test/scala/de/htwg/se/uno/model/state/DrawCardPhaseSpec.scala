@@ -3,7 +3,7 @@ import org.scalatest.wordspec.AnyWordSpec
 import de.htwg.se.uno.model._
 import de.htwg.se.uno.model.state._
 
-class DrawCardStateSpec extends AnyWordSpec with Matchers {
+class DrawCardPhaseSpec extends AnyWordSpec with Matchers {
 
   "DrawCardState" should {
 
@@ -28,8 +28,8 @@ class DrawCardStateSpec extends AnyWordSpec with Matchers {
         }
       }
 
-      val unoStates = new UnoStates(dummyGameState)
-      val drawCardState = DrawCardState(unoStates)
+      val unoStates = new UnoPhases(dummyGameState)
+      val drawCardState = DrawCardPhase(unoStates)
 
       val newState = drawCardState.drawCard()
 
@@ -44,43 +44,43 @@ class DrawCardStateSpec extends AnyWordSpec with Matchers {
 
     "return this on playCard" in {
       val dummyGameState = new GameState(List(), 0, List(), false, List(), List())
-      val unoStates = new UnoStates(dummyGameState)
-      val drawCardState = DrawCardState(unoStates)
+      val unoStates = new UnoPhases(dummyGameState)
+      val drawCardState = DrawCardPhase(unoStates)
       drawCardState.playCard() shouldBe drawCardState
     }
 
     "return this on nextPlayer" in {
       val dummyGameState = new GameState(List(), 0, List(), false, List(), List())
-      val unoStates = new UnoStates(dummyGameState)
-      val drawCardState = DrawCardState(unoStates)
+      val unoStates = new UnoPhases(dummyGameState)
+      val drawCardState = DrawCardPhase(unoStates)
       drawCardState.nextPlayer() shouldBe drawCardState
     }
 
     "return this on dealInitialCards" in {
       val dummyGameState = new GameState(List(), 0, List(), false, List(), List())
-      val unoStates = new UnoStates(dummyGameState)
-      val drawCardState = DrawCardState(unoStates)
+      val unoStates = new UnoPhases(dummyGameState)
+      val drawCardState = DrawCardPhase(unoStates)
       drawCardState.dealInitialCards() shouldBe drawCardState
     }
 
     "return this on checkForWinner" in {
       val dummyGameState = new GameState(List(), 0, List(), false, List(), List())
-      val unoStates = new UnoStates(dummyGameState)
-      val drawCardState = DrawCardState(unoStates)
+      val unoStates = new UnoPhases(dummyGameState)
+      val drawCardState = DrawCardPhase(unoStates)
       drawCardState.checkForWinner() shouldBe drawCardState
     }
 
     "return this on playerSaysUno" in {
       val dummyGameState = new GameState(List(), 0, List(), false, List(), List())
-      val unoStates = new UnoStates(dummyGameState)
-      val drawCardState = DrawCardState(unoStates)
+      val unoStates = new UnoPhases(dummyGameState)
+      val drawCardState = DrawCardPhase(unoStates)
       drawCardState.playerSaysUno() shouldBe drawCardState
     }
 
     "isValidPlay should be false" in {
       val dummyGameState = new GameState(List(), 0, List(), false, List(), List())
-      val unoStates = new UnoStates(dummyGameState)
-      val drawCardState = DrawCardState(unoStates)
+      val unoStates = new UnoPhases(dummyGameState)
+      val drawCardState = DrawCardPhase(unoStates)
       drawCardState.isValidPlay shouldBe false
     }
   }

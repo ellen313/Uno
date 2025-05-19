@@ -3,7 +3,7 @@ import org.scalatest.wordspec.AnyWordSpec
 import de.htwg.se.uno.model._
 import de.htwg.se.uno.model.state._
 
-class StartStateSpec extends AnyWordSpec with Matchers {
+class StartPhaseSpec extends AnyWordSpec with Matchers {
 
   "StartState" should {
 
@@ -11,8 +11,8 @@ class StartStateSpec extends AnyWordSpec with Matchers {
       val dummyGameState = new GameState(List(), 0, List(), false, List(), List()) {
         override def dealInitialCards(n: Int): GameState = this
       }
-      val unoStates = new UnoStates(dummyGameState)
-      val startState = StartState(unoStates)
+      val unoStates = new UnoPhases(dummyGameState)
+      val startState = StartPhase(unoStates)
       startState.playCard() shouldBe startState
     }
 
@@ -20,8 +20,8 @@ class StartStateSpec extends AnyWordSpec with Matchers {
       val dummyGameState = new GameState(List(), 0, List(), false, List(), List()) {
         override def dealInitialCards(n: Int): GameState = this
       }
-      val unoStates = new UnoStates(dummyGameState)
-      val startState = StartState(unoStates)
+      val unoStates = new UnoPhases(dummyGameState)
+      val startState = StartPhase(unoStates)
       startState.drawCard() shouldBe startState
     }
 
@@ -29,8 +29,8 @@ class StartStateSpec extends AnyWordSpec with Matchers {
       val dummyGameState = new GameState(List(), 0, List(), false, List(), List()) {
         override def dealInitialCards(n: Int): GameState = this
       }
-      val unoStates = new UnoStates(dummyGameState)
-      val startState = StartState(unoStates)
+      val unoStates = new UnoPhases(dummyGameState)
+      val startState = StartPhase(unoStates)
       startState.nextPlayer() shouldBe startState
     }
 
@@ -39,11 +39,11 @@ class StartStateSpec extends AnyWordSpec with Matchers {
         override def dealInitialCards(n: Int): GameState = this.copy(discardPile = List(NumberCard("red", 1)))
       }
 
-      val unoStates = new UnoStates(dummyGameState) {
+      val unoStates = new UnoPhases(dummyGameState) {
         override def setState(state: GamePhase): Unit = super.setState(state)
       }
 
-      val startState = StartState(unoStates)
+      val startState = StartPhase(unoStates)
 
       val returnedState = startState.dealInitialCards()
 
@@ -53,22 +53,22 @@ class StartStateSpec extends AnyWordSpec with Matchers {
 
     "return this on checkForWinner" in {
       val dummyGameState = new GameState(List(), 0, List(), false, List(), List())
-      val unoStates = new UnoStates(dummyGameState)
-      val startState = StartState(unoStates)
+      val unoStates = new UnoPhases(dummyGameState)
+      val startState = StartPhase(unoStates)
       startState.checkForWinner() shouldBe startState
     }
 
     "return this on playerSaysUno" in {
       val dummyGameState = new GameState(List(), 0, List(), false, List(), List())
-      val unoStates = new UnoStates(dummyGameState)
-      val startState = StartState(unoStates)
+      val unoStates = new UnoPhases(dummyGameState)
+      val startState = StartPhase(unoStates)
       startState.playerSaysUno() shouldBe startState
     }
 
     "isValidPlay should be false" in {
       val dummyGameState = new GameState(List(), 0, List(), false, List(), List())
-      val unoStates = new UnoStates(dummyGameState)
-      val startState = StartState(unoStates)
+      val unoStates = new UnoPhases(dummyGameState)
+      val startState = StartPhase(unoStates)
       startState.isValidPlay shouldBe false
     }
   }

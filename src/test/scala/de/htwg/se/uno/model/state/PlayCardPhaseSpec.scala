@@ -4,7 +4,7 @@ import org.scalatest.wordspec.AnyWordSpec
 import org.scalatest.matchers.should.Matchers
 import de.htwg.se.uno.model.*
 
-class PlayCardStateSpec extends AnyWordSpec with Matchers {
+class PlayCardPhaseSpec extends AnyWordSpec with Matchers {
 
   "PlayCardState" should {
 
@@ -12,24 +12,24 @@ class PlayCardStateSpec extends AnyWordSpec with Matchers {
       val card = NumberCard("red", 5)
       val player = PlayerHand(List(card))
       val gameState = GameState(List(player), 0, List(), isReversed = false, List(card), List())
-      val context = new UnoStates(gameState)
+      val context = new UnoPhases(gameState)
 
-      val state = PlayCardState(context, card)
+      val state = PlayCardPhase(context, card)
       val nextState = state.playCard()
 
-      nextState shouldBe a[PlayerTurnState]
+      nextState shouldBe a[PlayerTurnPhase]
     }
 
     "play a skip card and skip the next player" in {
       val card = ActionCard("red", "skip")
       val players = List(PlayerHand(List(card)), PlayerHand(Nil), PlayerHand(Nil))
       val gameState = GameState(players, 0, List(), false, List(card), List())
-      val context = new UnoStates(gameState)
+      val context = new UnoPhases(gameState)
 
-      val state = PlayCardState(context, card)
+      val state = PlayCardPhase(context, card)
       val result = state.playCard()
 
-      result shouldBe a[PlayerTurnState]
+      result shouldBe a[PlayerTurnPhase]
       context.gameState.currentPlayerIndex shouldBe 2
     }
 
@@ -37,12 +37,12 @@ class PlayCardStateSpec extends AnyWordSpec with Matchers {
       val card = ActionCard("blue", "reverse")
       val players = List(PlayerHand(List(card)), PlayerHand(Nil))
       val gameState = GameState(players, 0, List(), false, List(card), List())
-      val context = new UnoStates(gameState)
+      val context = new UnoPhases(gameState)
 
-      val state = PlayCardState(context, card)
+      val state = PlayCardPhase(context, card)
       val result = state.playCard()
 
-      result shouldBe a[PlayerTurnState]
+      result shouldBe a[PlayerTurnPhase]
       context.gameState.isReversed shouldBe true
     }
 
@@ -50,62 +50,62 @@ class PlayCardStateSpec extends AnyWordSpec with Matchers {
       val card = WildCard("wild")
       val players = List(PlayerHand(List(card)), PlayerHand(Nil))
       val gameState = GameState(players, 0, List(), false, List(card), List())
-      val context = new UnoStates(gameState)
+      val context = new UnoPhases(gameState)
 
-      val state = PlayCardState(context, card)
+      val state = PlayCardPhase(context, card)
       val result = state.playCard()
 
-      result shouldBe a[PlayerTurnState]
+      result shouldBe a[PlayerTurnPhase]
       context.gameState.currentPlayerIndex shouldBe 1
     }
 
     "drawCard should return itself and print" in {
       val card = NumberCard("red", 1)
-      val context = new UnoStates(GameState(List(PlayerHand(List(card))), 0, Nil, false, Nil, Nil))
-      val state = PlayCardState(context, card)
+      val context = new UnoPhases(GameState(List(PlayerHand(List(card))), 0, Nil, false, Nil, Nil))
+      val state = PlayCardPhase(context, card)
 
       state.drawCard() shouldBe state
     }
 
     "dealInitialCards should return itself and print" in {
       val card = NumberCard("red", 1)
-      val context = new UnoStates(GameState(List(PlayerHand(List(card))), 0, Nil, false, Nil, Nil))
-      val state = PlayCardState(context, card)
+      val context = new UnoPhases(GameState(List(PlayerHand(List(card))), 0, Nil, false, Nil, Nil))
+      val state = PlayCardPhase(context, card)
 
       state.dealInitialCards() shouldBe state
     }
 
     "checkForWinner should return GameOverState" in {
       val card = NumberCard("red", 1)
-      val context = new UnoStates(GameState(List(PlayerHand(List(card))), 0, Nil, false, Nil, Nil))
-      val state = PlayCardState(context, card)
+      val context = new UnoPhases(GameState(List(PlayerHand(List(card))), 0, Nil, false, Nil, Nil))
+      val state = PlayCardPhase(context, card)
 
-      state.checkForWinner() shouldBe a[GameOverState]
+      state.checkForWinner() shouldBe a[GameOverPhase]
     }
 
     "playerSaysUno should return UnoCalledState" in {
       val card = NumberCard("red", 1)
-      val context = new UnoStates(GameState(List(PlayerHand(List(card))), 0, Nil, false, Nil, Nil))
-      val state = PlayCardState(context, card)
+      val context = new UnoPhases(GameState(List(PlayerHand(List(card))), 0, Nil, false, Nil, Nil))
+      val state = PlayCardPhase(context, card)
 
-      state.playerSaysUno() shouldBe a[UnoCalledState]
+      state.playerSaysUno() shouldBe a[UnoCalledPhase]
     }
 
     "nextPlayer should return PlayerTurnState" in {
       val card = NumberCard("red", 1)
-      val context = new UnoStates(GameState(List(PlayerHand(List(card))), 0, Nil, false, Nil, Nil))
-      val state = PlayCardState(context, card)
+      val context = new UnoPhases(GameState(List(PlayerHand(List(card))), 0, Nil, false, Nil, Nil))
+      val state = PlayCardPhase(context, card)
 
-      state.nextPlayer() shouldBe a[PlayerTurnState]
+      state.nextPlayer() shouldBe a[PlayerTurnPhase]
     }
 
     "isValidPlay should return true if card matches" in {
       val card = NumberCard("red", 1)
       val top = NumberCard("red", 2)
       val gameState = GameState(List(PlayerHand(List(card))), 0, Nil, false, List(top), Nil)
-      val context = new UnoStates(gameState)
+      val context = new UnoPhases(gameState)
 
-      val state = PlayCardState(context, card)
+      val state = PlayCardPhase(context, card)
       state.isValidPlay shouldBe true
     }
 
@@ -113,9 +113,9 @@ class PlayCardStateSpec extends AnyWordSpec with Matchers {
       val card = NumberCard("green", 5)
       val top = NumberCard("red", 2)
       val gameState = GameState(List(PlayerHand(List(card))), 0, Nil, false, List(top), Nil)
-      val context = new UnoStates(gameState)
+      val context = new UnoPhases(gameState)
 
-      val state = PlayCardState(context, card)
+      val state = PlayCardPhase(context, card)
       state.isValidPlay shouldBe false
     }
 
@@ -140,8 +140,8 @@ class PlayCardStateSpec extends AnyWordSpec with Matchers {
           drawPile = dummyPenaltyCards,
           selectedColor = None
         )
-        val context = new UnoStates(gameState)
-        PlayCardState(context, drawTwoCard)
+        val context = new UnoPhases(gameState)
+        PlayCardPhase(context, drawTwoCard)
       }
       noException should be thrownBy stateDrawTwo.playCard()
 
@@ -155,8 +155,8 @@ class PlayCardStateSpec extends AnyWordSpec with Matchers {
           drawPile = dummyPenaltyCards,
           selectedColor = Some("blue")
         )
-        val context = new UnoStates(gameState)
-        PlayCardState(context, wildDrawFourCard)
+        val context = new UnoPhases(gameState)
+        PlayCardPhase(context, wildDrawFourCard)
       }
       noException should be thrownBy stateWildDrawFour.playCard()
     }
@@ -179,12 +179,12 @@ class PlayCardStateSpec extends AnyWordSpec with Matchers {
         drawPile = drawPile,
         selectedColor = None
       )
-      val context = new UnoStates(gameState)
+      val context = new UnoPhases(gameState)
 
-      val state = PlayCardState(context, card)
+      val state = PlayCardPhase(context, card)
       val result = state.playCard()
 
-      result shouldBe a[PlayerTurnState]
+      result shouldBe a[PlayerTurnPhase]
       context.gameState.currentPlayerIndex shouldBe 2
       context.gameState.players(2).cards should have size 3
       context.gameState.drawPile shouldBe empty

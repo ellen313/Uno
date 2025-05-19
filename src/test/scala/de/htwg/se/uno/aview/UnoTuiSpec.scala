@@ -2,10 +2,10 @@ package de.htwg.se.uno.aview
 
 import org.scalatest.matchers.should.Matchers.*
 import org.scalatest.wordspec.AnyWordSpec
-
 import de.htwg.se.uno.model.*
 import de.htwg.se.uno.aview.*
 import de.htwg.se.uno.controller.*
+import de.htwg.se.uno.model.state.UnoStates
 
 import java.io.{ByteArrayOutputStream, PrintStream}
 
@@ -28,7 +28,8 @@ class UnoTuiSpec extends AnyWordSpec {
       )
       
       GameBoard.initGame(gameState)
-      val unoTui = new UnoTui()
+      val context = new UnoStates(gameState)
+      val unoTui = new UnoTui(context)
 
       assert(GameBoard.gameState eq gameState)
       assert(!unoTui.shouldExit)
@@ -49,7 +50,8 @@ class UnoTuiSpec extends AnyWordSpec {
       )
       
       GameBoard.initGame(gameState)
-      val unoTui = new UnoTui()
+      val context = new UnoStates(gameState)
+      val unoTui = new UnoTui(context)
       unoTui.setShouldExit(true)
 
 
@@ -72,7 +74,8 @@ class UnoTuiSpec extends AnyWordSpec {
       )
 
       GameBoard.initGame(gameState)
-      val unoTui = new UnoTui()
+      val context = new UnoStates(gameState)
+      val unoTui = new UnoTui(context)
       
       val stream = new java.io.ByteArrayOutputStream()
       Console.withOut(stream) {
@@ -95,7 +98,8 @@ class UnoTuiSpec extends AnyWordSpec {
       )
 
       GameBoard.initGame(gameState)
-      val unoTui = new UnoTui()
+      val context = new UnoStates(gameState)
+      val unoTui = new UnoTui(context)
 
       val stream = new java.io.ByteArrayOutputStream()
       Console.withOut(stream) {
@@ -120,7 +124,8 @@ class UnoTuiSpec extends AnyWordSpec {
       )
       
       GameBoard.initGame(gameState)
-      val unoTui = new UnoTui()
+      val context = new UnoStates(gameState)
+      val unoTui = new UnoTui(context)
       
       unoTui.selectedColor = Some("blue")
 
@@ -146,7 +151,8 @@ class UnoTuiSpec extends AnyWordSpec {
       )
 
       GameBoard.initGame(gameState)
-      val unoTui = new UnoTui()
+      val context = new UnoStates(gameState)
+      val unoTui = new UnoTui(context)
 
       val stream = new java.io.ByteArrayOutputStream()
       Console.withOut(stream) {
@@ -172,7 +178,8 @@ class UnoTuiSpec extends AnyWordSpec {
       )
 
       GameBoard.initGame(gameState)
-      val unoTui = new UnoTui(){
+      val context = new UnoStates(gameState)
+      val unoTui = new UnoTui(context) {
         override def display(): Unit = {
           val playable = gameState.players(gameState.currentPlayerIndex)
             .cards.exists(card =>
@@ -205,7 +212,8 @@ class UnoTuiSpec extends AnyWordSpec {
       )
 
       GameBoard.initGame(gameState)
-      val unoTui = new UnoTui()
+      val context = new UnoStates(gameState)
+      val unoTui = new UnoTui(context)
 
       val inputs = Iterator("invalid", "1")
       val Input = () => inputs.next()
@@ -236,7 +244,8 @@ class UnoTuiSpec extends AnyWordSpec {
       )
       
       GameBoard.initGame(gameState)
-      val unoTui = new UnoTui()
+      val context = new UnoStates(gameState)
+      val unoTui = new UnoTui(context)
 
       val inputs = Iterator("invalid", "1")
       val Input = () => inputs.next()
@@ -261,7 +270,8 @@ class UnoTuiSpec extends AnyWordSpec {
       )
 
       GameBoard.initGame(gameState)
-      val unoTui = new UnoTui()
+      val context = new UnoStates(gameState)
+      val unoTui = new UnoTui(context)
 
       val output = new ByteArrayOutputStream()
       val inputs = Iterator("5", "2")
@@ -289,7 +299,8 @@ class UnoTuiSpec extends AnyWordSpec {
       )
       
       GameBoard.initGame(gameState)
-      val unoTui = new UnoTui()
+      val context = new UnoStates(gameState)
+      val unoTui = new UnoTui(context)
 
       val invalidInput = "invalid"
       val outputStream = new java.io.ByteArrayOutputStream()
@@ -320,7 +331,8 @@ class UnoTuiSpec extends AnyWordSpec {
       )
 
       GameBoard.initGame(gameState)
-      val unoTui = new UnoTui()
+      val context = new UnoStates(gameState)
+      val unoTui = new UnoTui(context)
       unoTui.setShouldExit(true)
 
 
@@ -343,7 +355,8 @@ class UnoTuiSpec extends AnyWordSpec {
       )
       
       GameBoard.initGame(gameState)
-      val unoTui = new UnoTui()
+      val context = new UnoStates(gameState)
+      val unoTui = new UnoTui(context)
 
       val input = new java.io.ByteArrayInputStream("2\n".getBytes())
       val output = new java.io.ByteArrayOutputStream()
@@ -374,7 +387,8 @@ class UnoTuiSpec extends AnyWordSpec {
       )
 
       GameBoard.initGame(gameState)
-      val unoTui = new UnoTui(){
+      val context = new UnoStates(gameState)
+      val unoTui = new UnoTui(context) {
         override def display(): Unit = {}
       }
 
@@ -400,7 +414,8 @@ class UnoTuiSpec extends AnyWordSpec {
       assert(gameState.isValidPlay(playableCard, Some(topCard), None))
       
       GameBoard.initGame(gameState)
-      val unoTui = new UnoTui()
+      val context = new UnoStates(gameState)
+      val unoTui = new UnoTui(context)
 
       val outputStream = new java.io.ByteArrayOutputStream()
       Console.withOut(outputStream) {
@@ -429,7 +444,8 @@ class UnoTuiSpec extends AnyWordSpec {
       )
 
       GameBoard.initGame(gameState)
-      val unoTui = new UnoTui()
+      val context = new UnoStates(gameState)
+      val unoTui = new UnoTui(context)
       unoTui.selectedColor = Some("red")
 
       val displayOutput = new java.io.ByteArrayOutputStream()
@@ -476,7 +492,8 @@ class UnoTuiSpec extends AnyWordSpec {
         allCards = List()
       )
 
-      val unoTui = new UnoTui(){
+      val context = new UnoStates(gameState)
+      val unoTui = new UnoTui(context) {
         override def display(): Unit = {}
       }
       unoTui.handleInput("0")
@@ -507,7 +524,8 @@ class UnoTuiSpec extends AnyWordSpec {
       )
 
       GameBoard.initGame(gameState)
-      val unoTui = new UnoTui()
+      val context = new UnoStates(gameState)
+      val unoTui = new UnoTui(context)
       
       // 2. Output erfassen
       val outputStream = new java.io.ByteArrayOutputStream()
@@ -536,7 +554,8 @@ class UnoTuiSpec extends AnyWordSpec {
       )
 
       GameBoard.initGame(gameState)
-      val unoTui = new UnoTui()
+      val context = new UnoStates(gameState)
+      val unoTui = new UnoTui(context)
       
       val stream = new java.io.ByteArrayOutputStream()
       Console.withOut(stream) {
@@ -561,7 +580,8 @@ class UnoTuiSpec extends AnyWordSpec {
     )
 
     GameBoard.initGame(gameState)
-    val unoTui = new UnoTui()
+    val context = new UnoStates(gameState)
+    val unoTui = new UnoTui(context)
     unoTui.setShouldExit(false)
 
 
@@ -595,7 +615,8 @@ class UnoTuiSpec extends AnyWordSpec {
     )
 
     GameBoard.initGame(gameState)
-    val unoTui = new UnoTui()
+    val context = new UnoStates(gameState)
+    val unoTui = new UnoTui(context)
     
     unoTui.setShouldExit(false)
 
@@ -619,7 +640,8 @@ class UnoTuiSpec extends AnyWordSpec {
     )
 
     GameBoard.initGame(gameState)
-    val unoTui = new UnoTui()
+    val context = new UnoStates(gameState)
+    val unoTui = new UnoTui(context)
     
     unoTui.setShouldExit(true)
 
@@ -633,9 +655,6 @@ class UnoTuiSpec extends AnyWordSpec {
     assert(outputStr.isEmpty)
   }
   "detect and handle winner correctly" in {
-    val unoTui = new UnoTui()
-    unoTui.setShouldExit(false)
-
     val winningPlayer = PlayerHand(List.empty)
     val otherPlayer = PlayerHand(List(NumberCard("red", 1)))
     val gameState = GameState(
@@ -647,6 +666,10 @@ class UnoTuiSpec extends AnyWordSpec {
       drawPile = Nil,
       selectedColor = None
     )
+
+    val context = new UnoStates(gameState)
+    val unoTui = new UnoTui(context)
+    unoTui.setShouldExit(false)
 
     val out = new ByteArrayOutputStream()
     Console.withOut(new PrintStream(out)) {

@@ -9,32 +9,26 @@ case class PlayCardPhase(context: UnoPhases, card: Card) extends GamePhase {
     context.setState(PlayerTurnPhase(context))
 
     val finalGameState = card match {
-      //------------ skip ------------
       case ActionCard(_, "skip") =>
         context.gameState = context.gameState.nextPlayer().nextPlayer()
         PlayerTurnPhase(context)
 
-      //------------ reverse ------------
       case ActionCard(_, "reverse") =>
         context.gameState = context.gameState.copy(isReversed = !context.gameState.isReversed)
         PlayerTurnPhase(context)
 
-      //------------ draw two ------------
       case ActionCard(_, "draw two") =>
         context.gameState = handlePenaltyCards(context.gameState, 2).nextPlayer()
         PlayerTurnPhase(context)
 
-      //------------ wild draw four ------------
       case WildCard("wild draw four") =>
         context.gameState = handlePenaltyCards(context.gameState, 4).nextPlayer()
         PlayerTurnPhase(context)
 
-      //------------ wild card ------------    
       case WildCard("wild") =>
         context.gameState = context.gameState.nextPlayer()
         PlayerTurnPhase(context)    
 
-      //------------ default ------------
       case _ =>
         context.gameState = context.gameState.nextPlayer()
         PlayerTurnPhase(context)

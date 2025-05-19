@@ -5,7 +5,8 @@ import scala.io.StdIn.readLine
 import de.htwg.se.uno.model.*
 import de.htwg.se.uno.controller.GameBoard
 import de.htwg.se.uno.controller.command.UnoCalledCommand
-import de.htwg.se.uno.model.state.UnoStates
+import de.htwg.se.uno.model.state.UnoPhases
+import scala.util.{Success, Failure, Try}
 
 object UnoGame {
   def runUno(numberPlayers: Option[Int] = None, cardsPerPlayer: Int = 7): UnoTui = {
@@ -36,11 +37,18 @@ object UnoGame {
     Thread.sleep(2000)
 
     val initialGameState = GameBoard.gameState
-    val context = new UnoStates(initialGameState)
-    val tui = new UnoTui(context)
-    tui.display()
-    inputLoop(tui)
-    tui
+
+    GameBoard.gameState match {
+      case scala.util.Success(initialGameState) =>
+        val context = new UnoPhases(initialGameState)
+        val tui = new UnoTui(context)
+        tui.display()
+        inputLoop(tui)
+        tui
+
+      case scala.util.Failure(exception: Throwable) =>
+        throw new IllegalStateException("Game state not initialized", exception)
+    }
   }
 
   private def dealCards(drawPile: List[Card], playerCount: Int, cardsPerPlayer: Int): (List[Card], List[PlayerHand]) = {
@@ -68,52 +76,59 @@ object UnoGame {
   @tailrec
   def inputLoop(tui: UnoTui): Unit = {
     val currentState = GameBoard.gameState
-    if (currentState.players.exists(_.cards.isEmpty)) {
-      println("Game over. GG!")
-      System.exit(0)
-      return
-    }
+    GameBoard.gameState match {
+      case scala.util.Success(currentState) =>
 
-    val name = GameBoard.gameState.currentPlayerIndex
-    val currentPlayer = GameBoard.gameState.players(GameBoard.gameState.currentPlayerIndex)
-    if (currentPlayer.cards.length == 1 && !currentPlayer.hasSaidUno) {
-      GameBoard.executeCommand(UnoCalledCommand(null))
-      println(s"${name} said UNO!")
-    }
+        if (currentState.players.exists(_.cards.isEmpty)) {
+          println("Game over. GG!")
+          System.exit(0)
+          return
+        }
 
-    val input = readLine().trim
-    input match {
-      case "exit" =>
-        println("Game exited.")
-        System.exit(0)
+        val name = currentState.currentPlayerIndex
+        val currentPlayer = currentState.players(currentState.currentPlayerIndex)
 
-      case _ =>
-        tui.handleInput(input)
+        if (currentPlayer.cards.length == 1 && !currentPlayer.hasSaidUno) {
+          GameBoard.executeCommand(UnoCalledCommand(None))
+          println(s"$name said UNO!")
+        }
 
-        tui.display()
-        inputLoop(tui)
+        val input = readLine().trim
+        input match {
+          case "exit" =>
+            println("Game exited.")
+            System.exit(0)
+
+          case _ =>
+            tui.handleInput(input)
+
+            tui.display()
+            inputLoop(tui)
+        }
+
+      case scala.util.Failure(exception) =>
+        println(s"Error: Game state not initialized: $exception")
+        System.exit(1)
     }
   }
 
   private def readValidInt(prompt: String, min: Int, max: Int): Int = {
-    var valid = false
-    var number = 0
-    while (!valid) {
+    var numberOpt: Option[Int] = None
+
+    while (numberOpt.isEmpty) {
       print(prompt)
       val input = readLine()
-      try {
-        val parsed = input.toInt
-        if (parsed >= min && parsed <= max) {
-          number = parsed
-          valid = true
-        } else {
+
+      Try(input.toInt) match {
+        case Success(parsed) if parsed >= min && parsed <= max =>
+          numberOpt = Some(parsed)
+        case Success(_) =>
           println(s"Please enter a number between $min and $max.")
-        }
-      } catch {
-        case _: NumberFormatException =>
+        case Failure(_) =>
           println("Invalid input. Please enter a number.")
       }
     }
-    number
+
+    numberOpt.get
   }
 }

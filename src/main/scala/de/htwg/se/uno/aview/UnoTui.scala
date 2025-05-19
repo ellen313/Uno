@@ -3,33 +3,32 @@ package de.htwg.se.uno.aview
 import de.htwg.se.uno.model.*
 import de.htwg.se.uno.util.Observer
 import de.htwg.se.uno.controller.GameBoard
-import de.htwg.se.uno.controller.command.{DrawCardCommand, PlayCardCommand, UnoCalledCommand, ColorWishCommand}
+import de.htwg.se.uno.controller.command.*
 import de.htwg.se.uno.aview.ColorPrinter.*
+import de.htwg.se.uno.model.state.UnoStates
 
 import scala.io.StdIn.readLine
 
-class UnoTui(controller: GameBoard) extends Observer {
+class UnoTui(context: UnoStates) extends Observer {
 
-  var gameShouldExit = false
+  private var gameShouldExit = false
   var selectedColor: Option[String] = None
 
-  controller.addObserver(this)
+  GameBoard.addObserver(this)
 
   def display(): Unit = {
-    val state = controller.state
 
+    val state = GameBoard.gameState
     if (state.players.isEmpty || gameShouldExit) return
 
     val currentPlayer = state.players(state.currentPlayerIndex)
-    val topCard = state.discardPile.lastOption.getOrElse(return)
+    val topCard = state.discardPile.headOption.getOrElse(return)
 
     println("\n--------------------------------------------------------------------")
     println(s"Player ${state.currentPlayerIndex + 1}'s turn!")
 
-    // UNO Call Anzeige
-    state.players.zipWithIndex
-      .filter(_._1.hasSaidUno)
-      .foreach { case (_, idx) =>
+    val unoPlayers = state.players.zipWithIndex.filter(_._1.hasSaidUno)
+    unoPlayers.foreach { case (_, idx) =>
         if (idx == state.currentPlayerIndex) println("You said 'UNO'!")
         else println(s"Player ${idx + 1} said UNO")
       }
@@ -40,85 +39,87 @@ class UnoTui(controller: GameBoard) extends Observer {
 
     showHand(currentPlayer)
 
-    val canPlay = currentPlayer.cards.exists(card => controller.isValidPlay(card, topCard, selectedColor))
-    if (!canPlay) {
+    if (!currentPlayer.cards.exists(card => state.isValidPlay(card, Some(topCard), selectedColor))) {
       println("No playable Card! You have to draw a card...")
-      controller.executeCommand(DrawCardCommand(controller))
-      controller.executeCommand(PlayCardCommand(-1)) // Signalisiert: Kein Spielzug
-      return
+      GameBoard.executeCommand(DrawCardCommand())
+      gameShouldExit = false
+      display()
+    } else {
+      println("Select a card (index) to play or type 'draw' to draw a card:")
     }
-
-    println("Select a card (index) to play or type 'draw' to draw a card:")
-    val input = readLine().trim
-    handleInput(input)
   }
 
   def handleInput(input: String): Unit = {
-    val state = controller.state
+    val state = GameBoard.gameState
     val currentPlayer = state.players(state.currentPlayerIndex)
 
     input match {
       case "draw" =>
-        val chosenCard = controller.gameState.players(controller.gameState.currentPlayerIndex).cards(cardIndex)
-        controller.executeCommand(DrawCardCommand(controller))
-        controller.executeCommand(PlayCardCommand(controller, chosenCard)) // Kein Spielzug
-        return
+        val (newState, drawnCard) = state.drawCardAndReturnDrawn()
+        println(s"You drew: $drawnCard")
 
-      case "uno" =>
-        controller.executeCommand(UnoCalledCommand(controller, context))
-        return
+        if (newState.isValidPlay(drawnCard, newState.discardPile.headOption, newState.selectedColor)) {
+          println("Playing drawn card...")
+          GameBoard.updateState(newState)
+
+          val chosenColor =
+            if (drawnCard.isInstanceOf[WildCard]) Some(chooseWildColor())
+            else None
+
+          GameBoard.executeCommand(PlayCardCommand(drawnCard, chosenColor))
+        } else {
+          println("Card cannot be played, turn ends.")
+          val skipped = newState.nextPlayer()
+          GameBoard.updateState(skipped)
+          skipped.notifyObservers()
+        }
 
       case _ =>
         try {
           val index = input.toInt
           if (index < 0 || index >= currentPlayer.cards.length) {
             println("Invalid index.")
-            return
+          } else {
+            val chosenCard = currentPlayer.cards(index)
+
+            val chosenColor =
+              if (chosenCard.isInstanceOf[WildCard]) Some(chooseWildColor())
+              else None
+
+            GameBoard.executeCommand(PlayCardCommand(chosenCard, chosenColor))
           }
-
-          val chosenCard = currentPlayer.cards(index)
-          if (chosenCard.isInstanceOf[WildCard]) {
-            val color = chooseWildColor()
-            controller.executeCommand(ColorWishCommand(unoState))
-          }
-
-          controller.executeCommand(PlayCardCommand(index))
-
-          // Wenn Spieler auf eine Karte reduziert wurde und noch kein "UNO" gerufen:
-          val updatedPlayer = controller.state.players(controller.state.currentPlayerIndex)
-          if (updatedPlayer.cards.length == 1 && !updatedPlayer.hasSaidUno) {
-            controller.executeCommand(UnoCalledCommand(controller.state.currentPlayerIndex))
-            println("You said 'UNO'!")
-          }
-
         } catch {
           case _: NumberFormatException =>
             println("Invalid input. Use card index or 'draw'.")
         }
     }
 
+    checkUno()
     checkForWinner()
   }
 
-  def chooseWildColor(): String = {
+  def chooseWildColor(inputFunc: () => String = () => readLine()): String = {
     val colors = List("red", "green", "blue", "yellow")
-    var chosen: Option[String] = None
+    var validColor = false
+    var chosenColor = ""
 
-    while (chosen.isEmpty) {
-      println("Choose a color for the Wild Card:")
+    while (!validColor) {
+      println("Please choose a color for the Wild Card:")
       colors.zipWithIndex.foreach { case (c, i) => println(s"$i - $c") }
-      val input = readLine().trim
-      input.toIntOption match {
-        case Some(i) if i >= 0 && i < colors.length =>
-          chosen = Some(colors(i))
-        case _ => println("Invalid color. Try again.")
+
+      inputFunc().trim match {
+        case input if input.matches("[0-3]") =>
+          chosenColor = colors(input.toInt)
+          println(s"Wild Card color changed to: $chosenColor")
+          validColor = true
+        case _ => println("Invalid input. Please enter a number between 0 and 3.")
       }
     }
 
-    chosen.get
+    chosenColor
   }
 
-  def showHand(player: PlayerHand): Unit = {
+  private def showHand(player: PlayerHand): Unit = {
     println("Your cards:")
     player.cards.zipWithIndex.foreach { case (card, i) =>
       print(s"$i - ")
@@ -127,11 +128,27 @@ class UnoTui(controller: GameBoard) extends Observer {
   }
 
   def checkForWinner(): Unit = {
-    controller.checkForWinner() match {
+    GameBoard.checkForWinner() match {
       case Some(idx) =>
         println(s"Player ${idx + 1} wins! Game over.")
         gameShouldExit = true
-      case None => // continue
+      case None => ()
+    }
+  }
+
+  def shouldExit: Boolean = gameShouldExit
+
+  def setShouldExit(value: Boolean): Unit = {
+    gameShouldExit = value
+  }
+
+  private def checkUno(): Unit = {
+    val state = GameBoard.gameState
+    val updatedPlayer = state.players(state.currentPlayerIndex)
+
+    if (updatedPlayer.cards.length == 1 && !updatedPlayer.hasSaidUno) {
+      GameBoard.executeCommand(UnoCalledCommand(context))
+      println("You said 'UNO'!")
     }
   }
 

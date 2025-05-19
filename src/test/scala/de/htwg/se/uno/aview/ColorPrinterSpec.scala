@@ -1,6 +1,8 @@
+package de.htwg.se.uno.aview
+
 import org.scalatest.wordspec.AnyWordSpec
-import model.*
-import aview.ColorPrinter.printCard
+import de.htwg.se.uno.model.*
+import de.htwg.se.uno.aview.ColorPrinter.printCard
 
 class ColorPrinterSpec extends AnyWordSpec {
 
@@ -36,6 +38,11 @@ class ColorPrinterSpec extends AnyWordSpec {
     "have the correct properties" in {
       val numberCard = NumberCard("red", 5)
       assert(numberCard.color == "red")
+      assert(numberCard.number == 5)
+    }
+    "handle yellow card" in {
+      val numberCard = NumberCard("yellow", 5)
+      assert(numberCard.color == "yellow")
       assert(numberCard.number == 5)
     }
   }

@@ -1,7 +1,7 @@
 package de.htwg.se.uno.aview
 
 import de.htwg.se.uno.model.*
-// $COVERAGE-OFF$
+
 object ColorPrinter {
   //ansi escape codes
   val Reset = "\u001B[0m"
@@ -34,4 +34,4 @@ object ColorPrinter {
     }
   }
 }
-// $COVERAGE-ON$
+

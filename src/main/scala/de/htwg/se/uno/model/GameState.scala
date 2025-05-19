@@ -2,8 +2,6 @@ package de.htwg.se.uno.model
 
 import de.htwg.se.uno.util.Observable
 
-import scala.annotation.tailrec
-
 case class GameState( players: List[PlayerHand], currentPlayerIndex: Int,
                       allCards: List[Card], isReversed: Boolean = false,
                       discardPile: List[Card], drawPile: List[Card], selectedColor: Option[String] = None)
@@ -16,6 +14,7 @@ case class GameState( players: List[PlayerHand], currentPlayerIndex: Int,
     } else {
       (currentPlayerIndex + 1) % playerCount
     }
+    println(s"Next Player Index: $nextIndex")
     this.copy(currentPlayerIndex = nextIndex)
   }
 
@@ -72,117 +71,118 @@ case class GameState( players: List[PlayerHand], currentPlayerIndex: Int,
     (drawnCard, updatedPlayerHand, updatedDrawPile, discardPile)
   }
 
-  def playCard(card: Card): GameState = {
+  def playCard(card: Card, chosenColor: Option[String] = None): GameState = {
+    if (players.exists(_.cards.isEmpty)) return this
 
-    if (players.exists(_.cards.isEmpty)) {
-      return this
-    }
-
-    val currentPlayerHand = players(currentPlayerIndex)
-    val topCard = discardPile.lastOption
-
+    val topCard = discardPile.headOption
     if (!isValidPlay(card, topCard)) {
-      var updatedPlayerHand = currentPlayerHand
-      var updatedDrawPile = drawPile
-      var updatedDiscardPile = discardPile
-      var playableCardFound = false
-
-      val maxIterations = 10
-      var iterationCount = 0
-
-      while (!playableCardFound && updatedDrawPile.nonEmpty && iterationCount < maxIterations) {
-        iterationCount += 1
-        val (drawnCard, newHand, newDrawPile, newDiscardPile) =
-          drawCard(updatedPlayerHand, updatedDrawPile, updatedDiscardPile)
-        updatedPlayerHand = newHand
-        updatedDrawPile = newDrawPile
-        updatedDiscardPile = newDiscardPile
-        playableCardFound = isValidPlay(drawnCard, topCard)
-      }
+      println("Invalid play.")
+      return this
+//      var updatedPlayerHand = currentPlayerHand
+//      var updatedDrawPile = drawPile
+//      var updatedDiscardPile = discardPile
+//      var playableCardFound = false
+//
+//      val maxIterations = 10
+//      var iterationCount = 0
+//
+//      while (!playableCardFound && updatedDrawPile.nonEmpty && iterationCount < maxIterations) {
+//        iterationCount += 1
+//        val (drawnCard, newHand, newDrawPile, newDiscardPile) =
+//          drawCard(updatedPlayerHand, updatedDrawPile, updatedDiscardPile)
+//        updatedPlayerHand = newHand
+//        updatedDrawPile = newDrawPile
+//        updatedDiscardPile = newDiscardPile
+//        playableCardFound = isValidPlay(drawnCard, topCard)
     }
 
-    val updatedHand = currentPlayerHand.removeCard(card)
-    val updatedDiscardPile = discardPile :+ card
+    val newSelectedColor = card match {
+      case WildCard(_) | WildCard("wild draw four") => chosenColor
+      case _ => None
+    }
 
-    val baseGameState = this.copy(
+    val updatedHand = players(currentPlayerIndex).removeCard(card)
+    val updatedDiscardPile = card :: discardPile
+
+    this.copy(
       players = players.updated(currentPlayerIndex, updatedHand),
-      discardPile = updatedDiscardPile
+      discardPile = updatedDiscardPile,
+      selectedColor = if (card.isInstanceOf[WildCard]) selectedColor else None,
     )
-
-    //---------------------------------------------- special card ------------------------------------------------------
-    val finalGameState = card match {
-      //------------ skip ------------
-      case ActionCard(_, "skip") =>
-        baseGameState.nextPlayer().nextPlayer()
-
-      //------------ reverse ------------
-      case ActionCard(_, "reverse") =>
-        baseGameState.copy(isReversed = !baseGameState.isReversed).nextPlayer()
-
-      //------------ draw two ------------
-      case ActionCard(_, "draw two") =>
-        baseGameState.handleDrawCards(2)
-
-      //------------ wild draw four ------------
-      case WildCard("wild draw four") =>
-        baseGameState.handleDrawCards(4)
-
-      //------------ default ------------
-      case _ =>
-        baseGameState.nextPlayer()
-    }
-
-    val finalHand = if (updatedHand.hasUno) updatedHand.sayUno() else updatedHand.resetUnoStatus()
-    val updatedFinalGameState = finalGameState.copy(
-      players = finalGameState.players.updated(currentPlayerIndex, finalHand))
-
-    updatedFinalGameState.notifyObservers()
-    updatedFinalGameState
   }
 
-  private def handleDrawCards(count: Int): GameState = {
-    val nextPlayerIndex = nextPlayer().currentPlayerIndex
-
-    val (updatedNextPlayerHand, updatedDrawPile, updatedDiscardPile) = (1 to count).foldLeft((players(nextPlayerIndex), drawPile, discardPile)) {
-      case ((hand, drawPile, discardPile), _) =>
-        val (drawnCard, updatedHand, updatedDrawPile, updatedDiscardPile) = drawCard(hand, drawPile, discardPile)
-        (updatedHand, updatedDrawPile, updatedDiscardPile)
+  def handleDrawCards(count: Int): GameState = {
+    val nextPlayerIndex = if (isReversed) {
+      (currentPlayerIndex - 1 + players.length) % players.length
+    } else {
+      (currentPlayerIndex + 1) % players.length
     }
+
+    val (updatedHand, updatedDrawPile, _) =
+      (1 to count).foldLeft((players(nextPlayerIndex), drawPile, discardPile)) {
+        case ((hand, draw, _), _) =>
+          val (_, newHand, newDraw, _) = drawCard(hand, draw, Nil)  // discardPile irrelevant
+          (newHand, newDraw, Nil)
+      }
+
     this.copy(
-      players = players.updated(nextPlayerIndex, updatedNextPlayerHand),
-      drawPile = updatedDrawPile,
-      discardPile = updatedDiscardPile,
-      currentPlayerIndex = nextPlayerIndex
+      players = players.updated(nextPlayerIndex, updatedHand),
+      drawPile = updatedDrawPile
     )
   }
 
   def isValidPlay(card: Card, topCard: Option[Card], selectedColor: Option[String] = None): Boolean = {
-    topCard match {
-      case None => true
-      case Some(tCard) =>
-        (card, tCard) match {
 
-          case (WildCard("wild draw four"), WildCard("wild draw four")) => false
-          case (WildCard("wild"), _) => true
-          case (WildCard("wild draw four"), _) => true
-          case (_, WildCard("wild")) => true
-          case (_, WildCard("wild draw four")) => true
+    selectedColor match {
+      case Some(color) =>
+        card match {
+          case WildCard(_) => true
+          case ActionCard(c, _) => c == color
+          case NumberCard(c, _) => c == color
+        }
+      case None =>
 
+        topCard match {
+          case None => true
 
-          case (ActionCard(color, "draw two"), ActionCard(topColor, "draw two")) => color == topColor
+          case Some(tCard) =>
+            (card, tCard) match {
 
-          case (NumberCard(color, number), NumberCard(topColor, topNumber)) =>
-            color == topColor || number == topNumber
+              case (ActionCard(_, "draw two"), ActionCard(_, "draw two")) => false
+              case (WildCard("wild draw four"), WildCard("wild draw four")) => false
 
-          case (NumberCard(color, _), ActionCard(topColor, _)) => color == topColor
-          case (ActionCard(color, _), NumberCard(topColor, _)) => color == topColor
+              case (ActionCard(color, "draw two"), NumberCard(topColor, _)) =>
+                color == topColor || selectedColor.contains(color)
 
-          case (ActionCard(color, action), ActionCard(topColor, topAction)) =>
-            color == topColor || action == topAction
+              case (NumberCard(color, number), NumberCard(topColor, topNumber)) =>
+                color == topColor || number == topNumber || selectedColor.contains(color)
 
-          case _ => false
+              case (NumberCard(color, _), ActionCard(topColor, _)) =>
+                color == topColor || selectedColor.contains(color)
+
+              case (ActionCard(color, _), NumberCard(topColor, _)) =>
+                color == topColor || selectedColor.contains(color)
+
+              case (ActionCard(color, action), ActionCard(topColor, topAction)) =>
+                color == topColor || action == topAction || selectedColor.contains(color)
+
+              case (WildCard("wild"), _) => true
+              case (WildCard("wild draw four"), _) => true
+              case (_, WildCard("wild")) => true
+              case (_, WildCard("wild draw four")) => true
+
+              case _ => false
+            }
         }
     }
+  }
+
+  def drawCardAndReturnDrawn(): (GameState, Card) = {
+    val card = drawPile.head
+    val updatedPlayer = players(currentPlayerIndex) + card
+    val updatedPlayers = players.updated(currentPlayerIndex, updatedPlayer)
+    val newState = this.copy(drawPile = drawPile.tail, players = updatedPlayers)
+    (newState, card)
   }
 
   def setSelectedColor(color: String): GameState = {
@@ -201,9 +201,9 @@ case class GameState( players: List[PlayerHand], currentPlayerIndex: Int,
 
           currentPlayer.cards(cardIndex) match {
             case wild: WildCard =>
-              val playedCard = WildCard(wild.action) // z. B. "wild" oder "wild draw four"
+              val playedCard = WildCard(wild.action)
               val updatedGame = 
-                setSelectedColor(color)           // <- Du brauchst diese Methode im GameState!
+                setSelectedColor(color)
                 playCard(playedCard)
               Success(updatedGame)
 

@@ -1,0 +1,87 @@
+import org.scalatest.matchers.should.Matchers
+import org.scalatest.wordspec.AnyWordSpec
+import de.htwg.se.uno.model._
+import de.htwg.se.uno.model.state._
+
+class DrawCardStateSpec extends AnyWordSpec with Matchers {
+
+  "DrawCardState" should {
+
+    "perform drawCard and update gameState and state correctly" in {
+      val initialHand = PlayerHand(List(NumberCard("red", 5)))
+      val drawPile = List(NumberCard("green", 7), NumberCard("yellow", 3))
+      val discardPile = List(NumberCard("blue", 2))
+
+      val dummyGameState = new GameState(
+        players = List(initialHand, PlayerHand(Nil)),
+        currentPlayerIndex = 0,
+        allCards = Nil,
+        isReversed = false,
+        discardPile = discardPile,
+        drawPile = drawPile
+      ) {
+        override def drawCard(player: PlayerHand, drawPile: List[Card], discardPile: List[Card]): (Card, PlayerHand, List[Card], List[Card]) = {
+          val drawnCard = drawPile.head
+          val newHand = player + drawnCard
+          val newDrawPile = drawPile.tail
+          (drawnCard, newHand, newDrawPile, discardPile)
+        }
+      }
+
+      val unoStates = new UnoStates(dummyGameState)
+      val drawCardState = DrawCardState(unoStates)
+
+      val newState = drawCardState.drawCard()
+
+      newState.getClass.getSimpleName shouldBe "PlayerTurnState"
+
+      val updatedHand = unoStates.gameState.players.head
+      updatedHand.cards should contain(NumberCard("green", 7))
+
+      unoStates.gameState.drawPile should have size (drawPile.size - 1)
+      unoStates.gameState.discardPile shouldBe discardPile
+    }
+
+    "return this on playCard" in {
+      val dummyGameState = new GameState(List(), 0, List(), false, List(), List())
+      val unoStates = new UnoStates(dummyGameState)
+      val drawCardState = DrawCardState(unoStates)
+      drawCardState.playCard() shouldBe drawCardState
+    }
+
+    "return this on nextPlayer" in {
+      val dummyGameState = new GameState(List(), 0, List(), false, List(), List())
+      val unoStates = new UnoStates(dummyGameState)
+      val drawCardState = DrawCardState(unoStates)
+      drawCardState.nextPlayer() shouldBe drawCardState
+    }
+
+    "return this on dealInitialCards" in {
+      val dummyGameState = new GameState(List(), 0, List(), false, List(), List())
+      val unoStates = new UnoStates(dummyGameState)
+      val drawCardState = DrawCardState(unoStates)
+      drawCardState.dealInitialCards() shouldBe drawCardState
+    }
+
+    "return this on checkForWinner" in {
+      val dummyGameState = new GameState(List(), 0, List(), false, List(), List())
+      val unoStates = new UnoStates(dummyGameState)
+      val drawCardState = DrawCardState(unoStates)
+      drawCardState.checkForWinner() shouldBe drawCardState
+    }
+
+    "return this on playerSaysUno" in {
+      val dummyGameState = new GameState(List(), 0, List(), false, List(), List())
+      val unoStates = new UnoStates(dummyGameState)
+      val drawCardState = DrawCardState(unoStates)
+      drawCardState.playerSaysUno() shouldBe drawCardState
+    }
+
+    "isValidPlay should be false" in {
+      val dummyGameState = new GameState(List(), 0, List(), false, List(), List())
+      val unoStates = new UnoStates(dummyGameState)
+      val drawCardState = DrawCardState(unoStates)
+      drawCardState.isValidPlay shouldBe false
+    }
+  }
+}

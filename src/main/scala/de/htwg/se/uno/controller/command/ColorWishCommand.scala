@@ -1,17 +1,32 @@
 package de.htwg.se.uno.controller.command
 
 import de.htwg.se.uno.model.*
-import de.htwg.se.uno.model.state.UnoStates
+import de.htwg.se.uno.model.state.UnoPhases
 import de.htwg.se.uno.controller.GameBoard
 
 case class ColorWishCommand(color: String) extends Command {
+
+  //for undo operation
+  private var previousState: Option[GameState] = None
+
   override def execute(): Unit = {
-    val gameState = GameBoard.gameState
+    GameBoard.gameState.foreach { state =>
+      previousState = Some(state)
 
-    gameState.setSelectedColor(color)
+      val updatedState: GameState = state.setSelectedColor(color)
 
-    GameBoard.gameState.notifyObservers()
+      GameBoard.updateState(updatedState)
 
-    println(s"Farbe für Wild Card gesetzt: $color")
+      println(s"Chose color for Wild Card: $color")
+    }
   }
+
+  override def undo(): Unit = {
+    previousState.foreach { oldState =>
+      GameBoard.updateState(oldState)
+      println(s"Undo: color reseted")
+    }
+  }
+
+  override def redo(): Unit = execute()
 }

@@ -24,12 +24,12 @@ class UnoCalledCommandSpec extends AnyWordSpec with Matchers {
 
       GameBoard.updateState(gameState)
 
-      val unoStates = new UnoStates(gameState)
+      val unoStates = new UnoPhases(gameState)
       val command = UnoCalledCommand(unoStates)
 
       command.execute()
 
-      unoStates.state shouldBe a[GameOverState]
+      unoStates.state shouldBe a[GameOverPhase]
     }
 
 
@@ -48,7 +48,7 @@ class UnoCalledCommandSpec extends AnyWordSpec with Matchers {
 
       GameBoard.updateState(initialState)
 
-      val unoStates = new UnoStates(initialState)
+      val unoStates = new UnoPhases(initialState)
       val command = UnoCalledCommand(unoStates)
 
       command.execute()
@@ -71,7 +71,7 @@ class UnoCalledCommandSpec extends AnyWordSpec with Matchers {
 
       GameBoard.updateState(initialState)
 
-      val unoStates = new UnoStates(initialState)
+      val unoStates = new UnoPhases(initialState)
       val command = UnoCalledCommand(unoStates)
 
       command.execute()

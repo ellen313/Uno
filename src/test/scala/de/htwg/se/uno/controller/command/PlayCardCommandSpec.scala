@@ -36,9 +36,11 @@ class PlayCardCommandSpec extends AnyWordSpec with Matchers {
     "not allow an invalid card to be played" in {
       val invalidState = baseState.copy(
         players = List(PlayerHand(List(NumberCard("blue", 9))), player2),
-        discardPile = List(NumberCard("red", 3))
+        discardPile = List(NumberCard("red", 3)),
+        drawPile = List()
       )
-      GameBoard.initGame(invalidState)
+
+      GameBoard.updateState(invalidState)
 
       val command = PlayCardCommand(NumberCard("blue", 9))
       command.execute()
@@ -53,7 +55,7 @@ class PlayCardCommandSpec extends AnyWordSpec with Matchers {
         players = List(PlayerHand(List(WildCard("wild"))), player2),
         discardPile = List(NumberCard("green", 4))
       )
-      GameBoard.initGame(wildState)
+      GameBoard.updateState(wildState)
 
       val command = PlayCardCommand(WildCard("wild"), Some("blue"))
       command.execute()
@@ -70,7 +72,7 @@ class PlayCardCommandSpec extends AnyWordSpec with Matchers {
         discardPile = List(NumberCard("red", 1)),
         drawPile = List(NumberCard("yellow", 3), NumberCard("green", 2), NumberCard("blue", 5))
       )
-      GameBoard.initGame(state)
+      GameBoard.updateState(state)
 
       PlayCardCommand(ActionCard("red", "draw two")).execute()
 
@@ -85,7 +87,7 @@ class PlayCardCommandSpec extends AnyWordSpec with Matchers {
         discardPile = List(NumberCard("red", 1)),
         isReversed = false
       )
-      GameBoard.initGame(state)
+      GameBoard.updateState(state)
 
       PlayCardCommand(ActionCard("red", "reverse")).execute()
 
@@ -100,7 +102,7 @@ class PlayCardCommandSpec extends AnyWordSpec with Matchers {
         discardPile = List(NumberCard("yellow", 5)),
         drawPile = List(NumberCard("blue", 3), NumberCard("green", 8), NumberCard("yellow", 1), NumberCard("red", 9))
       )
-      GameBoard.initGame(state)
+      GameBoard.updateState(state)
 
       val command = PlayCardCommand(WildCard("wild draw four"), Some("green"))
       command.execute()

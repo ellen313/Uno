@@ -51,8 +51,20 @@ class GameBoardSpec extends AnyWordSpec with Matchers {
     "check for winner correctly" in {
       val winner = PlayerHand(Nil)
       val loser = PlayerHand(List(NumberCard("yellow", 3)))
-      val state = GameBoard.gameState.get.copy(players = List(loser, winner))
-      GameBoard.updateState(state)
+
+      val topCard = NumberCard("red", 7)
+
+      val initialState = GameState(
+        players = List(loser, winner),
+        currentPlayerIndex = 0,
+        allCards = List(),
+        isReversed = false,
+        drawPile = List(),
+        discardPile = List(topCard),
+        selectedColor = None
+      )
+
+      GameBoard.updateState(initialState)
       GameBoard.checkForWinner() shouldBe Some(1)
     }
 
@@ -71,11 +83,18 @@ class GameBoardSpec extends AnyWordSpec with Matchers {
     "validate a card play through proxy method" in {
       val validCard = NumberCard("red", 5)
       val topCard = NumberCard("red", 7)
-      val state = GameBoard.gameState.get.copy(
+
+      val initialState = GameState(
         players = List(PlayerHand(List(validCard))),
-        discardPile = List(topCard)
+        currentPlayerIndex = 0,
+        allCards = List(),
+        isReversed = false,
+        drawPile = List(),
+        discardPile = List(topCard),
+        selectedColor = None
       )
-      GameBoard.updateState(state)
+
+      GameBoard.updateState(initialState)
       GameBoard.isValidPlay(validCard, topCard, None) shouldBe true
     }
   }

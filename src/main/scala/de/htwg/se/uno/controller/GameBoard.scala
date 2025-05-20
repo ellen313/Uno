@@ -68,7 +68,11 @@ object GameBoard extends Observable {
   }
 
   def checkForWinner(): Option[Int] = {
-    requireGameState.players.zipWithIndex.find(_._1.cards.isEmpty).map(_._2)
+    requireGameState.players.zipWithIndex
+      .find { case (player, _) =>
+        player.cards.isEmpty && player.hasSaidUno
+      }
+      .map(_._2)
   }
 
   override def addObserver(observer: Observer): Unit = {

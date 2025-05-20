@@ -138,7 +138,7 @@ case class GameState( players: List[PlayerHand], currentPlayerIndex: Int,
         card match {
           case WildCard(_) => true
           case ActionCard(c, _) => c == color
-          case NumberCard(c, _) => c == color
+          case NumberCard(c, v) => c == color
         }
       case None =>
 

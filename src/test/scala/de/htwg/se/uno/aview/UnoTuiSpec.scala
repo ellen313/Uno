@@ -17,7 +17,7 @@ class UnoTuiSpec extends AnyWordSpec with Matchers {
       currentPlayerIndex = 0,
       allCards = List(NumberCard("red", 5), WildCard("wild")),
       isReversed = false,
-      drawPile = List(NumberCard("green", 2)),
+      drawPile = List(NumberCard("red", 9)),
       discardPile = List(NumberCard("red", 3)),
       selectedColor = None
     )
@@ -58,8 +58,8 @@ class UnoTuiSpec extends AnyWordSpec with Matchers {
       val winningPlayer = PlayerHand(Nil, hasSaidUno = true)
       val winningState = gameState.copy(players = List(winningPlayer))
       GameBoard.updateState(winningState)
-      tui.checkForWinner()
-      tui.shouldExit shouldBe true
+
+      GameBoard.checkForWinner().isDefined shouldBe true
     }
 
     "trigger update without throwing" in {

@@ -27,7 +27,7 @@ case class PlayCardCommand(card: Card, chooseColor: Option[String] = None) exten
             newState.copy(isReversed = !newState.isReversed).nextPlayer()
 
           case ActionCard(_, "draw two") =>
-            newState.handleDrawCards(2).nextPlayer()
+            newState.handleDrawCards(2).nextPlayer().nextPlayer()
 
           case WildCard("wild draw four") =>
             newState.copy(selectedColor = chooseColor).handleDrawCards(4).nextPlayer()

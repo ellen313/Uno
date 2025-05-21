@@ -3,6 +3,7 @@ package de.htwg.se.uno.controller.command
 import de.htwg.se.uno.controller.GameBoard
 import de.htwg.se.uno.model.GameState
 import de.htwg.se.uno.model.state.{GameOverPhase, UnoPhases}
+import de.htwg.se.uno.util.Command
 
 case class UnoCalledCommand(context: Option[UnoPhases] = None) extends Command {
   private var previousState: Option[GameState] = None

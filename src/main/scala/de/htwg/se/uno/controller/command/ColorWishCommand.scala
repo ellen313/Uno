@@ -3,6 +3,7 @@ package de.htwg.se.uno.controller.command
 import de.htwg.se.uno.model.*
 import de.htwg.se.uno.model.state.UnoPhases
 import de.htwg.se.uno.controller.GameBoard
+import de.htwg.se.uno.util.Command
 
 case class ColorWishCommand(color: String) extends Command {
 

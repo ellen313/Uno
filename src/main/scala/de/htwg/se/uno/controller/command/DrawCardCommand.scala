@@ -2,6 +2,7 @@ package de.htwg.se.uno.controller.command
 
 import de.htwg.se.uno.model.*
 import de.htwg.se.uno.controller.GameBoard
+import de.htwg.se.uno.util.Command
 
 case class DrawCardCommand() extends Command {
   var drawnCard: Option[Card] = None
@@ -38,6 +39,7 @@ case class DrawCardCommand() extends Command {
   override def undo(): Unit = {
     previousState.foreach { oldState =>
       GameBoard.updateState(oldState)
+      oldState.notifyObservers()
     }
   }
 

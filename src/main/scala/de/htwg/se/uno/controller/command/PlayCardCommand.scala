@@ -4,6 +4,7 @@ import de.htwg.se.uno.model.*
 import de.htwg.se.uno.aview.UnoTui
 import de.htwg.se.uno.controller.GameBoard
 import de.htwg.se.uno.model.state.UnoPhases
+import de.htwg.se.uno.util.Command
 
 case class PlayCardCommand(card: Card, chooseColor: Option[String] = None) extends Command {
   private var validPlay: Boolean = false

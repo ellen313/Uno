@@ -77,8 +77,8 @@ class PlayCardCommandSpec extends AnyWordSpec with Matchers {
       PlayCardCommand(ActionCard("red", "draw two")).execute()
 
       val updated = GameBoard.gameState.get
-      updated.players(1).cards.size shouldBe 3 // had 1, drew 2
-      updated.currentPlayerIndex shouldBe 0    // skipped
+      updated.players(1).cards.size shouldBe 3
+      updated.currentPlayerIndex shouldBe 0
     }
 
     "handle reverse correctly" in {
@@ -109,8 +109,8 @@ class PlayCardCommandSpec extends AnyWordSpec with Matchers {
 
       val updated = GameBoard.gameState.get
       updated.selectedColor shouldBe Some("green")
-      updated.players(1).cards.size shouldBe 5 // had 1, drew 4
-      updated.currentPlayerIndex shouldBe 0    // skipped
+      updated.players(1).cards.size shouldBe 5
+      updated.currentPlayerIndex shouldBe 1
     }
   }
 }

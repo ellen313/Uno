@@ -4,13 +4,13 @@ import org.scalatest.matchers.should.Matchers
 import org.scalatest.wordspec.AnyWordSpec
 import de.htwg.se.uno.model.GameState
 
-class GameOverStateSpec extends AnyWordSpec with Matchers {
+class GameOverPhaseSpec extends AnyWordSpec with Matchers {
 
   "GameOverState" should {
 
     val dummyGameState = GameState(Nil, 0, Nil, false, Nil, Nil)
-    val unoStates = new UnoStates(dummyGameState)
-    val gameOverState = GameOverState(unoStates)
+    val unoStates = new UnoPhases(dummyGameState)
+    val gameOverState = GameOverPhase(unoStates)
 
     "return this on playCard" in {
       gameOverState.playCard() shouldBe gameOverState

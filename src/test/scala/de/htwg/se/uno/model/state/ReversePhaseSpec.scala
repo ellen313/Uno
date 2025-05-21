@@ -4,7 +4,7 @@ import org.scalatest.matchers.should.Matchers
 import org.scalatest.wordspec.AnyWordSpec
 import de.htwg.se.uno.model._
 
-class ReverseStateSpec extends AnyWordSpec with Matchers {
+class ReversePhaseSpec extends AnyWordSpec with Matchers {
 
   "ReverseState" should {
 
@@ -18,48 +18,48 @@ class ReverseStateSpec extends AnyWordSpec with Matchers {
         drawPile = List()
       )
 
-      val unoStates = new UnoStates(initialState)
-      val reverseState = ReverseState(unoStates)
+      val unoStates = new UnoPhases(initialState)
+      val reverseState = ReversePhase(unoStates)
       val result = reverseState.nextPlayer()
 
-      result shouldBe a[PlayerTurnState]
+      result shouldBe a[PlayerTurnPhase]
       unoStates.gameState.isReversed shouldBe true
       unoStates.gameState.currentPlayerIndex should not be 0
     }
 
     "return this on playCard" in {
-      val unoStates = new UnoStates(GameState(Nil, 0, Nil, false, Nil, Nil))
-      val reverseState = ReverseState(unoStates)
+      val unoStates = new UnoPhases(GameState(Nil, 0, Nil, false, Nil, Nil))
+      val reverseState = ReversePhase(unoStates)
       reverseState.playCard() shouldBe reverseState
     }
 
     "return this on drawCard" in {
-      val unoStates = new UnoStates(GameState(Nil, 0, Nil, false, Nil, Nil))
-      val reverseState = ReverseState(unoStates)
+      val unoStates = new UnoPhases(GameState(Nil, 0, Nil, false, Nil, Nil))
+      val reverseState = ReversePhase(unoStates)
       reverseState.drawCard() shouldBe reverseState
     }
 
     "return this on dealInitialCards" in {
-      val unoStates = new UnoStates(GameState(Nil, 0, Nil, false, Nil, Nil))
-      val reverseState = ReverseState(unoStates)
+      val unoStates = new UnoPhases(GameState(Nil, 0, Nil, false, Nil, Nil))
+      val reverseState = ReversePhase(unoStates)
       reverseState.dealInitialCards() shouldBe reverseState
     }
 
     "return this on checkForWinner" in {
-      val unoStates = new UnoStates(GameState(Nil, 0, Nil, false, Nil, Nil))
-      val reverseState = ReverseState(unoStates)
+      val unoStates = new UnoPhases(GameState(Nil, 0, Nil, false, Nil, Nil))
+      val reverseState = ReversePhase(unoStates)
       reverseState.checkForWinner() shouldBe reverseState
     }
 
     "return this on playerSaysUno" in {
-      val unoStates = new UnoStates(GameState(Nil, 0, Nil, false, Nil, Nil))
-      val reverseState = ReverseState(unoStates)
+      val unoStates = new UnoPhases(GameState(Nil, 0, Nil, false, Nil, Nil))
+      val reverseState = ReversePhase(unoStates)
       reverseState.playerSaysUno() shouldBe reverseState
     }
 
     "return false for isValidPlay" in {
-      val unoStates = new UnoStates(GameState(Nil, 0, Nil, false, Nil, Nil))
-      val reverseState = ReverseState(unoStates)
+      val unoStates = new UnoPhases(GameState(Nil, 0, Nil, false, Nil, Nil))
+      val reverseState = ReversePhase(unoStates)
       reverseState.isValidPlay shouldBe false
     }
   }

@@ -3,7 +3,7 @@ import org.scalatest.matchers.should.Matchers
 import org.scalatest.wordspec.AnyWordSpec
 import de.htwg.se.uno.model.state.*
 
-class UnoStatesSpec extends AnyWordSpec with Matchers {
+class UnoPhasesSpec extends AnyWordSpec with Matchers {
   
     class DummyState extends GamePhase {
         override def playCard(): GamePhase = this
@@ -19,7 +19,7 @@ class UnoStatesSpec extends AnyWordSpec with Matchers {
 
         "delegate playCard call to currentState and update state" in {
             val gameState = GameState(List(), 0, List(), false, List(), List())
-            val unoStates = new UnoStates(gameState)
+            val unoStates = new UnoPhases(gameState)
             val dummy = new DummyState
             unoStates.setState(dummy)
 
@@ -29,7 +29,7 @@ class UnoStatesSpec extends AnyWordSpec with Matchers {
 
         "delegate drawCard call to currentState and update state" in {
             val gameState = GameState(List(), 0, List(), false, List(), List())
-            val unoStates = new UnoStates(gameState)
+            val unoStates = new UnoPhases(gameState)
             val dummy = new DummyState
             unoStates.setState(dummy)
 
@@ -39,7 +39,7 @@ class UnoStatesSpec extends AnyWordSpec with Matchers {
 
         "delegate nextPlayer call to currentState and update state" in {
             val gameState = GameState(List(), 0, List(), false, List(), List())
-            val unoStates = new UnoStates(gameState)
+            val unoStates = new UnoPhases(gameState)
             val dummy = new DummyState
             unoStates.setState(dummy)
 
@@ -49,7 +49,7 @@ class UnoStatesSpec extends AnyWordSpec with Matchers {
 
         "delegate dealInitialCards call to currentState and update state" in {
             val gameState = GameState(List(), 0, List(), false, List(), List())
-            val unoStates = new UnoStates(gameState)
+            val unoStates = new UnoPhases(gameState)
             val dummy = new DummyState
             unoStates.setState(dummy)
 
@@ -59,7 +59,7 @@ class UnoStatesSpec extends AnyWordSpec with Matchers {
 
         "delegate checkForWinner call to currentState and update state" in {
             val gameState = GameState(List(), 0, List(), false, List(), List())
-            val unoStates = new UnoStates(gameState)
+            val unoStates = new UnoPhases(gameState)
             val dummy = new DummyState
             unoStates.setState(dummy)
 
@@ -69,7 +69,7 @@ class UnoStatesSpec extends AnyWordSpec with Matchers {
 
         "delegate playerSaysUno call to currentState and update state" in {
             val gameState = GameState(List(), 0, List(), false, List(), List())
-            val unoStates = new UnoStates(gameState)
+            val unoStates = new UnoPhases(gameState)
             val dummy = new DummyState
             unoStates.setState(dummy)
 
@@ -79,7 +79,7 @@ class UnoStatesSpec extends AnyWordSpec with Matchers {
 
         "tryPlayCard calls playCard if isValidPlay is true" in {
             val gameState = GameState(List(), 0, List(), false, List(), List())
-            val unoStates = new UnoStates(gameState)
+            val unoStates = new UnoPhases(gameState)
           
             var played = false
             val dummy = new DummyState {
@@ -96,7 +96,7 @@ class UnoStatesSpec extends AnyWordSpec with Matchers {
 
         "tryPlayCard prints 'Invalid play.' if isValidPlay is false" in {
             val gameState = GameState(List(), 0, List(), false, List(), List())
-            val unoStates = new UnoStates(gameState)
+            val unoStates = new UnoPhases(gameState)
 
             val dummy = new DummyState {
                 override def isValidPlay: Boolean = false
@@ -117,7 +117,7 @@ class UnoStatesSpec extends AnyWordSpec with Matchers {
 
         "setSelectedColor updates selectedColor" in {
             val gameState = GameState(List(), 0, List(), false, List(), List())
-            val unoStates = new UnoStates(gameState)
+            val unoStates = new UnoPhases(gameState)
 
             unoStates.selectedColor shouldBe None
             unoStates.setSelectedColor("red")

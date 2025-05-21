@@ -2,34 +2,46 @@ package de.htwg.se.uno.controller.command
 
 import de.htwg.se.uno.model.*
 import de.htwg.se.uno.controller.GameBoard
+import de.htwg.se.uno.util.Command
 
 case class DrawCardCommand() extends Command {
   var drawnCard: Option[Card] = None
+  private var previousState: Option[GameState] = None
   
   override def execute(): Unit = {
-    val game = GameBoard.gameState
-    val currentPlayer = game.players(game.currentPlayerIndex)
-    val (cardDrawn, updatedPlayerHand, updatedDrawPile, updatedDiscardPile) =
-      game.drawCard(
-        playerHand = currentPlayer,
-        drawPile = game.drawPile,
-        discardPile = game.discardPile
+    GameBoard.gameState.foreach { state =>
+      previousState = Some(state)
+      val currentPlayer = state.players(state.currentPlayerIndex)
+      val (cardDrawn, updatedPlayerHand, updatedDrawPile, updatedDiscardPile) =
+        state.drawCard(
+          playerHand = currentPlayer,
+          drawPile = state.drawPile,
+          discardPile = state.discardPile
+        )
+
+      drawnCard = Some(cardDrawn)
+
+      val updatedPlayers = state.players.updated(
+        state.currentPlayerIndex, updatedPlayerHand
       )
-      
-    drawnCard = Some(cardDrawn)  
 
-    val updatedPlayers = game.players.updated(
-      game.currentPlayerIndex, updatedPlayerHand
-    )
+      val newGameState = state.copy(
+        players = updatedPlayers,
+        drawPile = updatedDrawPile,
+        discardPile = updatedDiscardPile
+      )
 
-    val newGameState = game.copy(
-      players = updatedPlayers,
-      drawPile = updatedDrawPile,
-      discardPile = updatedDiscardPile
-    )
+      GameBoard.updateState(newGameState)
+    }
+  }  
 
-    GameBoard.updateState(newGameState)
-
-    GameBoard.gameState.notifyObservers()
+  // lay card back on draw pile
+  override def undo(): Unit = {
+    previousState.foreach { oldState =>
+      GameBoard.updateState(oldState)
+      oldState.notifyObservers()
+    }
   }
+
+  override def redo(): Unit = execute()
 }

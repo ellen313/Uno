@@ -1,6 +1,6 @@
 package de.htwg.se.uno.model.state
 
-case class DrawCardState(context: UnoStates) extends GamePhase {
+case class DrawCardPhase(context: UnoPhases) extends GamePhase {
   override def playCard(): GamePhase = this
   override def drawCard(): GamePhase = {
     val currentPlayer = context.gameState.players(context.gameState.currentPlayerIndex)
@@ -13,7 +13,7 @@ case class DrawCardState(context: UnoStates) extends GamePhase {
       drawPile = updatedDrawPile,
       discardPile = updatedDiscardPile
     )
-    context.setState(PlayerTurnState(context))
+    context.setState(PlayerTurnPhase(context))
     context.state
   }
   override def nextPlayer(): GamePhase = this

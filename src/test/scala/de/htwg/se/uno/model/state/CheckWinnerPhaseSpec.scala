@@ -4,7 +4,7 @@ import de.htwg.se.uno.model.{GameState, PlayerHand, NumberCard}
 import org.scalatest.matchers.should.Matchers
 import org.scalatest.wordspec.AnyWordSpec
 
-class CheckWinnerStateSpec extends AnyWordSpec with Matchers {
+class CheckWinnerPhaseSpec extends AnyWordSpec with Matchers {
 
   class GameStateWithWinner(players: List[PlayerHand]) extends GameState(
     players = players,
@@ -35,13 +35,13 @@ class CheckWinnerStateSpec extends AnyWordSpec with Matchers {
         PlayerHand(List(NumberCard("red", 5)))
       )
       val gameState = new GameStateWithWinner(players)
-      val unoStates = new UnoStates(gameState)
-      val checkWinnerState = CheckWinnerState(unoStates)
+      val unoStates = new UnoPhases(gameState)
+      val checkWinnerState = CheckWinnerPhase(unoStates)
 
       unoStates.setState(checkWinnerState)
       val newState = unoStates.state.checkForWinner()
 
-      newState shouldBe a [GameOverState]
+      newState shouldBe a [GameOverPhase]
     }
 
     "transition to PlayerTurnState if there is no winner" in {
@@ -49,19 +49,19 @@ class CheckWinnerStateSpec extends AnyWordSpec with Matchers {
         PlayerHand(List(NumberCard("red", 5)))
       )
       val gameState = new GameStateWithoutWinner(players)
-      val unoStates = new UnoStates(gameState)
-      val checkWinnerState = CheckWinnerState(unoStates)
+      val unoStates = new UnoPhases(gameState)
+      val checkWinnerState = CheckWinnerPhase(unoStates)
 
       unoStates.setState(checkWinnerState)
       val newState = unoStates.state.checkForWinner()
 
-      newState shouldBe a [PlayerTurnState]
+      newState shouldBe a [PlayerTurnPhase]
     }
 
     "return itself when playCard is called" in {
       val gameState = new GameStateWithoutWinner(List())
-      val unoStates = new UnoStates(gameState)
-      val checkWinnerState = CheckWinnerState(unoStates)
+      val unoStates = new UnoPhases(gameState)
+      val checkWinnerState = CheckWinnerPhase(unoStates)
       unoStates.setState(checkWinnerState)
 
       val result = checkWinnerState.playCard()
@@ -70,8 +70,8 @@ class CheckWinnerStateSpec extends AnyWordSpec with Matchers {
 
     "return itself when drawCard is called" in {
       val gameState = new GameStateWithoutWinner(List())
-      val unoStates = new UnoStates(gameState)
-      val checkWinnerState = CheckWinnerState(unoStates)
+      val unoStates = new UnoPhases(gameState)
+      val checkWinnerState = CheckWinnerPhase(unoStates)
       unoStates.setState(checkWinnerState)
 
       val result = checkWinnerState.drawCard()
@@ -80,8 +80,8 @@ class CheckWinnerStateSpec extends AnyWordSpec with Matchers {
 
     "return itself when nextPlayer is called" in {
       val gameState = new GameStateWithoutWinner(List())
-      val unoStates = new UnoStates(gameState)
-      val checkWinnerState = CheckWinnerState(unoStates)
+      val unoStates = new UnoPhases(gameState)
+      val checkWinnerState = CheckWinnerPhase(unoStates)
       unoStates.setState(checkWinnerState)
 
       val result = checkWinnerState.nextPlayer()
@@ -90,8 +90,8 @@ class CheckWinnerStateSpec extends AnyWordSpec with Matchers {
 
     "return itself when dealInitialCards is called" in {
       val gameState = new GameStateWithoutWinner(List())
-      val unoStates = new UnoStates(gameState)
-      val checkWinnerState = CheckWinnerState(unoStates)
+      val unoStates = new UnoPhases(gameState)
+      val checkWinnerState = CheckWinnerPhase(unoStates)
       unoStates.setState(checkWinnerState)
 
       val result = checkWinnerState.dealInitialCards()
@@ -100,8 +100,8 @@ class CheckWinnerStateSpec extends AnyWordSpec with Matchers {
 
     "return itself when playerSaysUno is called" in {
       val gameState = new GameStateWithoutWinner(List())
-      val unoStates = new UnoStates(gameState)
-      val checkWinnerState = CheckWinnerState(unoStates)
+      val unoStates = new UnoPhases(gameState)
+      val checkWinnerState = CheckWinnerPhase(unoStates)
       unoStates.setState(checkWinnerState)
 
       val result = checkWinnerState.playerSaysUno()
@@ -110,8 +110,8 @@ class CheckWinnerStateSpec extends AnyWordSpec with Matchers {
 
     "return false for isValidPlay" in {
       val gameState = new GameStateWithoutWinner(List())
-      val unoStates = new UnoStates(gameState)
-      val checkWinnerState = CheckWinnerState(unoStates)
+      val unoStates = new UnoPhases(gameState)
+      val checkWinnerState = CheckWinnerPhase(unoStates)
       unoStates.setState(checkWinnerState)
 
       checkWinnerState.isValidPlay shouldBe false

@@ -1,13 +1,15 @@
 package de.htwg.se.uno.controller
 
 import de.htwg.se.uno.model.*
-import scala.util.Random
-import de.htwg.se.uno.util.{Observable, Observer}
+import de.htwg.se.uno.util.{Command, CommandInvoker, Observable, Observer}
+
+import scala.util.{Failure, Random, Success, Try}
 import de.htwg.se.uno.controller.command.*
 
 object GameBoard extends Observable {
 
   private var _gameState: Option[GameState] = None
+  private val invoker = new CommandInvoker()
 
   val fullDeck: List[Card] = createDeckWithAllCards()
 
@@ -16,13 +18,16 @@ object GameBoard extends Observable {
     (shuffled.headOption.toList, shuffled.tail)
   }
 
-  def gameState: GameState = _gameState.getOrElse(
-    throw new IllegalStateException("GameState not initialized")
-    //Try
-  )
+  def gameState: Try[GameState] = _gameState match {
+    case Some(state) => Success(state)
+    case None => Failure(new IllegalStateException("GameState not initialized"))
+  }
+
+  private def requireGameState: GameState = gameState.get
 
   def updateState(newState: GameState): Unit = {
     _gameState = Some(newState)
+    notifyObservers()
   }
 
   def initGame(state: GameState): Unit = {
@@ -34,19 +39,6 @@ object GameBoard extends Observable {
     )
     updateState(initializedState)
   }
-
-  // Methods for command pattern
-//  def state: GameState = gameState
-//
-//  def players: List[PlayerHand] = gameState.players
-//
-//  def currentPlayerIndex: Int = gameState.currentPlayerIndex
-//
-//  def selectedColor: Option[String] = gameState.selectedColor
-//
-//  def setSelectedColor(color: String): Unit = {
-//    updateState(gameState.copy(selectedColor = Some(color)))
-//  }
 
   def createDeckWithAllCards(): List[Card] = {
     val numberCards = for {
@@ -72,12 +64,26 @@ object GameBoard extends Observable {
   }
 
   def executeCommand(command: Command): Unit = {
-    command.execute()
-    gameState.notifyObservers()
+    invoker.executeCommand(command)
+  }
+
+  def undoCommand(): Unit = {
+    invoker.undoCommand()
+  }
+
+  def redoCommand(): Unit = {
+    invoker.redoCommand()
   }
 
   def checkForWinner(): Option[Int] = {
-    gameState.players.zipWithIndex.find(_._1.cards.isEmpty).map(_._2)
+    requireGameState.players.zipWithIndex.find { case (hand, _) =>
+      hand.isEmpty
+    } match {
+      case Some((_, winnerIndex)) =>
+        Some(winnerIndex)
+      case None =>
+        None
+    }
   }
 
   override def addObserver(observer: Observer): Unit = {
@@ -85,7 +91,7 @@ object GameBoard extends Observable {
   }
 
   def isValidPlay(card: Card, topCard: Card, selectedColor: Option[String]): Boolean = {
-    gameState.isValidPlay(card, Some(topCard), selectedColor)
+    requireGameState.isValidPlay(card, Some(topCard), selectedColor)
   }
 
   def reset(): Unit = {

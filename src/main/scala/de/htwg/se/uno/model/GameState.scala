@@ -138,7 +138,7 @@ case class GameState( players: List[PlayerHand], currentPlayerIndex: Int,
         card match {
           case WildCard(_) => true
           case ActionCard(c, _) => c == color
-          case NumberCard(c, _) => c == color
+          case NumberCard(c, v) => c == color
         }
       case None =>
 
@@ -194,45 +194,44 @@ case class GameState( players: List[PlayerHand], currentPlayerIndex: Int,
 
     input match {
       case s"play wild:$index:$color" =>
-        try {
-          val cardIndex = index.toInt
-          if (cardIndex < 0 || cardIndex >= currentPlayer.cards.length)
-            return Failure("Invalid card index.")
+        scala.util.Try(index.toInt) match {
+          case scala.util.Success(index) if index >= 0 && index < currentPlayer.cards.length =>
+            currentPlayer.cards(index) match {
+              case wild: WildCard =>
+                val playedCard = WildCard(wild.action)
+                val updatedGame =
+                  setSelectedColor(color)
+                  playCard(playedCard)
+                Success(updatedGame)
 
-          currentPlayer.cards(cardIndex) match {
-            case wild: WildCard =>
-              val playedCard = WildCard(wild.action)
-              val updatedGame = 
-                setSelectedColor(color)
-                playCard(playedCard)
-              Success(updatedGame)
+              case _ =>
+                Failure("Selected card is not a wild card.")
+            }
 
-            case _ =>
-              Failure("Selected card is not a wild card.")
-          }
-        } catch {
-          case _: NumberFormatException =>
+          case scala.util.Success(_) =>
+            Failure("Invalid card index.")
+
+          case scala.util.Failure(_) =>
             Failure("Card index must be a number.")
         }
 
       case s"play card:$index" =>
-        try {
-          val cardIndex = index.toInt
-          if (cardIndex < 0 || cardIndex >= currentPlayer.cards.length)
-            return Failure("Invalid card index.")
+        scala.util.Try(index.toInt) match {
+          case scala.util.Success(index) if index >= 0 && index < currentPlayer.cards.length =>
+            val card = currentPlayer.cards(index)
+            val topCard = discardPile.lastOption
 
-          val card = currentPlayer.cards(cardIndex)
-          val topCard = discardPile.lastOption
+            if (!isValidPlay(card, topCard)) {
+              Failure("Invalid card! Please select a valid card.")
+            } else {
+              val updatedGame = playCard(card)
+              Success(updatedGame)
+            }
 
-          if (!isValidPlay(card, topCard)) {
-            Failure("Invalid card! Please select a valid card.")
-          } else {
-            val updatedGame = playCard(card)
-            Success(updatedGame)
-          }
+          case scala.util.Success(_) =>
+            Failure("Invalid card index.")
 
-        } catch {
-          case _: NumberFormatException =>
+          case scala.util.Failure(_) =>
             Failure("Card index must be a number.")
         }
 

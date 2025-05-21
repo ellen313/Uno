@@ -7,7 +7,7 @@ class SkipPhaseSpec extends AnyWordSpec with Matchers {
 
   "SkipState" should {
 
-    "call nextPlayer twice and change state to PlayerTurnState" in {
+    "call nextPlayer twice and change state to PlayerTurnPhase" in {
       val dummyGameState = new GameState(List(), 0, List(), false, List(), List()) {
         private var counter = 0
         override def nextPlayer(): GameState = {
@@ -21,7 +21,7 @@ class SkipPhaseSpec extends AnyWordSpec with Matchers {
 
       val resultState = skipState.nextPlayer()
 
-      resultState.getClass.getSimpleName shouldBe "PlayerTurnState"
+      resultState.getClass.getSimpleName shouldBe "PlayerTurnPhase"
       unoStates.gameState.currentPlayerIndex shouldBe 2
     }
 

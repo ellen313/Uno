@@ -1,7 +1,9 @@
-package de.htwg.se.uno.controller.command
+package de.htwg.se.uno.util
 
+import de.htwg.se.uno.util.{Command, CommandInvoker}
 import org.scalatest.matchers.should.Matchers
 import org.scalatest.wordspec.AnyWordSpec
+
 import java.io.{ByteArrayOutputStream, PrintStream}
 
 class CommandInvokerSpec extends AnyWordSpec with Matchers {
@@ -34,7 +36,7 @@ class CommandInvokerSpec extends AnyWordSpec with Matchers {
 
       val invoker = new CommandInvoker
       invoker.executeCommand(dummyCommand)
-      invoker.undoCommand(dummyCommand)
+      invoker.undoCommand()
 
       undone shouldBe true
     }
@@ -50,8 +52,8 @@ class CommandInvokerSpec extends AnyWordSpec with Matchers {
 
       val invoker = new CommandInvoker
       invoker.executeCommand(dummyCommand)
-      invoker.undoCommand(dummyCommand)
-      invoker.redoCommand(dummyCommand)
+      invoker.undoCommand()
+      invoker.redoCommand()
 
       redone shouldBe true
     }
@@ -60,11 +62,7 @@ class CommandInvokerSpec extends AnyWordSpec with Matchers {
       val output = new ByteArrayOutputStream()
       Console.withOut(new PrintStream(output)) {
         val invoker = new CommandInvoker
-        invoker.undoCommand(new Command {
-          override def execute(): Unit = ()
-          override def undo(): Unit = ()
-          override def redo(): Unit = ()
-        })
+        invoker.undoCommand()
       }
 
       output.toString should include("Nothing to undo.")
@@ -74,11 +72,7 @@ class CommandInvokerSpec extends AnyWordSpec with Matchers {
       val output = new ByteArrayOutputStream()
       Console.withOut(new PrintStream(output)) {
         val invoker = new CommandInvoker
-        invoker.redoCommand(new Command {
-          override def execute(): Unit = ()
-          override def undo(): Unit = ()
-          override def redo(): Unit = ()
-        })
+        invoker.redoCommand()
       }
 
       output.toString should include("Nothing to redo.")

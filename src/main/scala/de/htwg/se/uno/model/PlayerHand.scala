@@ -18,7 +18,8 @@ case class PlayerHand(cards: List[Card], var hasSaidUno: Boolean = false) {
   def hasUno: Boolean = cards.length == 1
 
   def sayUno(): PlayerHand = {
-    this.copy(hasSaidUno = true)
+    if (cards.length == 1) this.copy(hasSaidUno = true)
+    else this
   }
 
   def resetUnoStatus(): PlayerHand = {

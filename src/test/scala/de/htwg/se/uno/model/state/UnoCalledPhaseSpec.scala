@@ -50,7 +50,7 @@ class UnoCalledPhaseSpec extends AnyWordSpec with Matchers {
       val resultState = unoCalledStateSpy.playerSaysUno()
       
       setStateCalledWith should not be None
-      setStateCalledWith.get.getClass.getSimpleName shouldBe "PlayerTurnState"
+      setStateCalledWith.get.getClass.getSimpleName shouldBe "PlayerTurnPhase"
       resultState shouldBe setStateCalledWith.get
     }
     

@@ -34,7 +34,7 @@ class StartPhaseSpec extends AnyWordSpec with Matchers {
       startState.nextPlayer() shouldBe startState
     }
 
-    "dealInitialCards sets the gameState and changes state to PlayerTurnState" in {
+    "dealInitialCards sets the gameState and changes state to PlayerTurnPhase" in {
       val dummyGameState = new GameState(List(), 0, List(), false, List(), List()) {
         override def dealInitialCards(n: Int): GameState = this.copy(discardPile = List(NumberCard("red", 1)))
       }
@@ -48,7 +48,7 @@ class StartPhaseSpec extends AnyWordSpec with Matchers {
       val returnedState = startState.dealInitialCards()
 
       unoStates.gameState.discardPile should contain (NumberCard("red", 1))
-      returnedState.getClass.getSimpleName shouldBe "PlayerTurnState"
+      returnedState.getClass.getSimpleName shouldBe "PlayerTurnPhase"
     }
 
     "return this on checkForWinner" in {

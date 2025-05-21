@@ -7,14 +7,14 @@ class ColorWishPhaseSpec extends AnyWordSpec with Matchers {
 
   "ColorWishState" should {
 
-    "transition to PlayerTurnState on playCard" in {
+    "transition to PlayerTurnPhase on playCard" in {
       val dummyGameState = new GameState(List(), 0, List(), false, List(), List())
       val unoStates = new UnoPhases(dummyGameState)
       val colorWishState = ColorWishPhase(unoStates)
 
       val result = colorWishState.playCard()
 
-      result.getClass.getSimpleName shouldBe "PlayerTurnState"
+      result.getClass.getSimpleName shouldBe "PlayerTurnPhase"
     }
 
     "return this on drawCard" in {

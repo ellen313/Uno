@@ -33,7 +33,7 @@ class DrawCardPhaseSpec extends AnyWordSpec with Matchers {
 
       val newState = drawCardState.drawCard()
 
-      newState.getClass.getSimpleName shouldBe "PlayerTurnState"
+      newState.getClass.getSimpleName shouldBe "PlayerTurnPhase"
 
       val updatedHand = unoStates.gameState.players.head
       updatedHand.cards should contain(NumberCard("green", 7))

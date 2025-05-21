@@ -49,7 +49,7 @@ class GameBoardSpec extends AnyWordSpec with Matchers {
     }
 
     "check for winner correctly" in {
-      val winner = PlayerHand(Nil)
+      val winner = PlayerHand(Nil).sayUno()
       val loser = PlayerHand(List(NumberCard("yellow", 3)))
 
       val topCard = NumberCard("red", 7)

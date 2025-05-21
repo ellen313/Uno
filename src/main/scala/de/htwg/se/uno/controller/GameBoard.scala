@@ -1,14 +1,15 @@
 package de.htwg.se.uno.controller
 
 import de.htwg.se.uno.model.*
+import de.htwg.se.uno.util.{Command, CommandInvoker, Observable, Observer}
 
-import de.htwg.se.uno.util.{Observable, Observer}
-import scala.util.{Random, Try, Failure, Success}
+import scala.util.{Failure, Random, Success, Try}
 import de.htwg.se.uno.controller.command.*
 
 object GameBoard extends Observable {
 
   private var _gameState: Option[GameState] = None
+  private val invoker = new CommandInvoker()
 
   val fullDeck: List[Card] = createDeckWithAllCards()
 
@@ -63,8 +64,15 @@ object GameBoard extends Observable {
   }
 
   def executeCommand(command: Command): Unit = {
-    command.execute()
-    notifyObservers()
+    invoker.executeCommand(command)
+  }
+
+  def undoCommand(): Unit = {
+    invoker.undoCommand()
+  }
+
+  def redoCommand(): Unit = {
+    invoker.redoCommand()
   }
 
   def checkForWinner(): Option[Int] = {

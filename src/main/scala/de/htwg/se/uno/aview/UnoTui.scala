@@ -81,6 +81,12 @@ class UnoTui(context: UnoPhases) extends Observer {
               skipped.notifyObservers()
             }
 
+          case "undo" =>
+            GameBoard.undoCommand()
+
+          case "redo" =>
+            GameBoard.redoCommand()
+
           case _ =>
             scala.util.Try(input.toInt) match {
               case scala.util.Success(index) if index >= 0 && index < currentPlayer.cards.length =>

@@ -9,7 +9,7 @@ import de.htwg.se.uno.model.state.UnoPhases
 
 import scala.io.StdIn.readLine
 
-class UnoTui(context: UnoPhases) extends Observer {
+class UnoTUI(context: UnoPhases) extends Observer {
 
   private var gameShouldExit = false
   var selectedColor: Option[String] = None

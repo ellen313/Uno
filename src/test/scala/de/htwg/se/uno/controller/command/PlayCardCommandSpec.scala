@@ -15,7 +15,7 @@ class PlayCardCommandSpec extends AnyWordSpec with Matchers {
     allCards = Nil,
     isReversed = false,
     drawPile = List(NumberCard("yellow", 1), NumberCard("green", 4)),
-    discardPile = List(NumberCard("red", 3)),
+    discardPile = List(NumberCard("red", 5)),
     selectedColor = None
   )
 

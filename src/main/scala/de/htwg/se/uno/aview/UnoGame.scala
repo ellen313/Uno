@@ -9,7 +9,7 @@ import de.htwg.se.uno.model.state.UnoPhases
 import scala.util.{Success, Failure, Try}
 
 object UnoGame {
-  def runUno(numberPlayers: Option[Int] = None, cardsPerPlayer: Int = 7): UnoTui = {
+  def runUno(numberPlayers: Option[Int] = None, cardsPerPlayer: Int = 7): UnoTUI = {
     println("Welcome to UNO!")
 
     val players = numberPlayers.getOrElse(readValidInt("How many players? (2-10): ", min = 2, max = 10))
@@ -41,7 +41,7 @@ object UnoGame {
     GameBoard.gameState match {
       case scala.util.Success(initialGameState) =>
         val context = new UnoPhases(initialGameState)
-        val tui = new UnoTui(context)
+        val tui = new UnoTUI(context)
         tui.display()
         inputLoop(tui)
         tui
@@ -74,7 +74,7 @@ object UnoGame {
   }
 
   @tailrec
-  def inputLoop(tui: UnoTui): Unit = {
+  def inputLoop(tui: UnoTUI): Unit = {
     val currentState = GameBoard.gameState
     GameBoard.gameState match {
       case scala.util.Success(currentState) =>

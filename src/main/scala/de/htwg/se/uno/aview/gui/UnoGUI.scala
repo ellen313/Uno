@@ -1,8 +1,11 @@
 package de.htwg.se.uno.aview.gui
 
 import de.htwg.se.uno.aview.UnoGame
+import de.htwg.se.uno.util.Observer
+import de.htwg.se.uno.controller.GameBoard
 import scalafx.application.JFXApp3
 import scalafx.scene.Scene
+import scalafx.Includes.jfxScene2sfx
 import scalafx.application.JFXApp3.PrimaryStage
 import scalafx.geometry.{Insets, Pos}
 import scalafx.scene.control.{Button, ButtonType}
@@ -20,45 +23,37 @@ import scalafx.scene.text.Text
 //  -> BooleanProperty, StringProperty, IntegerProperty etc.
 //  -> accessed with .value or ()
 
-object UnoGUI extends JFXApp3 {
+object UnoGUI extends JFXApp3 with Observer{
 
-  def startGame(): Unit = {
-    val tui = UnoGame.runUno()
-    UnoGame.inputLoop(tui)
+  override def update(): Unit = {
+    println("Observer update called: Gamestate changed.")
   }
 
   override def start(): Unit = {
+    GameBoard.addObserver(this)
+
     stage = new PrimaryStage {
       title = "Uno"
       scene = new Scene {
         fill = Color.rgb(40, 40, 40)
-        content = new VBox {
-          spacing = 30
-          padding = Insets(50, 80, 50, 80)
-          alignment = Pos.Center
-          children = Seq(
-            new Text {
-              text = "Uno"
-              style = "-fx-font: italic bold 100pt sans-serif"
-              fill = new LinearGradient(
-                endX = 0,
-                stops = Stops(Red, DarkRed)
-              )
-              effect = new DropShadow {
-                color = IndianRed
-                radius = 15
-                spread = 0.25
-              }
-            },
-            new Button("Start Game") {
-              style = "fx-font: italic bold; -fx-font-size: 20pt; -fx-background-color: #b22222; -fx-text-fill: white;"
-              onAction = _ => {
-                new Thread(() => startGame()).start()
-              }
-            }
-          )
-        }
+        content = StartScreen(() => {
+          showSetupScreen()
+        })
       }
+    }
+  }
+
+  def startGame(players: Int, cards: Int): Unit = {
+    new Thread(() => {
+      val tui = UnoGame.runUno(Some(players), cards)
+    }).start()
+  }
+
+  /*Switches to SetupScreen, when the Button in StartScreen is clicked*/
+  def showSetupScreen(): Unit = {
+    stage.scene().root = SetupScreen { (players, cards) =>
+      println(s"Start the Game with $players players and $cards cards")
+      startGame(players, cards)
     }
   }
 }

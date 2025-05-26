@@ -10,7 +10,7 @@ import scalafx.scene.paint.Color
 object StartScreen {
 
   def apply(onStart: () => Unit): StackPane = {
-    val startImage = new ImageView(new Image("file:src/main/scala/UnoLogo.jpeg")) {
+    val startImage = new ImageView(new Image("file:src/main/resources/UnoLogo.jpeg")) {
       fitWidth = 1400
       fitHeight = 1000
       preserveRatio = true

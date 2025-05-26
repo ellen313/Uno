@@ -1,20 +1,21 @@
 package de.htwg.se.uno.aview.gui
 
+import scalafx.application.JFXApp3.PrimaryStage
 import scalafx.scene.layout.StackPane
 import scalafx.scene.layout.VBox
-import scalafx.scene.control.{Button, ComboBox, Label, ListCell, TextField}
+import scalafx.scene.control.{Button, ComboBox}
 import scalafx.geometry.Pos
 import scalafx.geometry.Insets
+import scalafx.scene.Scene
 import scalafx.scene.effect.DropShadow
 import scalafx.scene.image.{Image, ImageView}
-import scalafx.scene.paint.Color.{DarkRed, LightGrey, LightYellow, Red, White}
-import scalafx.scene.paint.{Color, CycleMethod, LinearGradient, RadialGradient, Stop, Stops}
-import scalafx.scene.shape.Rectangle
+import scalafx.scene.paint.Color.{DarkRed, LightGrey, White}
+import scalafx.scene.paint.{Color, CycleMethod, LinearGradient, Stops}
 import scalafx.scene.text.Text
 
 object SetupScreen {
-  def apply(onStartGame: (Int, Int) => Unit): StackPane = {
-    val setupImage = new ImageView(new Image("file:src/main/scala/UnoSetup.jpg")) {
+  def apply(primaryStage: PrimaryStage): StackPane = {
+    val setupImage = new ImageView(new Image("file:src/main/resources/UnoSetup.jpg")) {
       fitWidth = 1400
       fitHeight = 900
       preserveRatio = false
@@ -58,6 +59,12 @@ object SetupScreen {
         try {
           val players = playersInput.value.value
           if (players < 2 || players > 10) throw new NumberFormatException("Invalid number of Players")
+
+          val gameScreen = new GameScreen(players, defaultCardsPerPlayer)
+
+          primaryStage.scene = new Scene(gameScreen) {
+            fill = Color
+          }
           onStartGame(players, defaultCardsPerPlayer)
         } catch {
           case _: Exception =>

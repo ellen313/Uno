@@ -1,14 +1,11 @@
 package de.htwg.se.uno.aview.gui
 
 import scalafx.scene.layout.{StackPane, VBox}
-import scalafx.scene.text.Text
 import scalafx.scene.control.Button
 import scalafx.geometry.{Insets, Pos}
 import scalafx.scene.effect.DropShadow
 import scalafx.scene.image.{Image, ImageView}
-import scalafx.scene.paint.Color.*
-import scalafx.scene.paint.{Color, CycleMethod, LinearGradient, RadialGradient, Stop, Stops}
-import scalafx.scene.shape.Rectangle
+import scalafx.scene.paint.Color
 
 object StartScreen {
 

@@ -38,7 +38,7 @@ object UnoGUI extends JFXApp3 with Observer{
       scene = new Scene {
         fill = Color.rgb(40, 40, 40)
         content = StartScreen(() => {
-          startGame(players, cards)
+          stage.scene().root = SetupScreen(stage)
         })
       }
     }

@@ -63,9 +63,8 @@ object SetupScreen {
           val gameScreen = new GameScreen(players, defaultCardsPerPlayer)
 
           primaryStage.scene = new Scene(gameScreen) {
-            fill = Color
+            fill = Color.DarkRed
           }
-          onStartGame(players, defaultCardsPerPlayer)
         } catch {
           case _: Exception =>
             println("Please select a valid number of players!")

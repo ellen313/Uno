@@ -3,6 +3,7 @@ package de.htwg.se.uno.aview.gui
 import de.htwg.se.uno.aview.UnoGame
 import de.htwg.se.uno.util.Observer
 import de.htwg.se.uno.controller.GameBoard
+import de.htwg.se.uno.model.PlayerHand
 import scalafx.application.JFXApp3
 import scalafx.scene.Scene
 import scalafx.Includes.jfxScene2sfx
@@ -37,7 +38,7 @@ object UnoGUI extends JFXApp3 with Observer{
       scene = new Scene {
         fill = Color.rgb(40, 40, 40)
         content = StartScreen(() => {
-          showSetupScreen()
+          startGame(players, cards)
         })
       }
     }
@@ -50,10 +51,10 @@ object UnoGUI extends JFXApp3 with Observer{
   }
 
   /*Switches to SetupScreen, when the Button in StartScreen is clicked*/
-  def showSetupScreen(): Unit = {
-    stage.scene().root = SetupScreen { (players, cards) =>
-      println(s"Start the Game with $players players and $cards cards")
-      startGame(players, cards)
-    }
-  }
+//  def showSetupScreen(): PrimaryStage = {
+//    stage.scene().root = SetupScreen { (players: Int, cards: Int) =>
+//      println(s"Start the Game with $players players and $cards cards")
+//      startGame(players, cards)
+//    }
+//  }
 }

@@ -3,7 +3,7 @@ package de.htwg.se.uno.aview.gui
 import de.htwg.se.uno.aview
 import de.htwg.se.uno.controller.GameBoard
 import de.htwg.se.uno.controller.command.{DrawCardCommand, PlayCardCommand}
-import de.htwg.se.uno.model.{Card, GameState, NumberCard, WildCard}
+import de.htwg.se.uno.model.{Card, GameState, NumberCard, PlayerHand, WildCard}
 import scalafx.geometry.{Insets, Pos}
 import scalafx.scene.control.ButtonBar.ButtonData
 import scalafx.scene.control.{Alert, Button, ButtonType, Dialog, Label}
@@ -11,13 +11,14 @@ import scalafx.scene.image.{Image, ImageView}
 import scalafx.scene.layout.{HBox, StackPane, VBox}
 import scalafx.scene.paint.Color
 import scalafx.scene.text.Font
-
 import scala.util.{Failure, Success}
+
 
 class GameScreen(players: Int, cardsPerPlayer: Int) extends StackPane {
 
+  val playerHand: PlayerHand = PlayerHand(List(NumberCard("red", 5)))
   GameBoard.initGame(GameState(
-    players = players,
+    players = List(playerHand),
     currentPlayerIndex = 0,
     isReversed = false,
     drawPile = Nil,
@@ -25,7 +26,7 @@ class GameScreen(players: Int, cardsPerPlayer: Int) extends StackPane {
     allCards = Nil
   ))
 
-  val gameBoardImage = new ImageView(new Image("file:src/main/resources/gameboard/uno_gameboard_left.jpg")) {
+  private val gameBoardImage = new ImageView(new Image("file:src/main/resources/gameboard/uno_gameboard_left.jpg")) {
     fitWidth = 1400
     fitHeight = 900
     preserveRatio = false
@@ -42,7 +43,7 @@ class GameScreen(players: Int, cardsPerPlayer: Int) extends StackPane {
   private val discardPileView = new VBox {
     spacing = 5
     alignment = Pos.Center
-    children = createCardViews(GameBoard.gameState.get.discardPile.take(1))
+    children = createCardView(GameBoard.gameState.get.discardPile.take(1))
   }
 
 
@@ -50,7 +51,7 @@ class GameScreen(players: Int, cardsPerPlayer: Int) extends StackPane {
     text = "Ziehen"
     style = "-fx-font-size: 16pt; -fx-padding: 20;"
     onAction = _ => {
-      GameBoard.executeCommand(DrawCardCommand(GameBoard.gameState.get.currentPlayerIndex))
+      GameBoard.executeCommand(DrawCardCommand())
       update()
     }
   }
@@ -59,8 +60,7 @@ class GameScreen(players: Int, cardsPerPlayer: Int) extends StackPane {
   private val playerHandView = new HBox {
     spacing = 10
     alignment = Pos.Center
-    children = createCardView(GameBoard.gameState.get.players.head
-    )
+    children = createCardView(GameBoard.gameState.get.players.head.cards)
   }
 
   // Hauptlayout
@@ -86,7 +86,7 @@ class GameScreen(players: Int, cardsPerPlayer: Int) extends StackPane {
   )
   
   
-  def createCardViews(cards: List[Card]): Seq[ImageView] = {
+  private def createCardView(cards: List[Card]): Seq[ImageView] = {
     cards.map { card =>
       new ImageView {
         image = new Image(cardImagePath(card))
@@ -100,7 +100,7 @@ class GameScreen(players: Int, cardsPerPlayer: Int) extends StackPane {
   private def cardImagePath(card: Card): String = {
     card match {
       case _: WildCard => s"file:src/main/resources/cards/wild.png"
-      case _ => s"file:src/main/resources/cards/${card.number}_${card.color}.png"
+      case _ => s"file:src/main/resources/cards/${card.color}.png"
     }
   }
   
@@ -166,7 +166,7 @@ class GameScreen(players: Int, cardsPerPlayer: Int) extends StackPane {
     }
 
     dialog.showAndWait() match {
-      case Some(color) =>
+      case Some(color: String) =>
         GameBoard.executeCommand(PlayCardCommand(wildCard, Some(color)))
         update()
       case None =>
@@ -177,8 +177,8 @@ class GameScreen(players: Int, cardsPerPlayer: Int) extends StackPane {
     GameBoard.gameState match {
       case Success(state) =>
         gameInfo.text = s"Spieler ${state.currentPlayerIndex + 1} ist am Zug"
-        discardPileView.children = createCardViews(state.discardPile.take(1))
-        playerHandView.children = createCardViews(state.players.head) // Nur für Spieler 1
+        discardPileView.children = createCardView(state.discardPile.take(1))
+        playerHandView.children = createCardView(state.players.head.cards) // Only for player 1
       case Failure(e) =>
         gameInfo.text = s"Fehler: ${e.getMessage}"
     }

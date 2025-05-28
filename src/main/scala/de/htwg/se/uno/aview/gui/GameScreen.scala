@@ -3,7 +3,7 @@ package de.htwg.se.uno.aview.gui
 import de.htwg.se.uno.aview
 import de.htwg.se.uno.controller.GameBoard
 import de.htwg.se.uno.controller.GameBoard.fullDeck
-import de.htwg.se.uno.controller.command.{DrawCardCommand, PlayCardCommand}
+import de.htwg.se.uno.controller.command.{DrawCardCommand, PlayCardCommand, UnoCalledCommand}
 import de.htwg.se.uno.model.{ActionCard, Card, CardFactory, GameState, NumberCard, PlayerHand, WildCard}
 import scalafx.animation.{FadeTransition, PauseTransition}
 import scalafx.geometry.{Insets, Pos}
@@ -12,7 +12,7 @@ import scalafx.scene.control.ButtonBar.ButtonData
 import scalafx.scene.control.{Alert, Button, ButtonType, Dialog, Label}
 import scalafx.scene.effect.DropShadow
 import scalafx.scene.image.{Image, ImageView}
-import scalafx.scene.layout.{HBox, Pane, StackPane, VBox}
+import scalafx.scene.layout.{BorderPane, HBox, Pane, StackPane, VBox}
 import scalafx.scene.paint.Color
 import scalafx.scene.text.Font
 import scalafx.util.Duration
@@ -21,9 +21,10 @@ import scala.util.{Failure, Success}
 
 
 class GameScreen(players: Int, cardsPerPlayer: Int) extends StackPane {
+  private var unoCaller: Option[Int] = None
   val allCards = CardFactory.createFullDeck()
   val hands = fullDeck.grouped(cardsPerPlayer).take(players).map(cards => PlayerHand(cards)).toList
-  val usedCards = hands.flatten(_.cards)
+  val usedCards = hands.flatMap(_.cards)
   val remainingDeck = fullDeck.diff(usedCards)
 
   GameBoard.initGame(GameState(
@@ -37,9 +38,10 @@ class GameScreen(players: Int, cardsPerPlayer: Int) extends StackPane {
 
   private val gameBoardImage = new ImageView(new Image("file:src/main/resources/gameboard/uno_gameboard_left.jpg")) {
     fitWidth = 1500
-    fitHeight = 900
-    alignment = Pos.TopCenter
-    preserveRatio = false
+    fitHeight = 880
+    preserveRatio = true
+    smooth = true
+    cache = true
   }
 
   private val gameInfo = new Label {
@@ -49,20 +51,54 @@ class GameScreen(players: Int, cardsPerPlayer: Int) extends StackPane {
     style = "-fx-background-color: rgba(0,0,0,0.7); -fx-padding: 10; -fx-background-radius: 10;"
   }
 
-
-  private val discardPileView = new VBox {
-    spacing = 5
-    alignment = Pos.Center
-    children = createCardView(GameBoard.gameState.get.discardPile.take(1))
-  }
-
-
-  private val drawPileView = new Button {
-    text = "Ziehen"
-    style = "-fx-font-family: 'sans-serif'; " +
+  private val player1Label = new Label("You") {
+    font = Font(20)
+    textFill = Color.White
+    style =
+      "-fx-font-family: 'sans-serif'; " +
       "-fx-font-style: italic; " +
       "-fx-font-weight: bold; " +
-      "-fx-font-size: 20pt; " +
+      "-fx-font-size: 15pt; " +
+      "-fx-background-color: linear-gradient(to bottom, #FCE205, #F9A602); " +
+      "-fx-text-fill: white; " +
+      "-fx-padding: 10 20; " +
+      "-fx-background-radius: 10; " +
+      "-fx-border-radius: 10;"
+  }
+
+  private val player1HandView = new HBox {
+    spacing = -60
+    alignment = Pos.BottomCenter
+    padding = Insets(10)
+  }
+
+  private val player2Label = new Label("Player 1") {
+    font = Font(20)
+    textFill = Color.White
+    style =
+      "-fx-font-family: 'sans-serif'; " +
+      "-fx-font-style: italic; " +
+      "-fx-font-weight: bold; " +
+      "-fx-font-size: 15pt; " +
+      "-fx-background-color: linear-gradient(to bottom, #FCE205, #F9A602); " +
+      "-fx-text-fill: white; " +
+      "-fx-padding: 10 20; " +
+      "-fx-background-radius: 10; " +
+      "-fx-border-radius: 10;"
+  }
+
+  private val player2HandView = new HBox {
+    spacing = -60
+    alignment = Pos.TopCenter
+    padding = Insets(10)
+  }
+
+  private val unoButton = new Button("UNO!") {
+    style =
+      "-fx-font-family: 'sans-serif'; " +
+      "-fx-font-style: italic; " +
+      "-fx-font-weight: bold; " +
+      "-fx-font-size: 15pt; " +
       "-fx-background-color: linear-gradient(to bottom, #FCE205, #F9A602); " +
       "-fx-text-fill: white; " +
       "-fx-padding: 10 20; " +
@@ -72,53 +108,109 @@ class GameScreen(players: Int, cardsPerPlayer: Int) extends StackPane {
       color = Color.White
       radius = 10
     }
-
-    cursor = Cursor.Hand
-
+    cursor = Cursor.Default
+    onMouseEntered = _ => cursor = Cursor.Hand
+    onMouseExited = _ => cursor = Cursor.Default
     onAction = _ => {
-      GameBoard.executeCommand(DrawCardCommand())
+      GameBoard.executeCommand(UnoCalledCommand())
+      unoCaller = Some(GameBoard.gameState.get.currentPlayerIndex)
       update()
     }
   }
 
+  private val discardPileView = new VBox {
+    spacing = 5
+    alignment = Pos.Center
+    children = createCardView(GameBoard.gameState.get.discardPile.take(1))
+  }
 
-  private val playerHandView = new Pane {
-    prefHeight = 150
+  val drawPileView = new ImageView {
+    image = new Image("file:src/main/resources/cards/back.png")
+    fitWidth = 100
+    fitHeight = 150
+    preserveRatio = true
+  }
+
+  private val playerHandView = new HBox {
+    spacing = -50
+    alignment = Pos.BottomCenter
+    padding = Insets(10)
   }
 
   // Hauptlayout
   children = Seq(
     gameBoardImage,
+
+    new VBox {
+      spacing = 10
+      children = Seq(player1Label)
+      alignment = Pos.BottomCenter
+      margin = Insets(0,0,20,0)
+    },
+    new VBox {
+      spacing = 10
+      children = Seq(player2Label)
+      alignment = Pos.TopCenter
+      margin = Insets(20,0,0,0)
+    },
+
     new VBox {
       spacing = 20
       alignment = Pos.Center
       children = Seq(
         gameInfo,
-        new HBox {
-          spacing = 50
-          alignment = Pos.Center
-          children = Seq(drawPileView, discardPileView)
-        }
+        new Button("Ziehen") {
+          style =
+            "-fx-font-family: 'sans-serif'; " +
+              "-fx-font-style: italic; " +
+              "-fx-font-weight: bold; " +
+              "-fx-font-size: 15pt; " +
+              "-fx-background-color: linear-gradient(to bottom, #FCE205, #F9A602); " +
+              "-fx-text-fill: white; " +
+              "-fx-padding: 10 20; " +
+              "-fx-background-radius: 10; " +
+              "-fx-border-radius: 10;"
+          effect = new DropShadow {
+            color = Color.White
+            radius = 10
+          }
+          cursor = Cursor.Default
+          onMouseEntered = _ => cursor = Cursor.Hand
+          onMouseExited = _ => cursor = Cursor.Default
+          onAction = _ => {
+            GameBoard.executeCommand(DrawCardCommand())
+            update()
+          }
+        },
+        unoButton
       )
     },
-    new StackPane {
-      alignment = Pos.BottomCenter
-      padding = Insets(0, 0, 50, 0)
-      children = playerHandView
-    }
+    new VBox {
+      spacing = 10
+      alignment = Pos.Center
+      children = Seq(discardPileView)
+    },
+    player1HandView,
+    player2HandView
   )
 
 
-  private def createCardView(cards: List[Card]): Seq[ImageView] = {
+  private def createCardView(cards: List[Card], hidden: Boolean = false): Seq[ImageView] = {
     val overlapOffset = 30.0
     cards.zipWithIndex.map { case (card, index) =>
+      val imagePath = if (hidden) {
+        "file:src/main/resources/cards/back.png"
+      } else {
+        cardImagePath(card)
+      }
       new ImageView {
         image = new Image(cardImagePath(card))
-        fitWidth = 80
+        fitWidth = 100
+        fitHeight = 300
         preserveRatio = true
-        layoutX = index * overlapOffset
-        layoutY = 0
-        onMouseClicked = _ => playCard(card)
+        if (!hidden) {
+          onMouseClicked = _ => playCard(card)
+        }
       }
     }
   }
@@ -215,21 +307,32 @@ class GameScreen(players: Int, cardsPerPlayer: Int) extends StackPane {
   def update(): Unit = {
     GameBoard.gameState match {
       case Success(state) =>
+        if (unoCaller.isDefined) {
+          val unoPlayer = unoCaller.get + 1
+          gameInfo.text = s"Spieler $unoPlayer ruft UNO!"
+          unoCaller = None
+        } else {
+          gameInfo.text = s"Spieler ${state.currentPlayerIndex + 1} ist am Zug"
+        }
         gameInfo.opacity = 1.0
-        gameInfo.text = s"Spieler ${state.currentPlayerIndex + 1} ist am Zug"
 
         val pause = new PauseTransition(Duration(2000))
-
         val fade = new FadeTransition(Duration(1000), gameInfo) {
           fromValue = 1.0
           toValue = 0.0
         }
-
         pause.onFinished = _ => fade.play()
         pause.play()
 
         discardPileView.children = createCardView(state.discardPile.take(1))
-        playerHandView.children.setAll(createCardView(state.players.head.cards).map(_.delegate): _*) // Only for player 1
+
+        // you spieler
+        val player1Cards = state.players.head.cards.take(7)
+        player1HandView.children.setAll(createCardView(state.players.head.cards).map(_.delegate): _*)
+        if (state.players.length > 1) {
+          val player2Cards = state.players(1).cards.take(7)
+          player2HandView.children.setAll(createCardView(player2Cards, hidden = true).map(_.delegate): _*)
+        }
       case Failure(e) =>
         gameInfo.text = s"Fehler: ${e.getMessage}"
         gameInfo.opacity = 1.0

@@ -190,8 +190,38 @@ class GameScreen(players: Int, cardsPerPlayer: Int) extends StackPane {
       alignment = Pos.Center
       children = Seq(discardPileView)
     },
+
     player1HandView,
-    player2HandView
+    player2HandView,
+
+    new VBox {
+      spacing = 10
+      alignment = Pos.TopLeft
+      padding = Insets(20)
+      children = Seq(
+        new Button("Exit") {
+          style =
+            "-fx-font-family: 'sans-serif'; " +
+              "-fx-font-style: italic; " +
+              "-fx-font-weight: bold; " +
+              "-fx-font-size: 15pt; " +
+              "-fx-background-color: linear-gradient(to bottom, #FCE205, #F9A602); " +
+              "-fx-text-fill: white; " +
+              "-fx-padding: 10 20; " +
+              "-fx-background-radius: 10; " +
+              "-fx-border-radius: 10;"
+          effect = new DropShadow {
+            color = Color.Black
+            radius = 8
+          }
+          cursor = Cursor.Default
+          onMouseEntered = _ => cursor = Cursor.Hand
+          onMouseExited = _ => cursor = Cursor.Default
+
+          onAction = _ => System.exit(0)
+        }
+      )
+    }
   )
 
 

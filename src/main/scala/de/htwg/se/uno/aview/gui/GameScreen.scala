@@ -216,7 +216,7 @@ class GameScreen(players: Int, cardsPerPlayer: Int) extends StackPane {
   }
 
   private def cardImagePath(card: Card): String = card match {
-    case NumberCard(number, color) =>
+    case NumberCard(color, number) =>
       s"file:src/main/resources/cards/${number}_$color.png"
 
     case ActionCard(color, action) =>

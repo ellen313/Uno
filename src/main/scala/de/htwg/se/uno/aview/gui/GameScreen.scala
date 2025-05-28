@@ -67,7 +67,7 @@ class GameScreen(players: Int, cardsPerPlayer: Int) extends StackPane {
   }
 
   private val player1HandView = new HBox {
-    spacing = -60
+    spacing = -70
     alignment = Pos.BottomCenter
     padding = Insets(10)
   }
@@ -88,7 +88,7 @@ class GameScreen(players: Int, cardsPerPlayer: Int) extends StackPane {
   }
 
   private val player2HandView = new HBox {
-    spacing = -60
+    spacing = -70
     alignment = Pos.TopCenter
     padding = Insets(10)
   }
@@ -205,8 +205,8 @@ class GameScreen(players: Int, cardsPerPlayer: Int) extends StackPane {
       }
       new ImageView {
         image = new Image(cardImagePath(card))
-        fitWidth = 100
-        fitHeight = 300
+        fitWidth = 130
+        fitHeight = 390
         preserveRatio = true
         if (!hidden) {
           onMouseClicked = _ => playCard(card)

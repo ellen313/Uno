@@ -2,33 +2,43 @@ package de.htwg.se.uno.aview.gui
 
 import de.htwg.se.uno.aview
 import de.htwg.se.uno.controller.GameBoard
+import de.htwg.se.uno.controller.GameBoard.fullDeck
 import de.htwg.se.uno.controller.command.{DrawCardCommand, PlayCardCommand}
-import de.htwg.se.uno.model.{Card, GameState, NumberCard, PlayerHand, WildCard}
+import de.htwg.se.uno.model.{ActionCard, Card, CardFactory, GameState, NumberCard, PlayerHand, WildCard}
+import scalafx.animation.{FadeTransition, PauseTransition}
 import scalafx.geometry.{Insets, Pos}
+import scalafx.scene.Cursor
 import scalafx.scene.control.ButtonBar.ButtonData
 import scalafx.scene.control.{Alert, Button, ButtonType, Dialog, Label}
+import scalafx.scene.effect.DropShadow
 import scalafx.scene.image.{Image, ImageView}
-import scalafx.scene.layout.{HBox, StackPane, VBox}
+import scalafx.scene.layout.{HBox, Pane, StackPane, VBox}
 import scalafx.scene.paint.Color
 import scalafx.scene.text.Font
+import scalafx.util.Duration
+
 import scala.util.{Failure, Success}
 
 
 class GameScreen(players: Int, cardsPerPlayer: Int) extends StackPane {
+  val allCards = CardFactory.createFullDeck()
+  val hands = fullDeck.grouped(cardsPerPlayer).take(players).map(cards => PlayerHand(cards)).toList
+  val usedCards = hands.flatten(_.cards)
+  val remainingDeck = fullDeck.diff(usedCards)
 
-  val playerHand: PlayerHand = PlayerHand(List(NumberCard("red", 5)))
   GameBoard.initGame(GameState(
-    players = List(playerHand),
+    players = hands,
     currentPlayerIndex = 0,
     isReversed = false,
-    drawPile = Nil,
+    drawPile = remainingDeck,
     discardPile = Nil,
-    allCards = Nil
+    allCards = allCards
   ))
 
   private val gameBoardImage = new ImageView(new Image("file:src/main/resources/gameboard/uno_gameboard_left.jpg")) {
-    fitWidth = 1400
+    fitWidth = 1500
     fitHeight = 900
+    alignment = Pos.TopCenter
     preserveRatio = false
   }
 
@@ -49,18 +59,31 @@ class GameScreen(players: Int, cardsPerPlayer: Int) extends StackPane {
 
   private val drawPileView = new Button {
     text = "Ziehen"
-    style = "-fx-font-size: 16pt; -fx-padding: 20;"
+    style = "-fx-font-family: 'sans-serif'; " +
+      "-fx-font-style: italic; " +
+      "-fx-font-weight: bold; " +
+      "-fx-font-size: 20pt; " +
+      "-fx-background-color: linear-gradient(to bottom, #FCE205, #F9A602); " +
+      "-fx-text-fill: white; " +
+      "-fx-padding: 10 20; " +
+      "-fx-background-radius: 10; " +
+      "-fx-border-radius: 10;"
+    effect = new DropShadow {
+      color = Color.White
+      radius = 10
+    }
+
+    cursor = Cursor.Hand
+
     onAction = _ => {
       GameBoard.executeCommand(DrawCardCommand())
       update()
     }
   }
-  
 
-  private val playerHandView = new HBox {
-    spacing = 10
-    alignment = Pos.Center
-    children = createCardView(GameBoard.gameState.get.players.head.cards)
+
+  private val playerHandView = new Pane {
+    prefHeight = 150
   }
 
   // Hauptlayout
@@ -84,27 +107,43 @@ class GameScreen(players: Int, cardsPerPlayer: Int) extends StackPane {
       children = playerHandView
     }
   )
-  
-  
+
+
   private def createCardView(cards: List[Card]): Seq[ImageView] = {
-    cards.map { card =>
+    val overlapOffset = 30.0
+    cards.zipWithIndex.map { case (card, index) =>
       new ImageView {
         image = new Image(cardImagePath(card))
         fitWidth = 80
         preserveRatio = true
+        layoutX = index * overlapOffset
+        layoutY = 0
         onMouseClicked = _ => playCard(card)
       }
     }
   }
-  
-  private def cardImagePath(card: Card): String = {
-    card match {
-      case _: WildCard => s"file:src/main/resources/cards/wild.png"
-      case _ => s"file:src/main/resources/cards/${card.color}.png"
-    }
+
+  private def cardImagePath(card: Card): String = card match {
+    case NumberCard(number, color) =>
+      s"file:src/main/resources/cards/${number}_$color.png"
+
+    case ActionCard(color, action) =>
+      action match {
+        case "reverse"   => s"file:src/main/resources/cards/reverse_$color.png"
+        case "skip"      => s"file:src/main/resources/cards/next_$color.png"
+        case "draw two"  => s"file:src/main/resources/cards/draw2_$color.png"
+        case _           => "file:src/main/resources/cards/unknown.png" // fallback
+      }
+
+    case WildCard(action) =>
+      action match {
+        case "wild draw four" => "file:src/main/resources/cards/draw_four.png"
+        case "wild"           => "file:src/main/resources/cards/wild.png"
+        case _                => "file:src/main/resources/cards/unknown.png"
+      }
   }
-  
-  
+
+
   def playCard(card: Card): Unit = {
     GameBoard.gameState match {
       case Success(state) =>
@@ -176,14 +215,27 @@ class GameScreen(players: Int, cardsPerPlayer: Int) extends StackPane {
   def update(): Unit = {
     GameBoard.gameState match {
       case Success(state) =>
+        gameInfo.opacity = 1.0
         gameInfo.text = s"Spieler ${state.currentPlayerIndex + 1} ist am Zug"
+
+        val pause = new PauseTransition(Duration(2000))
+
+        val fade = new FadeTransition(Duration(1000), gameInfo) {
+          fromValue = 1.0
+          toValue = 0.0
+        }
+
+        pause.onFinished = _ => fade.play()
+        pause.play()
+
         discardPileView.children = createCardView(state.discardPile.take(1))
-        playerHandView.children = createCardView(state.players.head.cards) // Only for player 1
+        playerHandView.children.setAll(createCardView(state.players.head.cards).map(_.delegate): _*) // Only for player 1
       case Failure(e) =>
         gameInfo.text = s"Fehler: ${e.getMessage}"
+        gameInfo.opacity = 1.0
     }
   }
-  
+
   update()
   GameBoard.addObserver(() => update())
 }

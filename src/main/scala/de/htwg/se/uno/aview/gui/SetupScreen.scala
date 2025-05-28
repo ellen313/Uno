@@ -6,7 +6,7 @@ import scalafx.scene.layout.VBox
 import scalafx.scene.control.{Button, ComboBox}
 import scalafx.geometry.Pos
 import scalafx.geometry.Insets
-import scalafx.scene.Scene
+import scalafx.scene.{Cursor, Scene}
 import scalafx.scene.effect.DropShadow
 import scalafx.scene.image.{Image, ImageView}
 import scalafx.scene.paint.Color.{DarkRed, LightGrey, White}
@@ -39,6 +39,8 @@ object SetupScreen {
         -fx-border-radius: 5;
         -fx-background-radius: 5;
       """
+
+      cursor = Cursor.Hand
     }
 
     val startButton = new Button("Start Game") {
@@ -55,6 +57,9 @@ object SetupScreen {
         color = Color.DarkRed
         radius = 10
       }
+
+      cursor = Cursor.Hand
+
       onAction = _ =>
         try {
           val players = playersInput.value.value

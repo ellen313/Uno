@@ -3,6 +3,7 @@ package de.htwg.se.uno.aview.gui
 import scalafx.scene.layout.{StackPane, VBox}
 import scalafx.scene.control.Button
 import scalafx.geometry.{Insets, Pos}
+import scalafx.scene.Cursor
 import scalafx.scene.effect.DropShadow
 import scalafx.scene.image.{Image, ImageView}
 import scalafx.scene.paint.Color
@@ -58,6 +59,9 @@ object StartScreen {
                 color = Color.DarkRed
                 radius = 10
               }
+
+              cursor = Cursor.Hand
+
               onAction = _ => onStart()
             }
           )

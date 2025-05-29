@@ -1,38 +1,40 @@
 package de.htwg.se.uno.aview.gui
 
-import de.htwg.se.uno.aview
 import de.htwg.se.uno.controller.GameBoard
 import de.htwg.se.uno.controller.GameBoard.fullDeck
 import de.htwg.se.uno.controller.command.{DrawCardCommand, PlayCardCommand, UnoCalledCommand}
 import de.htwg.se.uno.model.{ActionCard, Card, CardFactory, GameState, NumberCard, PlayerHand, WildCard}
 import scalafx.animation.{FadeTransition, PauseTransition}
 import scalafx.geometry.{Insets, Pos}
-import scalafx.scene.Cursor
-import scalafx.scene.control.ButtonBar.ButtonData
-import scalafx.scene.control.{Alert, Button, ButtonType, Dialog, Label}
-import scalafx.scene.effect.DropShadow
+import scalafx.scene.control.{Alert, Button, ButtonBar, ButtonType, Dialog, Label}
 import scalafx.scene.image.{Image, ImageView}
-import scalafx.scene.layout.{BorderPane, HBox, Pane, StackPane, VBox}
+import scalafx.scene.input.MouseEvent
+import scalafx.scene.layout.{HBox, StackPane, VBox}
 import scalafx.scene.paint.Color
-import scalafx.scene.text.Font
+import scalafx.scene.text.{Font, FontWeight}
+import scalafx.scene.Cursor
 import scalafx.util.Duration
+import scalafx.Includes.*
 
 import scala.util.{Failure, Success}
 
-
 class GameScreen(players: Int, cardsPerPlayer: Int) extends StackPane {
   private var unoCaller: Option[Int] = None
+  private var gameOver: Boolean = false
+
   val allCards = CardFactory.createFullDeck()
   val hands = fullDeck.grouped(cardsPerPlayer).take(players).map(cards => PlayerHand(cards)).toList
   val usedCards = hands.flatMap(_.cards)
   val remainingDeck = fullDeck.diff(usedCards)
+  val initialDiscard = remainingDeck.head
+  val updatedRemainingDeck = remainingDeck.tail
 
   GameBoard.initGame(GameState(
     players = hands,
     currentPlayerIndex = 0,
     isReversed = false,
-    drawPile = remainingDeck,
-    discardPile = Nil,
+    drawPile = updatedRemainingDeck,
+    discardPile = List(initialDiscard),
     allCards = allCards
   ))
 
@@ -42,6 +44,15 @@ class GameScreen(players: Int, cardsPerPlayer: Int) extends StackPane {
     preserveRatio = true
     smooth = true
     cache = true
+    mouseTransparent = true
+  }
+
+  private val winnerLabel = new Label {
+    text = ""
+    font = Font.font("Arial", FontWeight.Bold, 48)
+    textFill = Color.Gold
+    style = "-fx-background-color: rgba(0,0,0,0.8); -fx-background-radius: 20; -fx-padding: 30;"
+    visible = false
   }
 
   private val gameInfo = new Label {
@@ -51,66 +62,51 @@ class GameScreen(players: Int, cardsPerPlayer: Int) extends StackPane {
     style = "-fx-background-color: rgba(0,0,0,0.7); -fx-padding: 10; -fx-background-radius: 10;"
   }
 
-  private val player1Label = new Label("You") {
-    font = Font(20)
-    textFill = Color.White
-    style =
-      "-fx-font-family: 'sans-serif'; " +
-      "-fx-font-style: italic; " +
-      "-fx-font-weight: bold; " +
-      "-fx-font-size: 15pt; " +
-      "-fx-background-color: linear-gradient(to bottom, #FCE205, #F9A602); " +
-      "-fx-text-fill: white; " +
-      "-fx-padding: 10 20; " +
-      "-fx-background-radius: 10; " +
-      "-fx-border-radius: 10;"
-  }
-
   private val player1HandView = new HBox {
-    spacing = -70
+    spacing = -60
     alignment = Pos.BottomCenter
     padding = Insets(10)
-  }
-
-  private val player2Label = new Label("Player 1") {
-    font = Font(20)
-    textFill = Color.White
-    style =
-      "-fx-font-family: 'sans-serif'; " +
-      "-fx-font-style: italic; " +
-      "-fx-font-weight: bold; " +
-      "-fx-font-size: 15pt; " +
-      "-fx-background-color: linear-gradient(to bottom, #FCE205, #F9A602); " +
-      "-fx-text-fill: white; " +
-      "-fx-padding: 10 20; " +
-      "-fx-background-radius: 10; " +
-      "-fx-border-radius: 10;"
+    pickOnBounds = false
   }
 
   private val player2HandView = new HBox {
-    spacing = -70
+    spacing = -60
     alignment = Pos.TopCenter
     padding = Insets(10)
+    pickOnBounds = false
+  }
+
+  private val discardPileView = new VBox {
+    spacing = 5
+    alignment = Pos.Center
+    pickOnBounds = false
+  }
+
+  private val drawPileView = new ImageView {
+    image = new Image("file:src/main/resources/cards/back.png")
+    fitWidth = 130
+    fitHeight = 190
+    preserveRatio = true
+    cursor = Cursor.Hand
+    pickOnBounds = true
+    onMouseClicked = (e: MouseEvent) => {
+      println("Draw pile clicked!")
+      GameBoard.executeCommand(DrawCardCommand())
+      update()
+      e.consume()
+    }
+  }
+
+  private val drawButton = new Button("Draw") {
+    style = buttonStyle
+    onAction = _ => {
+      GameBoard.executeCommand(DrawCardCommand())
+      update()
+    }
   }
 
   private val unoButton = new Button("UNO!") {
-    style =
-      "-fx-font-family: 'sans-serif'; " +
-      "-fx-font-style: italic; " +
-      "-fx-font-weight: bold; " +
-      "-fx-font-size: 15pt; " +
-      "-fx-background-color: linear-gradient(to bottom, #FCE205, #F9A602); " +
-      "-fx-text-fill: white; " +
-      "-fx-padding: 10 20; " +
-      "-fx-background-radius: 10; " +
-      "-fx-border-radius: 10;"
-    effect = new DropShadow {
-      color = Color.White
-      radius = 10
-    }
-    cursor = Cursor.Default
-    onMouseEntered = _ => cursor = Cursor.Hand
-    onMouseExited = _ => cursor = Cursor.Default
+    style = buttonStyle
     onAction = _ => {
       GameBoard.executeCommand(UnoCalledCommand())
       unoCaller = Some(GameBoard.gameState.get.currentPlayerIndex)
@@ -118,241 +114,230 @@ class GameScreen(players: Int, cardsPerPlayer: Int) extends StackPane {
     }
   }
 
-  private val discardPileView = new VBox {
-    spacing = 5
-    alignment = Pos.Center
-    children = createCardView(GameBoard.gameState.get.discardPile.take(1))
+  private val exitButton = new Button("Exit") {
+    style = buttonStyle
+    onAction = _ => System.exit(0)
   }
 
-  val drawPileView = new ImageView {
-    image = new Image("file:src/main/resources/cards/back.png")
-    fitWidth = 100
-    fitHeight = 150
-    preserveRatio = true
-  }
-
-  private val playerHandView = new HBox {
-    spacing = -50
-    alignment = Pos.BottomCenter
-    padding = Insets(10)
-  }
-
-  // Hauptlayout
   children = Seq(
     gameBoardImage,
 
     new VBox {
-      spacing = 10
-      children = Seq(player1Label)
-      alignment = Pos.BottomCenter
-      margin = Insets(0,0,20,0)
-    },
-    new VBox {
-      spacing = 10
-      children = Seq(player2Label)
-      alignment = Pos.TopCenter
-      margin = Insets(20,0,0,0)
-    },
-
-    new VBox {
-      alignment = Pos.Center
-      children = Seq(gameInfo)
-      translateY = -100
-      mouseTransparent = true
-    },
-
-    new VBox {
-      spacing = 20
-      alignment = Pos.BottomRight
-      padding = Insets(0, 100, 100, 0)
-      children = Seq(
-        new Button("Draw") {
-          style =
-            "-fx-font-family: 'sans-serif'; " +
-              "-fx-font-style: italic; " +
-              "-fx-font-weight: bold; " +
-              "-fx-font-size: 15pt; " +
-              "-fx-background-color: linear-gradient(to bottom, #FCE205, #F9A602); " +
-              "-fx-text-fill: white; " +
-              "-fx-padding: 10 20; " +
-              "-fx-background-radius: 10; " +
-              "-fx-border-radius: 10;"
-          effect = new DropShadow {
-            color = Color.White
-            radius = 10
-          }
-          cursor = Cursor.Default
-          onMouseEntered = _ => cursor = Cursor.Hand
-          onMouseExited = _ => cursor = Cursor.Default
-          onAction = _ => {
-            GameBoard.executeCommand(DrawCardCommand())
-            update()
-          }
-        },
-        unoButton
-      )
-    },
-    new VBox {
-      spacing = 10
-      alignment = Pos.Center
-      children = Seq(discardPileView)
-    },
-
-    player1HandView,
-    player2HandView,
-
-    new VBox {
-      spacing = 10
       alignment = Pos.TopLeft
       padding = Insets(20)
-      children = Seq(
-        new Button("Exit") {
-          style =
-            "-fx-font-family: 'sans-serif'; " +
-              "-fx-font-style: italic; " +
-              "-fx-font-weight: bold; " +
-              "-fx-font-size: 15pt; " +
-              "-fx-background-color: linear-gradient(to bottom, #FCE205, #F9A602); " +
-              "-fx-text-fill: white; " +
-              "-fx-padding: 10 20; " +
-              "-fx-background-radius: 10; " +
-              "-fx-border-radius: 10;"
-          effect = new DropShadow {
-            color = Color.Black
-            radius = 8
-          }
-          cursor = Cursor.Default
-          onMouseEntered = _ => cursor = Cursor.Hand
-          onMouseExited = _ => cursor = Cursor.Default
+      children = Seq(exitButton)
+      pickOnBounds = false
+    },
 
-          onAction = _ => System.exit(0)
-        }
+    new VBox {
+      alignment = Pos.TopCenter
+      spacing = 10
+      children = Seq(
+        new Label("Player 1") { style = "-fx-text-fill: white; -fx-font-size: 20pt;" },
+        player2HandView
       )
+      pickOnBounds = false
+    },
+
+    new VBox {
+      alignment = Pos.BottomCenter
+      spacing = 10
+      children = Seq(
+        new Label("You") { style = "-fx-text-fill: white; -fx-font-size: 20pt;" },
+        player1HandView
+      )
+      pickOnBounds = false
+    },
+
+    new VBox {
+      alignment = Pos.Center
+      spacing = 20
+      children = Seq(
+        new StackPane {
+          children = drawPileView
+          pickOnBounds = false
+        },
+        discardPileView
+      )
+      pickOnBounds = false
+    },
+
+    new VBox {
+      alignment = Pos.BottomRight
+      padding = Insets(0, 100, 100, 0)
+      spacing = 10
+      children = Seq(drawButton, unoButton)
+      pickOnBounds = false
+    },
+
+    new VBox {
+      alignment = Pos.TopRight
+      padding = Insets(20)
+      children = Seq(gameInfo)
+      pickOnBounds = false
+    },
+
+    new StackPane {
+      alignment = Pos.Center
+      children = Seq(winnerLabel)
+      pickOnBounds = false
     }
   )
 
+  private def buttonStyle: String =
+    "-fx-font-family: 'sans-serif'; " +
+      "-fx-font-style: italic; " +
+      "-fx-font-weight: bold; " +
+      "-fx-font-size: 15pt; " +
+      "-fx-background-color: linear-gradient(to bottom, #FCE205, #F9A602); " +
+      "-fx-text-fill: white; " +
+      "-fx-padding: 10 20; " +
+      "-fx-background-radius: 10; " +
+      "-fx-border-radius: 10;"
 
   private def createCardView(cards: List[Card], hidden: Boolean = false): Seq[ImageView] = {
-    val overlapOffset = 30.0
     cards.zipWithIndex.map { case (card, index) =>
-      val imagePath = if (hidden) {
-        "file:src/main/resources/cards/back.png"
-      } else {
-        cardImagePath(card)
-      }
-      val iv = new ImageView {
-        image = new Image(cardImagePath(card))
+      val imagePath = /*if (hidden) "file:src/main/resources/cards/back.png" else*/ cardImagePath(card)
+      new ImageView(new Image(imagePath)) {
         fitWidth = 130
-        fitHeight = 390
+        fitHeight = 190
         preserveRatio = true
+        pickOnBounds = true
+        if (!hidden) {
+          cursor = Cursor.Hand
+          onMouseClicked = (e: MouseEvent) => {
+            println(s"Card $index clicked!")
+            e.consume()
+            playCard(card)
+          }
+        }
+
+        if (!hidden && !gameOver) {
+          cursor = Cursor.Hand
+          onMouseClicked = (e: MouseEvent) => {
+            println(s"Card $index clicked!")
+            e.consume()
+            playCard(card)
+          }
+        }
+
+        // Debug-Hilfe: Roter Rand um klickbare Karten
+        style = if (!hidden) "-fx-effect: dropshadow(gaussian, white, 5, 0.5, 0, 0);" else ""
       }
-      if (!hidden) {
-        onMouseClicked = _ => playCard(card)
-      }
-      iv
     }
   }
 
   private def cardImagePath(card: Card): String = card match {
-    case NumberCard(color, number) =>
-      s"file:src/main/resources/cards/${number}_$color.png"
-
-    case ActionCard(color, action) =>
-      action match {
-        case "reverse"   => s"file:src/main/resources/cards/reverse_$color.png"
-        case "skip"      => s"file:src/main/resources/cards/next_$color.png"
-        case "draw two"  => s"file:src/main/resources/cards/draw2_$color.png"
-        case _           => "file:src/main/resources/cards/unknown.png" // fallback
-      }
-
-    case WildCard(action) =>
-      action match {
-        case "wild draw four" => "file:src/main/resources/cards/draw_four.png"
-        case "wild"           => "file:src/main/resources/cards/wild.png"
-        case _                => "file:src/main/resources/cards/unknown.png"
-      }
+    case NumberCard(color, number) => s"file:src/main/resources/cards/${number}_$color.png"
+    case ActionCard(color, action) => action match {
+      case "reverse" => s"file:src/main/resources/cards/reverse_$color.png"
+      case "skip" => s"file:src/main/resources/cards/next_$color.png"
+      case "draw two" => s"file:src/main/resources/cards/draw2_$color.png"
+      case _ => "file:src/main/resources/cards/unknown.png"
+    }
+    case WildCard(action) => action match {
+      case "wild draw four" => "file:src/main/resources/cards/draw_four.png"
+      case "wild" => "file:src/main/resources/cards/wild.png"
+      case _ => "file:src/main/resources/cards/unknown.png"
+    }
   }
-
 
   def playCard(card: Card): Unit = {
     GameBoard.gameState match {
       case Success(state) =>
-        if (GameBoard.isValidPlay(card, state.discardPile.head, None)) {
+        if (GameBoard.isValidPlay(card, state.discardPile.headOption.getOrElse(card), None)) {
           card match {
-            case wild: WildCard =>
-
-              showColorPickerDialog(wild)
+            case wild: WildCard => showColorPickerDialog(wild)
             case _ =>
-
               GameBoard.executeCommand(PlayCardCommand(card, None))
-              update()
+              GameBoard.gameState match {
+                case Success(newState) =>
+                  println(s"Current player: ${newState.currentPlayerIndex}")
+                  update()
+                case Failure(e) => println(s"Error: ${e.getMessage}")
+              }
           }
         } else {
           showInvalidMoveMessage()
         }
-      case Failure(_) =>
+      case Failure(e) => println(s"Error: ${e.getMessage}")
     }
   }
 
   private def showInvalidMoveMessage(): Unit = {
-    val alert = new Alert(Alert.AlertType.Warning) {
+    new Alert(Alert.AlertType.Warning) {
       title = "Invalid move"
-      headerText = "This card can not be played"
-      contentText = "The card does not match the top card on the discard pile"
-    }
-    alert.showAndWait()
+      headerText = "Diese Karte kann nicht gespielt werden"
+      contentText = "Sie passt nicht zur obersten Karte auf dem Ablagestapel."
+    }.showAndWait()
   }
+
 
   private def showColorPickerDialog(wildCard: WildCard): Unit = {
     val dialog = new Dialog[String]() {
-      title = "Select color"
-      headerText = "Choose a color for the wildcard"
-      contentText = "Please select:"
+      title = "Farbe wählen"
+      headerText = "Wähle eine Farbe für die Wildcard"
     }
-      val buttonTypes = Seq(
-        new ButtonType("Red", ButtonData.OKDone),
-        new ButtonType("Blue", ButtonData.OKDone),
-        new ButtonType("Green", ButtonData.OKDone),
-        new ButtonType("Yellow", ButtonData.OKDone),
-        new ButtonType("Cancel", ButtonData.CancelClose)
-      )
 
-    dialog.dialogPane().getButtonTypes.addAll(buttonTypes.map(_.delegate): _*)
+    val buttonTypes = Seq("Red", "Blue", "Green", "Yellow").map { color =>
+      new ButtonType(color, ButtonBar.ButtonData.OKDone)
+    } :+ new ButtonType("Abbrechen", ButtonBar.ButtonData.CancelClose)
 
-    val colorMap = Map(
-      "Red" -> "red",
-      "Blue" -> "blue",
-      "Green" -> "green",
-      "Yellow" -> "yellow"
-    )
+    dialog.dialogPane().getButtonTypes.addAll(buttonTypes.map(_.delegate).toSeq: _*)
 
-    dialog.resultConverter = (buttonType: ButtonType) => {
-      if (buttonType.getButtonData == ButtonData.OKDone) {
-        colorMap.getOrElse(buttonType.getText, "")
-      } else {
+    val colorMap = Map("Red" -> "red", "Blue" -> "blue", "Green" -> "green", "Yellow" -> "yellow")
+
+    dialog.resultConverter = (bt: ButtonType) => {
+      if (bt.getButtonData == ButtonBar.ButtonData.OKDone)
+        colorMap.get(bt.getText).orNull
+      else
         null
-      }
     }
 
     dialog.showAndWait() match {
-      case Some(color: String) =>
+      case Some(color: String) if color.nonEmpty =>
+        println(s"Color chosen: $color for wildcard $wildCard")
         GameBoard.executeCommand(PlayCardCommand(wildCard, Some(color)))
-        update()
-      case None =>
+        GameBoard.gameState match {
+          case Success(newState) =>
+            println(s"Wildcard played, new player index: ${newState.currentPlayerIndex}")
+            update()
+          case Failure(e) =>
+            println(s"Error after playing wildcard: ${e.getMessage}")
+        }
+
+      case Some(null) | None =>
+        println("No color selected or dialog was cancelled.")
+
+      case Some(other) =>
+        println(s"Unexpected dialog result: $other (${Option(other).map(_.getClass.getName).getOrElse("null")})")
     }
   }
 
   def update(): Unit = {
+    if (gameOver) return
     GameBoard.gameState match {
       case Success(state) =>
+        state.players.zipWithIndex.find(_._1.cards.isEmpty) match {
+          case Some((_, index)) =>
+            gameOver = true
+            winnerLabel.text = s"Spieler ${index + 1} hat gewonnen!"
+            winnerLabel.visible = true
+            drawButton.disable = true
+            unoButton.disable = true
+            player1HandView.children.foreach(_.setDisable(true))
+            player2HandView.children.foreach(_.setDisable(true))
+            return
+          case None =>
+        }
+
         if (unoCaller.isDefined) {
           val unoPlayer = unoCaller.get + 1
-          gameInfo.text = s"Player $unoPlayer calls UNO!"
+          gameInfo.text = s"Player $unoPlayer ruft UNO!"
           unoCaller = None
         } else {
-          gameInfo.text = s"It is Player ${state.currentPlayerIndex + 1}'s turn"
+          gameInfo.text = s"Player ${state.currentPlayerIndex + 1} ist am Zug"
         }
-        gameInfo.opacity = 1.0
 
         val pause = new PauseTransition(Duration(2000))
         val fade = new FadeTransition(Duration(1000), gameInfo) {
@@ -362,18 +347,15 @@ class GameScreen(players: Int, cardsPerPlayer: Int) extends StackPane {
         pause.onFinished = _ => fade.play()
         pause.play()
 
-        discardPileView.children = createCardView(state.discardPile.take(1))
-
-        // you spieler
-        val player1Cards = state.players.head.cards.take(7)
+        discardPileView.children.setAll(createCardView(state.discardPile.take(1)).map(_.delegate): _*)
         player1HandView.children.setAll(createCardView(state.players.head.cards).map(_.delegate): _*)
         if (state.players.length > 1) {
-          val player2Cards = state.players(1).cards.take(7)
-          player2HandView.children.setAll(createCardView(player2Cards, hidden = true).map(_.delegate): _*)
+          val isPlayer2Turn = state.currentPlayerIndex == 1
+          player2HandView.children.setAll(createCardView(state.players(1).cards, hidden = !isPlayer2Turn).map(_.delegate): _*)
         }
+
       case Failure(e) =>
-        gameInfo.text = s"Error: ${e.getMessage}"
-        gameInfo.opacity = 1.0
+        gameInfo.text = s"Fehler: ${e.getMessage}"
     }
   }
 

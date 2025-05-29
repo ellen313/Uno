@@ -138,6 +138,15 @@ class GameScreen(players: Int, cardsPerPlayer: Int) extends StackPane {
     pickOnBounds = false
   }
 
+  private def updateBackground(isReversed: Boolean): Unit = {
+    val imagePath = if (isReversed)
+      "file:src/main/resources/gameboard/uno_gameboard_right.jpg"
+    else
+      "file:src/main/resources/gameboard/uno_gameboard_left.jpg"
+    gameBoardImage.image = new Image(imagePath)
+  }
+
+
   children = Seq(
     gameBoardImage,
 
@@ -352,6 +361,7 @@ class GameScreen(players: Int, cardsPerPlayer: Int) extends StackPane {
 
     GameBoard.gameState match {
       case Success(state) =>
+        updateBackground(state.isReversed)
         state.players.zipWithIndex.find(_._1.cards.isEmpty) match {
           case Some((_, index)) =>
             gameOver = true

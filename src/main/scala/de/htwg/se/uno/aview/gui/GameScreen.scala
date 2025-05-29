@@ -57,7 +57,7 @@ class GameScreen(players: Int, cardsPerPlayer: Int) extends StackPane {
     allCards = allCards
   ))
 
-  private val gameBoardImage = new ImageView(new Image("file:src/main/resources/gameboard/uno_gameboard_left.jpg")) {
+  private val gameBoardImage = new ImageView(new Image("file:src/main/resources/gameboard/uno_gameboard_right.jpg")) {
     fitWidth = 1500
     fitHeight = 880
     preserveRatio = true
@@ -159,9 +159,9 @@ class GameScreen(players: Int, cardsPerPlayer: Int) extends StackPane {
 
   private def updateBackground(isReversed: Boolean): Unit = {
     val imagePath = if (isReversed)
-      "file:src/main/resources/gameboard/uno_gameboard_right.jpg"
-    else
       "file:src/main/resources/gameboard/uno_gameboard_left.jpg"
+    else
+      "file:src/main/resources/gameboard/uno_gameboard_right.jpg"
     gameBoardImage.image = new Image(imagePath)
   }
 

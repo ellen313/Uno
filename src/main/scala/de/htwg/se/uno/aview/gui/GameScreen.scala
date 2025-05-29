@@ -240,15 +240,16 @@ class GameScreen(players: Int, cardsPerPlayer: Int) extends StackPane {
       } else {
         cardImagePath(card)
       }
-      new ImageView {
+      val iv = new ImageView {
         image = new Image(cardImagePath(card))
         fitWidth = 130
         fitHeight = 390
         preserveRatio = true
-        if (!hidden) {
-          onMouseClicked = _ => playCard(card)
-        }
       }
+      if (!hidden) {
+        onMouseClicked = _ => playCard(card)
+      }
+      iv
     }
   }
 

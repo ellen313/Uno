@@ -118,6 +118,11 @@ class GameScreen(players: Int, cardsPerPlayer: Int) extends StackPane {
     style = buttonStyle
     onAction = _ => System.exit(0)
   }
+  
+  private val youLabel = new Label {
+    text = "You"
+    style = "-fx-text-fill: white; -fx-font-size: 20pt;"
+  }
 
   children = Seq(
     gameBoardImage,
@@ -132,10 +137,7 @@ class GameScreen(players: Int, cardsPerPlayer: Int) extends StackPane {
     new VBox {
       alignment = Pos.TopCenter
       spacing = 10
-      children = Seq(
-        new Label("Player 1") { style = "-fx-text-fill: white; -fx-font-size: 20pt;" },
-        player2HandView
-      )
+      children = Seq(player2HandView)
       pickOnBounds = false
     },
 
@@ -143,7 +145,7 @@ class GameScreen(players: Int, cardsPerPlayer: Int) extends StackPane {
       alignment = Pos.BottomCenter
       spacing = 10
       children = Seq(
-        new Label("You") { style = "-fx-text-fill: white; -fx-font-size: 20pt;" },
+        youLabel,
         player1HandView
       )
       pickOnBounds = false
@@ -221,7 +223,6 @@ class GameScreen(players: Int, cardsPerPlayer: Int) extends StackPane {
           }
         }
 
-        // Debug-Hilfe: Roter Rand um klickbare Karten
         style = if (!hidden) "-fx-effect: dropshadow(gaussian, white, 5, 0.5, 0, 0);" else ""
       }
     }
@@ -272,7 +273,6 @@ class GameScreen(players: Int, cardsPerPlayer: Int) extends StackPane {
     }.showAndWait()
   }
 
-
   private def showColorPickerDialog(wildCard: WildCard): Unit = {
     val dialog = new Dialog[String]() {
       title = "Farbe wählen"
@@ -316,6 +316,7 @@ class GameScreen(players: Int, cardsPerPlayer: Int) extends StackPane {
 
   def update(): Unit = {
     if (gameOver) return
+
     GameBoard.gameState match {
       case Success(state) =>
         state.players.zipWithIndex.find(_._1.cards.isEmpty) match {
@@ -338,6 +339,8 @@ class GameScreen(players: Int, cardsPerPlayer: Int) extends StackPane {
         } else {
           gameInfo.text = s"Player ${state.currentPlayerIndex + 1} ist am Zug"
         }
+        
+        youLabel.text = s"You (Player ${state.currentPlayerIndex + 1})"
 
         val pause = new PauseTransition(Duration(2000))
         val fade = new FadeTransition(Duration(1000), gameInfo) {
@@ -346,13 +349,23 @@ class GameScreen(players: Int, cardsPerPlayer: Int) extends StackPane {
         }
         pause.onFinished = _ => fade.play()
         pause.play()
-
+        
         discardPileView.children.setAll(createCardView(state.discardPile.take(1)).map(_.delegate): _*)
-        player1HandView.children.setAll(createCardView(state.players.head.cards).map(_.delegate): _*)
-        if (state.players.length > 1) {
-          val isPlayer2Turn = state.currentPlayerIndex == 1
-          player2HandView.children.setAll(createCardView(state.players(1).cards, hidden = !isPlayer2Turn).map(_.delegate): _*)
+        
+        val currentPlayerHand = state.players(state.currentPlayerIndex).cards
+        player1HandView.children.setAll(createCardView(currentPlayerHand).map(_.delegate): _*)
+        
+        val nextPlayerIndex = (state.currentPlayerIndex + 1) % state.players.length
+        val nextPlayerCardCount = state.players(nextPlayerIndex).cards.length
+        val backImage = new Image("file:src/main/resources/cards/back.png")
+        val backCards = Seq.fill(nextPlayerCardCount) {
+          new ImageView(backImage) {
+            fitWidth = 130
+            fitHeight = 190
+            preserveRatio = true
+          }
         }
+        player2HandView.children.setAll(backCards.map(_.delegate): _*)
 
       case Failure(e) =>
         gameInfo.text = s"Fehler: ${e.getMessage}"

@@ -155,11 +155,18 @@ class GameScreen(players: Int, cardsPerPlayer: Int) extends StackPane {
     },
 
     new VBox {
-      spacing = 20
       alignment = Pos.Center
+      children = Seq(gameInfo)
+      translateY = -100
+      mouseTransparent = true
+    },
+
+    new VBox {
+      spacing = 20
+      alignment = Pos.BottomRight
+      padding = Insets(0, 100, 100, 0)
       children = Seq(
-        gameInfo,
-        new Button("Ziehen") {
+        new Button("Draw") {
           style =
             "-fx-font-family: 'sans-serif'; " +
               "-fx-font-style: italic; " +
@@ -288,34 +295,34 @@ class GameScreen(players: Int, cardsPerPlayer: Int) extends StackPane {
 
   private def showInvalidMoveMessage(): Unit = {
     val alert = new Alert(Alert.AlertType.Warning) {
-      title = "Ungültiger Zug"
-      headerText = "Diese Karte kann nicht gespielt werden"
-      contentText = "Die Karte passt nicht zur obersten Karte auf dem Ablagestapel"
+      title = "Invalid move"
+      headerText = "This card can not be played"
+      contentText = "The card does not match the top card on the discard pile"
     }
     alert.showAndWait()
   }
 
   private def showColorPickerDialog(wildCard: WildCard): Unit = {
     val dialog = new Dialog[String]() {
-      title = "Farbe wählen"
-      headerText = "Wähle eine Farbe für die Wildcard"
-      contentText = "Bitte wähle:"
+      title = "Select color"
+      headerText = "Choose a color for the wildcard"
+      contentText = "Please select:"
     }
       val buttonTypes = Seq(
-        new ButtonType("Rot", ButtonData.OKDone),
-        new ButtonType("Blau", ButtonData.OKDone),
-        new ButtonType("Grün", ButtonData.OKDone),
-        new ButtonType("Gelb", ButtonData.OKDone),
-        new ButtonType("Abbrechen", ButtonData.CancelClose)
+        new ButtonType("Red", ButtonData.OKDone),
+        new ButtonType("Blue", ButtonData.OKDone),
+        new ButtonType("Green", ButtonData.OKDone),
+        new ButtonType("Yellow", ButtonData.OKDone),
+        new ButtonType("Cancel", ButtonData.CancelClose)
       )
 
     dialog.dialogPane().getButtonTypes.addAll(buttonTypes.map(_.delegate): _*)
 
     val colorMap = Map(
-      "Rot" -> "red",
-      "Blau" -> "blue",
-      "Grün" -> "green",
-      "Gelb" -> "yellow"
+      "Red" -> "red",
+      "Blue" -> "blue",
+      "Green" -> "green",
+      "Yellow" -> "yellow"
     )
 
     dialog.resultConverter = (buttonType: ButtonType) => {
@@ -339,10 +346,10 @@ class GameScreen(players: Int, cardsPerPlayer: Int) extends StackPane {
       case Success(state) =>
         if (unoCaller.isDefined) {
           val unoPlayer = unoCaller.get + 1
-          gameInfo.text = s"Spieler $unoPlayer ruft UNO!"
+          gameInfo.text = s"Player $unoPlayer calls UNO!"
           unoCaller = None
         } else {
-          gameInfo.text = s"Spieler ${state.currentPlayerIndex + 1} ist am Zug"
+          gameInfo.text = s"It is Player ${state.currentPlayerIndex + 1}'s turn"
         }
         gameInfo.opacity = 1.0
 
@@ -364,7 +371,7 @@ class GameScreen(players: Int, cardsPerPlayer: Int) extends StackPane {
           player2HandView.children.setAll(createCardView(player2Cards, hidden = true).map(_.delegate): _*)
         }
       case Failure(e) =>
-        gameInfo.text = s"Fehler: ${e.getMessage}"
+        gameInfo.text = s"Error: ${e.getMessage}"
         gameInfo.opacity = 1.0
     }
   }

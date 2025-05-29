@@ -25,12 +25,12 @@ object ColorPrinter {
       case ActionCard(color, action) =>
         println(s"${colorCode}ActionCard($color, $action)$Reset")
 
-      case  wild: WildCard =>
-        val actionString = wild.action match {
-          case "wild" => "Wild Card"
-          case "wild draw four" => "Wild Draw Four"
-        }
-        println(s"${Reset}$actionString$Reset")
+//      case  wild: WildCard =>
+//        val actionString = wild.action match {
+//          case "wild" => "Wild Card"
+//          case "wild draw four" => "Wild Draw Four"
+//        }
+        //println(s"${Reset}$actionString$Reset")
     }
   }
 }

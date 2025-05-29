@@ -1,6 +1,7 @@
 package de.htwg.se.uno.aview.gui
 
 import scalafx.application.JFXApp3.PrimaryStage
+import scalafx.collections.ObservableBuffer
 import scalafx.scene.layout.StackPane
 import scalafx.scene.layout.VBox
 import scalafx.scene.control.{Button, ComboBox}
@@ -23,7 +24,7 @@ object SetupScreen {
 
     val defaultCardsPerPlayer = 7
 
-    val playersInput = new ComboBox[Int](2 to 10) {
+    val playersInput = new ComboBox[Int](ObservableBuffer(2 to 10: _*)) {
       promptText = "Number of Players (2-10)"
       margin = Insets(20)
       minWidth = 300
@@ -60,20 +61,25 @@ object SetupScreen {
 
       cursor = Cursor.Hand
 
-      onAction = _ =>
+      onAction = _ => {
         try {
-          val players = playersInput.value.value
-          if (players < 2 || players > 10) throw new NumberFormatException("Invalid number of Players")
+          playersInput.value.value match {
+            case players if players >= 2 && players <= 10 =>
+              val gameScreen = new GameScreen(players, defaultCardsPerPlayer)
+              primaryStage.scene = new Scene(gameScreen) {
+                fill = Color.DarkRed
+              }
 
-          val gameScreen = new GameScreen(players, defaultCardsPerPlayer)
-
-          primaryStage.scene = new Scene(gameScreen) {
-            fill = Color.DarkRed
+            case _ =>
+              println("Please select a valid number of players (2-10)!")
           }
         } catch {
-          case _: Exception =>
-            println("Please select a valid number of players!")
+          case _: NullPointerException =>
+            println("Please select a number of players first!")
+          case e: Exception =>
+            println(s"Unexpected error: ${e.getMessage}")
         }
+      }
     }
 
     val layout = new VBox {
@@ -97,21 +103,6 @@ object SetupScreen {
         startButton
       )
     }
-
-//    val backgroundGradient = new RadialGradient(
-//      focusAngle = 0,
-//      focusDistance = 0,
-//      centerX = 0.5,
-//      centerY = 0.5,
-//      radius = 1,
-//      proportional = true,
-//      cycleMethod = CycleMethod.NoCycle,
-//      stops = Seq(
-//        Stop(0.0, Color.web("#FF4500")),
-//        Stop(0.5, Color.web("#8B0000")),
-//        Stop(1.0, Color.web("#8B0000"))
-//      )
-//    )
 
     new StackPane {
       children = Seq(

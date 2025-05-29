@@ -118,10 +118,24 @@ class GameScreen(players: Int, cardsPerPlayer: Int) extends StackPane {
     style = buttonStyle
     onAction = _ => System.exit(0)
   }
-  
+
   private val youLabel = new Label {
     text = "You"
     style = "-fx-text-fill: white; -fx-font-size: 20pt;"
+  }
+
+  private val playerLeftHandView = new VBox {
+    spacing = -60
+    alignment = Pos.CenterLeft
+    padding = Insets(10)
+    pickOnBounds = false
+  }
+
+  private val playerRightHandView = new VBox {
+    spacing = -60
+    alignment = Pos.CenterRight
+    padding = Insets(10)
+    pickOnBounds = false
   }
 
   children = Seq(
@@ -145,9 +159,26 @@ class GameScreen(players: Int, cardsPerPlayer: Int) extends StackPane {
       alignment = Pos.BottomCenter
       spacing = 10
       children = Seq(
-        youLabel,
+        new Label {
+          text = s"You (Player ${GameBoard.gameState.map(_.currentPlayerIndex + 1).getOrElse(1)})"
+          style = "-fx-text-fill: white; -fx-font-size: 20pt;"
+        },
         player1HandView
       )
+      pickOnBounds = false
+    },
+
+    new VBox {
+      alignment = Pos.CenterLeft
+      spacing = 10
+      children = Seq(playerLeftHandView)
+      pickOnBounds = false
+    },
+
+    new VBox {
+      alignment = Pos.CenterRight
+      spacing = 10
+      children = Seq(playerRightHandView)
       pickOnBounds = false
     },
 
@@ -166,7 +197,7 @@ class GameScreen(players: Int, cardsPerPlayer: Int) extends StackPane {
 
     new VBox {
       alignment = Pos.BottomRight
-      padding = Insets(0, 100, 100, 0)
+      padding = Insets(0, 150, 100, 0)
       spacing = 10
       children = Seq(drawButton, unoButton)
       pickOnBounds = false
@@ -185,6 +216,7 @@ class GameScreen(players: Int, cardsPerPlayer: Int) extends StackPane {
       pickOnBounds = false
     }
   )
+
 
   private def buttonStyle: String =
     "-fx-font-family: 'sans-serif'; " +
@@ -268,20 +300,21 @@ class GameScreen(players: Int, cardsPerPlayer: Int) extends StackPane {
   private def showInvalidMoveMessage(): Unit = {
     new Alert(Alert.AlertType.Warning) {
       title = "Invalid move"
-      headerText = "Diese Karte kann nicht gespielt werden"
-      contentText = "Sie passt nicht zur obersten Karte auf dem Ablagestapel."
+      headerText = "This card can not be played"
+      contentText = "It does not match the top card on the discard pile."
     }.showAndWait()
   }
 
+
   private def showColorPickerDialog(wildCard: WildCard): Unit = {
     val dialog = new Dialog[String]() {
-      title = "Farbe wählen"
-      headerText = "Wähle eine Farbe für die Wildcard"
+      title = "Choose color"
+      headerText = "Choose a color for the wildcard"
     }
 
     val buttonTypes = Seq("Red", "Blue", "Green", "Yellow").map { color =>
       new ButtonType(color, ButtonBar.ButtonData.OKDone)
-    } :+ new ButtonType("Abbrechen", ButtonBar.ButtonData.CancelClose)
+    } :+ new ButtonType("Cancel", ButtonBar.ButtonData.CancelClose)
 
     dialog.dialogPane().getButtonTypes.addAll(buttonTypes.map(_.delegate).toSeq: _*)
 
@@ -322,7 +355,7 @@ class GameScreen(players: Int, cardsPerPlayer: Int) extends StackPane {
         state.players.zipWithIndex.find(_._1.cards.isEmpty) match {
           case Some((_, index)) =>
             gameOver = true
-            winnerLabel.text = s"Spieler ${index + 1} hat gewonnen!"
+            winnerLabel.text = s"Player ${index + 1} has won!"
             winnerLabel.visible = true
             drawButton.disable = true
             unoButton.disable = true
@@ -334,12 +367,12 @@ class GameScreen(players: Int, cardsPerPlayer: Int) extends StackPane {
 
         if (unoCaller.isDefined) {
           val unoPlayer = unoCaller.get + 1
-          gameInfo.text = s"Player $unoPlayer ruft UNO!"
+          gameInfo.text = s"Player $unoPlayer calls UNO!"
           unoCaller = None
         } else {
-          gameInfo.text = s"Player ${state.currentPlayerIndex + 1} ist am Zug"
+          gameInfo.text = s"It is Player ${state.currentPlayerIndex + 1}'s turn"
         }
-        
+
         youLabel.text = s"You (Player ${state.currentPlayerIndex + 1})"
 
         val pause = new PauseTransition(Duration(2000))
@@ -349,29 +382,112 @@ class GameScreen(players: Int, cardsPerPlayer: Int) extends StackPane {
         }
         pause.onFinished = _ => fade.play()
         pause.play()
-        
+
         discardPileView.children.setAll(createCardView(state.discardPile.take(1)).map(_.delegate): _*)
-        
+
         val currentPlayerHand = state.players(state.currentPlayerIndex).cards
         player1HandView.children.setAll(createCardView(currentPlayerHand).map(_.delegate): _*)
-        
-        val nextPlayerIndex = (state.currentPlayerIndex + 1) % state.players.length
-        val nextPlayerCardCount = state.players(nextPlayerIndex).cards.length
+
         val backImage = new Image("file:src/main/resources/cards/back.png")
-        val backCards = Seq.fill(nextPlayerCardCount) {
-          new ImageView(backImage) {
-            fitWidth = 130
-            fitHeight = 190
-            preserveRatio = true
-          }
+        val playerCount = state.players.length
+        val currentPlayerIndex = state.currentPlayerIndex
+
+        playerCount match {
+          case 2 =>
+            //cards of other player
+            val nextPlayerIndex = (currentPlayerIndex + 1) % playerCount
+            val nextPlayerCardsCount = state.players(nextPlayerIndex).cards.length
+            val backCards = Seq.fill(nextPlayerCardsCount) {
+              new ImageView(backImage) {
+                fitWidth = 130
+                fitHeight = 190
+                preserveRatio = true
+              }
+            }
+            //cards top
+            player2HandView.children.setAll(backCards.map(_.delegate): _*)
+
+            //cards left/ right clean
+            playerLeftHandView.children.clear()
+            playerRightHandView.children.clear()
+
+          case 3 =>
+            //cards left player
+            val leftPlayerIndex = (currentPlayerIndex + 1) % playerCount
+            val leftPlayerCardsCount = state.players(leftPlayerIndex).cards.length
+            val leftBackCards = Seq.fill(leftPlayerCardsCount) {
+              new ImageView(backImage) {
+                fitWidth = 130
+                fitHeight = 190
+                preserveRatio = true
+                rotate = 90
+              }
+            }
+            playerLeftHandView.children.setAll(leftBackCards.map(_.delegate): _*)
+
+            //cards top player
+            val topPlayerIndex = (currentPlayerIndex + 2) % playerCount
+            val topPlayerCardsCount = state.players(topPlayerIndex).cards.length
+            val topBackCards = Seq.fill(topPlayerCardsCount) {
+              new ImageView(backImage) {
+                fitWidth = 130
+                fitHeight = 190
+                preserveRatio = true
+              }
+            }
+            player2HandView.children.setAll(topBackCards.map(_.delegate): _*)
+            playerRightHandView.children.clear()
+
+          case x if x >= 4 =>
+            //cards left player
+            val leftPlayerIndex = (currentPlayerIndex + 1) % playerCount
+            val leftPlayerCardsCount = state.players(leftPlayerIndex).cards.length
+            val leftBackCards = Seq.fill(leftPlayerCardsCount) {
+              new ImageView(backImage) {
+                fitWidth = 130
+                fitHeight = 190
+                preserveRatio = true
+                rotate = 90
+              }
+            }
+
+            //cards player right
+            val rightPlayerIndex = (currentPlayerIndex + 2) % playerCount
+            val rightPlayerCardsCount = state.players(rightPlayerIndex).cards.length
+            val rightBackCards = Seq.fill(rightPlayerCardsCount) {
+              new ImageView(backImage) {
+                fitWidth = 130
+                fitHeight = 190
+                preserveRatio = true
+                rotate = -90
+              }
+            }
+
+            //cards top player
+            val topPlayerIndex = (currentPlayerIndex + 3) % playerCount
+            val topPlayerCardsCount = state.players(topPlayerIndex).cards.length
+            val topBackCards = Seq.fill(topPlayerCardsCount) {
+              new ImageView(backImage) {
+                fitWidth = 130
+                fitHeight = 190
+                preserveRatio = true
+              }
+            }
+
+            playerLeftHandView.children.setAll(leftBackCards.map(_.delegate): _*)
+            playerRightHandView.children.setAll(rightBackCards.map(_.delegate): _*)
+            player2HandView.children.setAll(topBackCards.map(_.delegate): _*)
+
+          case _ =>
+            playerLeftHandView.children.clear()
+            playerRightHandView.children.clear()
+            player2HandView.children.clear()
         }
-        player2HandView.children.setAll(backCards.map(_.delegate): _*)
 
       case Failure(e) =>
-        gameInfo.text = s"Fehler: ${e.getMessage}"
+        gameInfo.text = s"Error: ${e.getMessage}"
     }
   }
-
   update()
   GameBoard.addObserver(() => update())
 }

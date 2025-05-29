@@ -412,6 +412,7 @@ class GameScreen(players: Int, cardsPerPlayer: Int) extends StackPane {
                 fitWidth = 130
                 fitHeight = 190
                 preserveRatio = true
+                rotate = 180
               }
             }
             //cards top
@@ -481,6 +482,7 @@ class GameScreen(players: Int, cardsPerPlayer: Int) extends StackPane {
                 fitWidth = 130
                 fitHeight = 190
                 preserveRatio = true
+                rotate = 180
               }
             }
 

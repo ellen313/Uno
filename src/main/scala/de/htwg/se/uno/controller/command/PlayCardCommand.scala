@@ -13,7 +13,7 @@ case class PlayCardCommand(card: Card, chooseColor: Option[String] = None) exten
       previousState = Some(state)
       val color = chooseColor.getOrElse("")
 
-      if (state.isValidPlay(card, state.discardPile.headOption, state.selectedColor)) {
+      if (state.isValidPlay(card, state.discardPile.headOption, chooseColor.orElse(state.selectedColor))) {
         validPlay = true
 
         val newState = state.playCard(card)

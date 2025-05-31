@@ -34,8 +34,8 @@ case class PlayerHand(cards: List[Card], var hasSaidUno: Boolean = false) {
         println(s"$color-$number")
       case ActionCard(color, actionType) =>
         println(s"$color-$actionType")
-      case WildCard(actionType) =>
-        println(s"$actionType")
+//      case WildCard(actionType) =>
+//        println(s"$actionType")
     }
   }
 
@@ -43,7 +43,7 @@ case class PlayerHand(cards: List[Card], var hasSaidUno: Boolean = false) {
     val sortedCards = cards.sortBy {
       case NumberCard(color, number) => (1, color, number)
       case ActionCard(color, _) => (2, color, Int.MaxValue)
-      case WildCard(_) => (3, "", Int.MaxValue)
+//      case WildCard(_) => (3, "", Int.MaxValue)
     }
     copy(cards = sortedCards)
   }

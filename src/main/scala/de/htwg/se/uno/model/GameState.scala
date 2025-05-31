@@ -97,7 +97,7 @@ case class GameState( players: List[PlayerHand], currentPlayerIndex: Int,
     }
 
     val newSelectedColor = card match {
-      case WildCard(_) | WildCard("wild draw four") => chosenColor
+      //case WildCard(_) | WildCard("wild draw four") => chosenColor
       case _ => None
     }
 
@@ -107,7 +107,7 @@ case class GameState( players: List[PlayerHand], currentPlayerIndex: Int,
     this.copy(
       players = players.updated(currentPlayerIndex, updatedHand),
       discardPile = updatedDiscardPile,
-      selectedColor = if (card.isInstanceOf[WildCard]) selectedColor else None,
+      //selectedColor = if (card.isInstanceOf[WildCard]) selectedColor else None,
     )
   }
 
@@ -136,7 +136,7 @@ case class GameState( players: List[PlayerHand], currentPlayerIndex: Int,
     selectedColor match {
       case Some(color) =>
         card match {
-          case WildCard(_) => true
+          //case WildCard(_) => true
           case ActionCard(c, _) => c == color
           case NumberCard(c, v) => c == color
         }
@@ -149,7 +149,7 @@ case class GameState( players: List[PlayerHand], currentPlayerIndex: Int,
             (card, tCard) match {
 
               case (ActionCard(_, "draw two"), ActionCard(_, "draw two")) => false
-              case (WildCard("wild draw four"), WildCard("wild draw four")) => false
+              //case (WildCard("wild draw four"), WildCard("wild draw four")) => false
 
               case (ActionCard(color, "draw two"), NumberCard(topColor, _)) =>
                 color == topColor || selectedColor.contains(color)
@@ -166,10 +166,10 @@ case class GameState( players: List[PlayerHand], currentPlayerIndex: Int,
               case (ActionCard(color, action), ActionCard(topColor, topAction)) =>
                 color == topColor || action == topAction || selectedColor.contains(color)
 
-              case (WildCard("wild"), _) => true
-              case (WildCard("wild draw four"), _) => true
-              case (_, WildCard("wild")) => true
-              case (_, WildCard("wild draw four")) => true
+//              case (WildCard("wild"), _) => true
+//              case (WildCard("wild draw four"), _) => true
+//              case (_, WildCard("wild")) => true
+//              case (_, WildCard("wild draw four")) => true
 
               case _ => false
             }
@@ -193,27 +193,27 @@ case class GameState( players: List[PlayerHand], currentPlayerIndex: Int,
     val currentPlayer = players(currentPlayerIndex)
 
     input match {
-      case s"play wild:$index:$color" =>
-        scala.util.Try(index.toInt) match {
-          case scala.util.Success(index) if index >= 0 && index < currentPlayer.cards.length =>
-            currentPlayer.cards(index) match {
-              case wild: WildCard =>
-                val playedCard = WildCard(wild.action)
-                val updatedGame =
-                  setSelectedColor(color)
-                  playCard(playedCard)
-                Success(updatedGame)
-
-              case _ =>
-                Failure("Selected card is not a wild card.")
-            }
-
-          case scala.util.Success(_) =>
-            Failure("Invalid card index.")
-
-          case scala.util.Failure(_) =>
-            Failure("Card index must be a number.")
-        }
+//      case s"play wild:$index:$color" =>
+//        scala.util.Try(index.toInt) match {
+//          case scala.util.Success(index) if index >= 0 && index < currentPlayer.cards.length =>
+//            currentPlayer.cards(index) match {
+//              case wild: WildCard =>
+//                val playedCard = WildCard(wild.action)
+//                val updatedGame =
+//                  setSelectedColor(color)
+//                  playCard(playedCard)
+//                Success(updatedGame)
+//
+//              case _ =>
+//                Failure("Selected card is not a wild card.")
+//            }
+//
+//          case scala.util.Success(_) =>
+//            Failure("Invalid card index.")
+//
+//          case scala.util.Failure(_) =>
+//            Failure("Card index must be a number.")
+//        }
 
       case s"play card:$index" =>
         scala.util.Try(index.toInt) match {

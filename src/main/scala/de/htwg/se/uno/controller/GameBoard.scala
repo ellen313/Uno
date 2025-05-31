@@ -53,9 +53,9 @@ object GameBoard extends Observable {
       action <- Card.actions
       color <- Card.colors
     } yield Card("action")
-      val wildCards = List.fill(4)(WildCard("wild")) ++ List.fill(4)(WildCard("wild draw four"))
+//      val wildCards = List.fill(4)(WildCard("wild")) ++ List.fill(4)(WildCard("wild draw four"))
 
-      numberCards.toList ++ actionCards.toList ++ wildCards
+      numberCards.toList ++ actionCards.toList //++ wildCards
   }
 
   def shuffleDeck(): (List[Card], List[Card]) = {

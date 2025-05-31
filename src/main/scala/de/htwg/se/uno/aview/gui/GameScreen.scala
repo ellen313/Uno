@@ -315,44 +315,42 @@ class GameScreen(players: Int, cardsPerPlayer: Int) extends StackPane {
   }
 
 
+  // Alternative Implementierung mit direkter Farbauswahl
   private def showColorPickerDialog(wildCard: WildCard): Unit = {
-    val dialog = new Dialog[String]() {
-      title = "Choose color"
+    val alert = new Alert(Alert.AlertType.Confirmation) {
+      title = "Choose Color"
       headerText = "Choose a color for the wildcard"
+      contentText = "Which color do you want to choose?"
     }
 
-    val buttonTypes = Seq("Red", "Blue", "Green", "Yellow").map { color =>
-      new ButtonType(color, ButtonBar.ButtonData.OKDone)
-    } :+ new ButtonType("Cancel", ButtonBar.ButtonData.CancelClose)
+    val redButton = new ButtonType("Red")
+    val blueButton = new ButtonType("Blue")
+    val greenButton = new ButtonType("Green")
+    val yellowButton = new ButtonType("Yellow")
+    val cancelButton = new ButtonType("Cancel", ButtonBar.ButtonData.CancelClose)
 
-    dialog.dialogPane().getButtonTypes.addAll(buttonTypes.map(_.delegate).toSeq: _*)
+    alert.buttonTypes = Seq(redButton, blueButton, greenButton, yellowButton, cancelButton)
 
-    val colorMap = Map("Red" -> "red", "Blue" -> "blue", "Green" -> "green", "Yellow" -> "yellow")
-
-    dialog.resultConverter = (bt: ButtonType) => {
-      if (bt.getButtonData == ButtonBar.ButtonData.OKDone)
-        colorMap.get(bt.getText).orNull
-      else
-        null
+    alert.showAndWait() match {
+      case Some(`redButton`) => playWildCard(wildCard, "red")
+      case Some(`blueButton`) => playWildCard(wildCard, "blue")
+      case Some(`greenButton`) => playWildCard(wildCard, "green")
+      case Some(`yellowButton`) => playWildCard(wildCard, "yellow")
+      case _ => println("Color selection cancelled")
     }
+  }
 
-    dialog.showAndWait() match {
-      case Some(color: String) if color.nonEmpty =>
-        println(s"Color chosen: $color for wildcard $wildCard")
-        GameBoard.executeCommand(PlayCardCommand(wildCard, Some(color)))
-        GameBoard.gameState match {
-          case Success(newState) =>
-            println(s"Wildcard played, new player index: ${newState.currentPlayerIndex}")
-            update()
-          case Failure(e) =>
-            println(s"Error after playing wildcard: ${e.getMessage}")
-        }
+  private def playWildCard(wildCard: WildCard, color: String): Unit = {
+    println(s"Playing wildcard with color: $color")
 
-      case Some(null) | None =>
-        println("No color selected or dialog was cancelled.")
-
-      case Some(other) =>
-        println(s"Unexpected dialog result: $other (${Option(other).map(_.getClass.getName).getOrElse("null")})")
+    GameBoard.executeCommand(PlayCardCommand(wildCard, Some(color)))
+    GameBoard.gameState match {
+      case Success(newState) =>
+        println(s"Wildcard played successfully, new player index: ${newState.currentPlayerIndex}")
+        update()
+      case Failure(e) =>
+        println(s"Error after playing wildcard: ${e.getMessage}")
+        showInvalidMoveMessage()
     }
   }
 

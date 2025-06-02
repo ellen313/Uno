@@ -15,6 +15,7 @@ import scalafx.scene.text.{Font, FontWeight}
 import scalafx.scene.Cursor
 import scalafx.util.Duration
 import scalafx.Includes.*
+import scalafx.application.Platform
 
 import scala.util.{Failure, Success}
 
@@ -355,148 +356,149 @@ class GameScreen(players: Int, cardsPerPlayer: Int) extends StackPane {
   }
 
   def update(): Unit = {
-    if (gameOver) return
+//    Platform.runLater(() => {
+      if (gameOver) return
 
-    GameBoard.gameState match {
-      case Success(state) =>
-        updateBackground(state.isReversed)
-        state.players.zipWithIndex.find(_._1.cards.isEmpty) match {
-          case Some((_, index)) =>
-            gameOver = true
-            winnerLabel.text = s"Player ${index + 1} has won!"
-            winnerLabel.visible = true
-            drawButton.disable = true
-            unoButton.disable = true
-            player1HandView.children.foreach(_.setDisable(true))
-            player2HandView.children.foreach(_.setDisable(true))
-            return
-          case None =>
-        }
+      GameBoard.gameState match {
+        case Success(state) =>
+          updateBackground(state.isReversed)
+          state.players.zipWithIndex.find(_._1.cards.isEmpty) match {
+            case Some((_, index)) =>
+              gameOver = true
+              winnerLabel.text = s"Player ${index + 1} has won!"
+              winnerLabel.visible = true
+              drawButton.disable = true
+              unoButton.disable = true
+              player1HandView.children.foreach(_.setDisable(true))
+              player2HandView.children.foreach(_.setDisable(true))
+              return
+            case None =>
+          }
 
-        if (unoCaller.isDefined) {
-          val unoPlayer = unoCaller.get + 1
-          gameInfo.text = s"Player $unoPlayer calls UNO!"
-          unoCaller = None
-        } else {
-          gameInfo.text = s"It is Player ${state.currentPlayerIndex + 1}'s turn"
-        }
+          if (unoCaller.isDefined) {
+            val unoPlayer = unoCaller.get + 1
+            gameInfo.text = s"Player $unoPlayer calls UNO!"
+            unoCaller = None
+          } else {
+            gameInfo.text = s"It is Player ${state.currentPlayerIndex + 1}'s turn"
+          }
 
-        youLabel.text = s"You (Player ${state.currentPlayerIndex + 1})"
+          youLabel.text = s"You (Player ${state.currentPlayerIndex + 1})"
 
-        val pause = new PauseTransition(Duration(2000))
-        val fade = new FadeTransition(Duration(1000), gameInfo) {
-          fromValue = 1.0
-          toValue = 0.0
-        }
-        pause.onFinished = _ => fade.play()
-        pause.play()
+          val pause = new PauseTransition(Duration(2000))
+          val fade = new FadeTransition(Duration(1000), gameInfo) {
+            fromValue = 1.0
+            toValue = 0.0
+          }
+          pause.onFinished = _ => fade.play()
+          pause.play()
 
-        discardPileView.children.setAll(createCardView(state.discardPile.take(1)).map(_.delegate): _*)
+          discardPileView.children.setAll(createCardView(state.discardPile.take(1)).map(_.delegate): _*)
 
-        val currentPlayerHand = state.players(state.currentPlayerIndex).cards
-        player1HandView.children.setAll(createCardView(currentPlayerHand).map(_.delegate): _*)
+          val currentPlayerHand = state.players(state.currentPlayerIndex).cards
+          player1HandView.children.setAll(createCardView(currentPlayerHand).map(_.delegate): _*)
 
-        val backImage = new Image("file:src/main/resources/cards/back.png")
-        val playerCount = state.players.length
-        val currentPlayerIndex = state.currentPlayerIndex
+          val backImage = new Image("file:src/main/resources/cards/back.png")
+          val playerCount = state.players.length
+          val currentPlayerIndex = state.currentPlayerIndex
 
-        playerCount match {
-          case 2 =>
-            //cards of other player
-            val nextPlayerIndex = (currentPlayerIndex + 1) % playerCount
-            val nextPlayerCardsCount = state.players(nextPlayerIndex).cards.length
-            val backCards = Seq.fill(nextPlayerCardsCount) {
-              new ImageView(backImage) {
-                fitWidth = 130
-                fitHeight = 190
-                preserveRatio = true
-                rotate = 180
+          playerCount match {
+            case 2 =>
+              //cards of other player
+              val nextPlayerIndex = (currentPlayerIndex + 1) % playerCount
+              val nextPlayerCardsCount = state.players(nextPlayerIndex).cards.length
+              val backCards = Seq.fill(nextPlayerCardsCount) {
+                new ImageView(backImage) {
+                  fitWidth = 130
+                  fitHeight = 190
+                  preserveRatio = true
+                  rotate = 180
+                }
               }
-            }
-            //cards top
-            player2HandView.children.setAll(backCards.map(_.delegate): _*)
+              //cards top
+              player2HandView.children.setAll(backCards.map(_.delegate): _*)
 
-            //cards left/ right clean
-            playerLeftHandView.children.clear()
-            playerRightHandView.children.clear()
+              //cards left/ right clean
+              playerLeftHandView.children.clear()
+              playerRightHandView.children.clear()
 
-          case 3 =>
-            //cards left player
-            val leftPlayerIndex = (currentPlayerIndex + 1) % playerCount
-            val leftPlayerCardsCount = state.players(leftPlayerIndex).cards.length
-            val leftBackCards = Seq.fill(leftPlayerCardsCount) {
-              new ImageView(backImage) {
-                fitWidth = 130
-                fitHeight = 190
-                preserveRatio = true
-                rotate = 90
+            case 3 =>
+              //cards left player
+              val leftPlayerIndex = (currentPlayerIndex + 1) % playerCount
+              val leftPlayerCardsCount = state.players(leftPlayerIndex).cards.length
+              val leftBackCards = Seq.fill(leftPlayerCardsCount) {
+                new ImageView(backImage) {
+                  fitWidth = 130
+                  fitHeight = 190
+                  preserveRatio = true
+                  rotate = 90
+                }
               }
-            }
-            playerLeftHandView.children.setAll(leftBackCards.map(_.delegate): _*)
+              playerLeftHandView.children.setAll(leftBackCards.map(_.delegate): _*)
 
-            //cards top player
-            val topPlayerIndex = (currentPlayerIndex + 2) % playerCount
-            val topPlayerCardsCount = state.players(topPlayerIndex).cards.length
-            val topBackCards = Seq.fill(topPlayerCardsCount) {
-              new ImageView(backImage) {
-                fitWidth = 130
-                fitHeight = 190
-                preserveRatio = true
+              //cards top player
+              val topPlayerIndex = (currentPlayerIndex + 2) % playerCount
+              val topPlayerCardsCount = state.players(topPlayerIndex).cards.length
+              val topBackCards = Seq.fill(topPlayerCardsCount) {
+                new ImageView(backImage) {
+                  fitWidth = 130
+                  fitHeight = 190
+                  preserveRatio = true
+                }
               }
-            }
-            player2HandView.children.setAll(topBackCards.map(_.delegate): _*)
-            playerRightHandView.children.clear()
+              player2HandView.children.setAll(topBackCards.map(_.delegate): _*)
+              playerRightHandView.children.clear()
 
-          case x if x >= 4 =>
-            //cards left player
-            val leftPlayerIndex = (currentPlayerIndex + 1) % playerCount
-            val leftPlayerCardsCount = state.players(leftPlayerIndex).cards.length
-            val leftBackCards = Seq.fill(leftPlayerCardsCount) {
-              new ImageView(backImage) {
-                fitWidth = 130
-                fitHeight = 190
-                preserveRatio = true
-                rotate = 90
+            case x if x >= 4 =>
+              //cards left player
+              val leftPlayerIndex = (currentPlayerIndex + 1) % playerCount
+              val leftPlayerCardsCount = state.players(leftPlayerIndex).cards.length
+              val leftBackCards = Seq.fill(leftPlayerCardsCount) {
+                new ImageView(backImage) {
+                  fitWidth = 130
+                  fitHeight = 190
+                  preserveRatio = true
+                  rotate = 90
+                }
               }
-            }
 
-            //cards player right
-            val rightPlayerIndex = (currentPlayerIndex + 2) % playerCount
-            val rightPlayerCardsCount = state.players(rightPlayerIndex).cards.length
-            val rightBackCards = Seq.fill(rightPlayerCardsCount) {
-              new ImageView(backImage) {
-                fitWidth = 130
-                fitHeight = 190
-                preserveRatio = true
-                rotate = -90
+              //cards player right
+              val rightPlayerIndex = (currentPlayerIndex + 2) % playerCount
+              val rightPlayerCardsCount = state.players(rightPlayerIndex).cards.length
+              val rightBackCards = Seq.fill(rightPlayerCardsCount) {
+                new ImageView(backImage) {
+                  fitWidth = 130
+                  fitHeight = 190
+                  preserveRatio = true
+                  rotate = -90
+                }
               }
-            }
 
-            //cards top player
-            val topPlayerIndex = (currentPlayerIndex + 3) % playerCount
-            val topPlayerCardsCount = state.players(topPlayerIndex).cards.length
-            val topBackCards = Seq.fill(topPlayerCardsCount) {
-              new ImageView(backImage) {
-                fitWidth = 130
-                fitHeight = 190
-                preserveRatio = true
-                rotate = 180
+              //cards top player
+              val topPlayerIndex = (currentPlayerIndex + 3) % playerCount
+              val topPlayerCardsCount = state.players(topPlayerIndex).cards.length
+              val topBackCards = Seq.fill(topPlayerCardsCount) {
+                new ImageView(backImage) {
+                  fitWidth = 130
+                  fitHeight = 190
+                  preserveRatio = true
+                  rotate = 180
+                }
               }
-            }
 
-            playerLeftHandView.children.setAll(leftBackCards.map(_.delegate): _*)
-            playerRightHandView.children.setAll(rightBackCards.map(_.delegate): _*)
-            player2HandView.children.setAll(topBackCards.map(_.delegate): _*)
+              playerLeftHandView.children.setAll(leftBackCards.map(_.delegate): _*)
+              playerRightHandView.children.setAll(rightBackCards.map(_.delegate): _*)
+              player2HandView.children.setAll(topBackCards.map(_.delegate): _*)
 
-          case _ =>
-            playerLeftHandView.children.clear()
-            playerRightHandView.children.clear()
-            player2HandView.children.clear()
-        }
+            case _ =>
+              playerLeftHandView.children.clear()
+              playerRightHandView.children.clear()
+              player2HandView.children.clear()
+          }
 
-      case Failure(e) =>
-        gameInfo.text = s"Error: ${e.getMessage}"
-    }
+        case Failure(e) =>
+          gameInfo.text = s"Error: ${e.getMessage}"
+      }
   }
   update()
   GameBoard.addObserver(() => update())

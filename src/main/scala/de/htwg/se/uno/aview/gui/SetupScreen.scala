@@ -1,5 +1,6 @@
 package de.htwg.se.uno.aview.gui
 
+import de.htwg.se.uno.controller.GameBoard
 import scalafx.application.JFXApp3.PrimaryStage
 import scalafx.collections.ObservableBuffer
 import scalafx.scene.layout.StackPane
@@ -65,6 +66,7 @@ object SetupScreen {
         try {
           playersInput.value.value match {
             case players if players >= 2 && players <= 10 =>
+              GameBoard.startGame(players, defaultCardsPerPlayer)
               val gameScreen = new GameScreen(players, defaultCardsPerPlayer)
               primaryStage.scene = new Scene(gameScreen) {
                 fill = Color.DarkRed

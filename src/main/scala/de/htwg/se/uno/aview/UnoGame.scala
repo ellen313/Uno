@@ -40,8 +40,9 @@ object UnoGame {
 
     GameBoard.gameState match {
       case scala.util.Success(initialGameState) =>
-        val context = new UnoPhases(initialGameState)
-        val tui = new UnoTUI(context)
+        //val context = new UnoPhases(initialGameState)
+        val controller = GameBoard
+        val tui = new UnoTUI(controller)
         tui.display()
         inputLoop(tui)
         tui

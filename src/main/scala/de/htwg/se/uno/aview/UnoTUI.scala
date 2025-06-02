@@ -2,14 +2,14 @@ package de.htwg.se.uno.aview
 
 import de.htwg.se.uno.model.{state, *}
 import de.htwg.se.uno.util.Observer
-import de.htwg.se.uno.controller.GameBoard
+import de.htwg.se.uno.controller.{ControllerInterface, GameBoard}
 import de.htwg.se.uno.controller.command.*
 import de.htwg.se.uno.aview.ColorPrinter.*
 import de.htwg.se.uno.model.state.UnoPhases
 
 import scala.io.StdIn.readLine
 
-class UnoTUI(context: UnoPhases) extends Observer {
+class UnoTUI(controller: ControllerInterface) extends Observer {
 
   private var gameShouldExit = false
   var selectedColor: Option[String] = None

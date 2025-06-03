@@ -2,14 +2,14 @@ package de.htwg.se.uno.aview
 
 import de.htwg.se.uno.model.{state, *}
 import de.htwg.se.uno.util.Observer
-import de.htwg.se.uno.controller.GameBoard
+import de.htwg.se.uno.controller.{ControllerInterface, GameBoard}
 import de.htwg.se.uno.controller.command.*
 import de.htwg.se.uno.aview.ColorPrinter.*
 import de.htwg.se.uno.model.state.UnoPhases
 
 import scala.io.StdIn.readLine
 
-class UnoTui(context: UnoPhases) extends Observer {
+class UnoTUI(controller: ControllerInterface) extends Observer {
 
   private var gameShouldExit = false
   var selectedColor: Option[String] = None
@@ -69,9 +69,9 @@ class UnoTui(context: UnoPhases) extends Observer {
               println("Playing drawn card...")
               GameBoard.updateState(newState)
 
-              val chosenColor =
-                if (drawnCard.isInstanceOf[WildCard]) Some(chooseWildColor())
-                else None
+              val chosenColor = None
+//                if (drawnCard.isInstanceOf[WildCard]) Some(chooseWildColor())
+//                else None
 
               GameBoard.executeCommand(PlayCardCommand(drawnCard, chosenColor))
             } else {
@@ -91,10 +91,10 @@ class UnoTui(context: UnoPhases) extends Observer {
             scala.util.Try(input.toInt) match {
               case scala.util.Success(index) if index >= 0 && index < currentPlayer.cards.length =>
                 val chosenCard = currentPlayer.cards(index)
-                val chosenColor =
-                  if (chosenCard.isInstanceOf[WildCard]) Some(chooseWildColor())
-                  else None
-                  
+                val chosenColor = None
+//                  if (chosenCard.isInstanceOf[WildCard]) Some(chooseWildColor())
+//                  else None
+
                 GameBoard.executeCommand(PlayCardCommand(chosenCard, chosenColor))
                 
               case scala.util.Success(_) =>
@@ -113,26 +113,26 @@ class UnoTui(context: UnoPhases) extends Observer {
     }
   }
 
-  def chooseWildColor(inputFunc: () => String = () => readLine()): String = {
-    val colors = List("red", "green", "blue", "yellow")
-    var validColor = false
-    var chosenColor = ""
-
-    while (!validColor) {
-      println("Please choose a color for the Wild Card:")
-      colors.zipWithIndex.foreach { case (c, i) => println(s"$i - $c") }
-
-      inputFunc().trim match {
-        case input if input.matches("[0-3]") =>
-          chosenColor = colors(input.toInt)
-          println(s"Wild Card color changed to: $chosenColor")
-          validColor = true
-        case _ => println("Invalid input. Please enter a number between 0 and 3.")
-      }
-    }
-
-    chosenColor
-  }
+//  def chooseWildColor(inputFunc: () => String = () => readLine()): String = {
+//    val colors = List("red", "green", "blue", "yellow")
+//    var validColor = false
+//    var chosenColor = ""
+//
+//    while (!validColor) {
+//      println("Please choose a color for the Wild Card:")
+//      colors.zipWithIndex.foreach { case (c, i) => println(s"$i - $c") }
+//
+//      inputFunc().trim match {
+//        case input if input.matches("[0-3]") =>
+//          chosenColor = colors(input.toInt)
+//          println(s"Wild Card color changed to: $chosenColor")
+//          validColor = true
+//        case _ => println("Invalid input. Please enter a number between 0 and 3.")
+//      }
+//    }
+//
+//    chosenColor
+//  }
 
   private def showHand(player: PlayerHand): Unit = {
     println("Your cards:")

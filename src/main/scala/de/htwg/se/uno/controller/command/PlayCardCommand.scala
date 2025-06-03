@@ -1,9 +1,7 @@
 package de.htwg.se.uno.controller.command
 
 import de.htwg.se.uno.model.*
-import de.htwg.se.uno.aview.UnoTui
 import de.htwg.se.uno.controller.GameBoard
-import de.htwg.se.uno.model.state.UnoPhases
 import de.htwg.se.uno.util.Command
 
 case class PlayCardCommand(card: Card, chooseColor: Option[String] = None) extends Command {
@@ -15,7 +13,7 @@ case class PlayCardCommand(card: Card, chooseColor: Option[String] = None) exten
       previousState = Some(state)
       val color = chooseColor.getOrElse("")
 
-      if (state.isValidPlay(card, state.discardPile.headOption, state.selectedColor)) {
+      if (state.isValidPlay(card, state.discardPile.headOption, chooseColor.orElse(state.selectedColor))) {
         validPlay = true
 
         val newState = state.playCard(card)

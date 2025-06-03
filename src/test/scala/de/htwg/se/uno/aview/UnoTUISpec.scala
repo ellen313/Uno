@@ -6,7 +6,7 @@ import de.htwg.se.uno.model.*
 import de.htwg.se.uno.model.state.*
 import de.htwg.se.uno.controller.GameBoard
 
-class UnoTuiSpec extends AnyWordSpec with Matchers {
+class UnoTUISpec extends AnyWordSpec with Matchers {
 
   "UnoTui" should {
 
@@ -24,7 +24,7 @@ class UnoTuiSpec extends AnyWordSpec with Matchers {
 
     GameBoard.updateState(gameState)
     val context = new UnoPhases(gameState)
-    val tui = new UnoTui(context)
+    val tui = new UnoTUI(context)
 
     "display the game state without throwing" in {
       GameBoard.gameState match {

@@ -1,13 +1,13 @@
 package de.htwg.se.uno.controller
 
+import de.htwg.se.uno.aview.UnoGame
 import de.htwg.se.uno.model.*
 import de.htwg.se.uno.util.{Command, CommandInvoker, Observable, Observer}
 
 import scala.util.{Failure, Random, Success, Try}
-import de.htwg.se.uno.controller.command.*
 
-object GameBoard extends Observable {
-
+object GameBoard extends Observable, ControllerInterface {
+  
   private var _gameState: Option[GameState] = None
   private val invoker = new CommandInvoker()
 
@@ -53,9 +53,9 @@ object GameBoard extends Observable {
       action <- Card.actions
       color <- Card.colors
     } yield Card("action")
-      val wildCards = List.fill(4)(WildCard("wild")) ++ List.fill(4)(WildCard("wild draw four"))
+//      val wildCards = List.fill(4)(WildCard("wild")) ++ List.fill(4)(WildCard("wild draw four"))
 
-      numberCards.toList ++ actionCards.toList ++ wildCards
+      numberCards.toList ++ actionCards.toList //++ wildCards
   }
 
   def shuffleDeck(): (List[Card], List[Card]) = {
@@ -97,5 +97,10 @@ object GameBoard extends Observable {
   def reset(): Unit = {
     _gameState = None
   }
-  
+
+  override def startGame(players: Int, cardsPerPlayer: Int): Unit = {
+    new Thread(() => {
+      val tui = UnoGame.runUno(Some(players), cardsPerPlayer)
+    }).start()
+  }
 }

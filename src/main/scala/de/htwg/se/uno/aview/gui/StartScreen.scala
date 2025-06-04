@@ -17,28 +17,8 @@ object StartScreen {
       preserveRatio = true
     }
 
-//    val backgroundGradient = new RadialGradient(
-//      focusAngle = 0,
-//      focusDistance = 0,
-//      centerX = 0.5,
-//      centerY = 0.5,
-//      radius = 1,
-//      proportional = true,
-//      cycleMethod = CycleMethod.NoCycle,
-//      stops = Seq(
-//        Stop(0.0, Color.web("#FFA500")),    // Hellorange (Mitte)
-//        Stop(0.5, Color.web("#FF4500")),    // Mittelorange
-//        Stop(1.0, Color.web("#8B0000"))     // Dunkelrot (Rand)
-//      )
-//    )
-
     new StackPane {
       children = Seq(
-//        new Rectangle {
-//          width = 1200
-//          height = 850
-//          fill = backgroundGradient
-//        },
         startImage,
         new VBox {
           spacing = 30

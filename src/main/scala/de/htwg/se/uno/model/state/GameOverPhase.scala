@@ -14,6 +14,4 @@ case class GameOverPhase(context: UnoPhases) extends GamePhase {
   override def playerSaysUno(): GamePhase = this
 
   override def isValidPlay: Boolean = false
-
-  //override def name: String = "GameOverState"
 }

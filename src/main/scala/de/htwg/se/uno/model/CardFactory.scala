@@ -22,7 +22,9 @@ object CardFactory {
       _ <- 1 to 2
     } yield ActionCard(color, action)
 
-    val fullDeck = numberCards ++ actionCards
+    val wildCards = List.fill(4)(WildCard("wild")) ++ List.fill(4)(WildCard("wild draw four"))
+
+    val fullDeck = numberCards ++ actionCards ++ wildCards
 
     Random.shuffle(fullDeck.toList)
   }

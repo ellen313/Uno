@@ -21,13 +21,13 @@ case class PlayCardPhase(context: UnoPhases, card: Card) extends GamePhase {
         context.gameState = handlePenaltyCards(context.gameState, 2).nextPlayer()
         PlayerTurnPhase(context)
 
-//      case WildCard("wild draw four") =>
-//        context.gameState = handlePenaltyCards(context.gameState, 4).nextPlayer()
-//        PlayerTurnPhase(context)
-//
-//      case WildCard("wild") =>
-//        context.gameState = context.gameState.nextPlayer()
-//        PlayerTurnPhase(context)
+      case WildCard("wild draw four") =>
+        context.gameState = handlePenaltyCards(context.gameState, 4).nextPlayer()
+        PlayerTurnPhase(context)
+
+      case WildCard("wild") =>
+        context.gameState = context.gameState.nextPlayer()
+        PlayerTurnPhase(context)
 
       case _ =>
         context.gameState = context.gameState.nextPlayer()

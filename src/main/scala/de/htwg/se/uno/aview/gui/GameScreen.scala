@@ -356,7 +356,6 @@ class GameScreen(players: Int, cardsPerPlayer: Int) extends StackPane {
   }
 
   def update(): Unit = {
-//    Platform.runLater(() => {
       if (gameOver) return
 
       GameBoard.gameState match {

@@ -8,5 +8,4 @@ trait GamePhase {
   def drawCard(): GamePhase
   def playCard(): GamePhase
   def isValidPlay: Boolean
-  //def name: String
 }

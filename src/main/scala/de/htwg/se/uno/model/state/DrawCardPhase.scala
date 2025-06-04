@@ -21,5 +21,4 @@ case class DrawCardPhase(context: UnoPhases) extends GamePhase {
   override def checkForWinner(): GamePhase = this
   override def playerSaysUno(): GamePhase = this
   override def isValidPlay: Boolean = false
-  //override def name: String = "DrawCardState"
 }

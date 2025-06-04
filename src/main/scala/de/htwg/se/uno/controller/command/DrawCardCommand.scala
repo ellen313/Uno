@@ -35,7 +35,6 @@ case class DrawCardCommand() extends Command {
     }
   }  
 
-  // lay card back on draw pile
   override def undo(): Unit = {
     previousState.foreach { oldState =>
       GameBoard.updateState(oldState)

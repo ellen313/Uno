@@ -17,6 +17,7 @@ import scalafx.scene.text.{Font, FontWeight}
 import scalafx.scene.Cursor
 import scalafx.util.Duration
 import scalafx.Includes.*
+import scalafx.scene.effect.DropShadow
 
 import scala.util.{Failure, Success}
 
@@ -243,19 +244,11 @@ class GameScreen(players: Int, cardsPerPlayer: Int) extends StackPane {
   private def createCardView(cards: List[Card], hidden: Boolean = false): Seq[ImageView] = {
     cards.zipWithIndex.map { case (card, index) =>
       val imagePath = cardImagePath(card)
-      new ImageView(new Image(imagePath)) {
+      val cardView = new ImageView(new Image(imagePath)) {
         fitWidth = 130
         fitHeight = 190
         preserveRatio = true
         pickOnBounds = true
-        if (!hidden) {
-          cursor = Cursor.Hand
-          onMouseClicked = (e: MouseEvent) => {
-            println(s"Card $index clicked!")
-            e.consume()
-            playCard(card)
-          }
-        }
 
         if (!hidden && !gameOver) {
           cursor = Cursor.Hand
@@ -264,12 +257,32 @@ class GameScreen(players: Int, cardsPerPlayer: Int) extends StackPane {
             e.consume()
             playCard(card)
           }
-        }
 
-        style = if (!hidden) "-fx-effect: dropshadow(gaussian, white, 5, 0.5, 0, 0);" else ""
+          onMouseEntered = _ => {
+            scaleX = 1.2
+            scaleY = 1.2
+            translateY = -20
+            effect = new DropShadow {
+              radius = 20
+              color = Color.Black
+            }
+          }
+
+          onMouseExited = _ => {
+            scaleX = 1.0
+            scaleY = 1.0
+            translateY = 0
+            effect = null
+          }
+
+          style = "-fx-effect: dropshadow(gaussian, white, 5, 0.5, 0, 0);"
+        }
       }
+
+      cardView
     }
   }
+
 
   private def cardImagePath(card: Card): String = card match {
     case NumberCard(color, number) => s"file:src/main/resources/cards/${number}_$color.png"

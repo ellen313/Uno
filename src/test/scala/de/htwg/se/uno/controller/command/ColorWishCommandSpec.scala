@@ -1,8 +1,9 @@
+import de.htwg.se.uno.controller.controllerComponent.base.GameBoard
+import de.htwg.se.uno.controller.controllerComponent.base.command.ColorWishCommand
 import org.scalatest.matchers.should.Matchers
 import org.scalatest.wordspec.AnyWordSpec
-import de.htwg.se.uno.controller.command.ColorWishCommand
-import de.htwg.se.uno.controller.GameBoard
 import de.htwg.se.uno.model.*
+import de.htwg.se.uno.model.gameComponent.base.GameState
 
 class ColorWishCommandSpec extends AnyWordSpec with Matchers {
 

@@ -2,7 +2,10 @@ package de.htwg.se.uno.model.state
 
 import org.scalatest.matchers.should.Matchers
 import org.scalatest.wordspec.AnyWordSpec
-import de.htwg.se.uno.model._
+import de.htwg.se.uno.model.*
+import de.htwg.se.uno.model.gameComponent.base.GameState
+import de.htwg.se.uno.model.gameComponent.base.state.{PlayerTurnPhase, ReversePhase, UnoPhases}
+import de.htwg.se.uno.model.playerComponent.PlayerHand
 
 class ReversePhaseSpec extends AnyWordSpec with Matchers {
 

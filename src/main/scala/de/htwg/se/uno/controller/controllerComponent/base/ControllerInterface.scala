@@ -1,6 +1,6 @@
-package de.htwg.se.uno.controller
+package de.htwg.se.uno.controller.controllerComponent.base
 
-import de.htwg.se.uno.model.GameState
+import de.htwg.se.uno.model.gameComponent.base.GameState
 import de.htwg.se.uno.util.{Command, Observable}
 
 import scala.util.Try

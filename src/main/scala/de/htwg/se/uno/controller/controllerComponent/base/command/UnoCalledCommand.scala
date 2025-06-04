@@ -1,8 +1,8 @@
-package de.htwg.se.uno.controller.command
+package de.htwg.se.uno.controller.controllerComponent.base.command
 
-import de.htwg.se.uno.controller.GameBoard
-import de.htwg.se.uno.model.GameState
-import de.htwg.se.uno.model.state.{GameOverPhase, UnoPhases}
+import de.htwg.se.uno.controller.controllerComponent.base.GameBoard
+import de.htwg.se.uno.model.gameComponent.base.GameState
+import de.htwg.se.uno.model.gameComponent.base.state.{GameOverPhase, UnoPhases}
 import de.htwg.se.uno.util.Command
 
 case class UnoCalledCommand(context: Option[UnoPhases] = None) extends Command {

@@ -1,6 +1,6 @@
-package de.htwg.se.uno.model.state
+package de.htwg.se.uno.model.gameComponent.base.state
 
-import de.htwg.se.uno.model.GameState
+import de.htwg.se.uno.model.gameComponent.base.GameState
 
 class UnoPhases(var gameState: GameState) {
   private var currentState: GamePhase = StartPhase(this)

@@ -1,6 +1,8 @@
-package de.htwg.se.uno.model.state
+package de.htwg.se.uno.model.gameComponent.base.state
 
 import de.htwg.se.uno.model.*
+import de.htwg.se.uno.model.cardComponent.{ActionCard, Card, WildCard}
+import de.htwg.se.uno.model.gameComponent.base.GameState
 
 case class PlayCardPhase(context: UnoPhases, card: Card) extends GamePhase {
 

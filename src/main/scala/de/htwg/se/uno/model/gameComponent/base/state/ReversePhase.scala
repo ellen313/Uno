@@ -1,4 +1,4 @@
-package de.htwg.se.uno.model.state
+package de.htwg.se.uno.model.gameComponent.base.state
 
 case class ReversePhase(context: UnoPhases) extends GamePhase {
   override def nextPlayer(): GamePhase = {

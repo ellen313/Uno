@@ -1,4 +1,6 @@
-package de.htwg.se.uno.model
+package de.htwg.se.uno.model.playerComponent
+
+import de.htwg.se.uno.model.cardComponent.{ActionCard, Card, NumberCard, WildCard}
 
 import scala.annotation.targetName
 

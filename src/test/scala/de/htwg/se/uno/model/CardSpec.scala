@@ -1,6 +1,7 @@
 import org.scalatest.wordspec.AnyWordSpec
 import org.scalatest.matchers.should.Matchers.*
 import de.htwg.se.uno.model.*
+import de.htwg.se.uno.model.cardComponent.{Card, WildCard}
 
 class CardSpec extends AnyWordSpec {
 

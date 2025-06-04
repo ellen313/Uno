@@ -1,4 +1,5 @@
-import de.htwg.se.uno.model.GameState
+import de.htwg.se.uno.model.gameComponent.base.GameState
+import de.htwg.se.uno.model.gameComponent.base.state.{GamePhase, UnoPhases}
 import org.scalatest.matchers.should.Matchers
 import org.scalatest.wordspec.AnyWordSpec
 import de.htwg.se.uno.model.state.*

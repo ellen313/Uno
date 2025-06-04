@@ -1,6 +1,9 @@
 package de.htwg.se.uno.model.state
 
-import de.htwg.se.uno.model.{GameState, PlayerHand, NumberCard}
+import de.htwg.se.uno.model.cardComponent.NumberCard
+import de.htwg.se.uno.model.gameComponent.base.GameState
+import de.htwg.se.uno.model.gameComponent.base.state.{CheckWinnerPhase, GameOverPhase, PlayerTurnPhase, UnoPhases}
+import de.htwg.se.uno.model.playerComponent.PlayerHand
 import org.scalatest.matchers.should.Matchers
 import org.scalatest.wordspec.AnyWordSpec
 

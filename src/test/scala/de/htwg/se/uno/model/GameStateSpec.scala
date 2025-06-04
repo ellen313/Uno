@@ -2,6 +2,10 @@ package de.htwg.se.uno.model
 
 import de.htwg.se.uno.util.*
 import de.htwg.se.uno.model.*
+import de.htwg.se.uno.model.cardComponent.{ActionCard, NumberCard, WildCard}
+import de.htwg.se.uno.model.gameComponent.base.GameState
+import de.htwg.se.uno.model.gameComponent.{Failure, Success}
+import de.htwg.se.uno.model.playerComponent.PlayerHand
 import org.scalatest.matchers.should.Matchers.*
 import org.scalatest.wordspec.AnyWordSpec
 

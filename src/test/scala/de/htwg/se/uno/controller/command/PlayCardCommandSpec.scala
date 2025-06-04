@@ -1,8 +1,11 @@
+import de.htwg.se.uno.controller.controllerComponent.base.GameBoard
+import de.htwg.se.uno.controller.controllerComponent.base.command.PlayCardCommand
 import org.scalatest.matchers.should.Matchers
 import org.scalatest.wordspec.AnyWordSpec
-import de.htwg.se.uno.controller.command.PlayCardCommand
-import de.htwg.se.uno.controller.GameBoard
-import de.htwg.se.uno.model._
+import de.htwg.se.uno.model.*
+import de.htwg.se.uno.model.cardComponent.{ActionCard, NumberCard, WildCard}
+import de.htwg.se.uno.model.gameComponent.base.GameState
+import de.htwg.se.uno.model.playerComponent.PlayerHand
 
 class PlayCardCommandSpec extends AnyWordSpec with Matchers {
 

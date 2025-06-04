@@ -1,8 +1,9 @@
 package de.htwg.se.uno.model.state
 
+import de.htwg.se.uno.model.gameComponent.base.GameState
+import de.htwg.se.uno.model.gameComponent.base.state.{GameOverPhase, UnoPhases}
 import org.scalatest.matchers.should.Matchers
 import org.scalatest.wordspec.AnyWordSpec
-import de.htwg.se.uno.model.GameState
 
 class GameOverPhaseSpec extends AnyWordSpec with Matchers {
 

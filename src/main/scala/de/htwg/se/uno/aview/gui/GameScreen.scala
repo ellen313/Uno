@@ -1,9 +1,11 @@
 package de.htwg.se.uno.aview.gui
 
-import de.htwg.se.uno.controller.GameBoard
-import de.htwg.se.uno.controller.GameBoard.fullDeck
-import de.htwg.se.uno.controller.command.{DrawCardCommand, PlayCardCommand, UnoCalledCommand}
-import de.htwg.se.uno.model.{ActionCard, Card, CardFactory, GameState, NumberCard, PlayerHand, WildCard}
+import de.htwg.se.uno.controller.controllerComponent.base.GameBoard
+import de.htwg.se.uno.controller.controllerComponent.base.GameBoard.fullDeck
+import de.htwg.se.uno.controller.controllerComponent.base.command.{DrawCardCommand, PlayCardCommand, UnoCalledCommand}
+import de.htwg.se.uno.model.cardComponent.{ActionCard, Card, CardFactory, NumberCard, WildCard}
+import de.htwg.se.uno.model.gameComponent.base.GameState
+import de.htwg.se.uno.model.playerComponent.PlayerHand
 import scalafx.animation.{FadeTransition, PauseTransition}
 import scalafx.geometry.{Insets, Pos}
 import scalafx.scene.control.{Alert, Button, ButtonBar, ButtonType, Dialog, Label}

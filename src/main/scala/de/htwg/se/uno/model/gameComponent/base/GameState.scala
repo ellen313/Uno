@@ -1,11 +1,16 @@
-package de.htwg.se.uno.model
+package de.htwg.se.uno.model.gameComponent.base
 
+import de.htwg.se.uno.model.*
+import de.htwg.se.uno.model.cardComponent.{ActionCard, Card, NumberCard, WildCard}
+import de.htwg.se.uno.model.gameComponent.{Failure, InputResult, Success}
+import de.htwg.se.uno.model.playerComponent.PlayerHand
 import de.htwg.se.uno.util.Observable
+import de.htwg.se.uno.model.gameComponent.GameStateInterface
 
 case class GameState( players: List[PlayerHand], currentPlayerIndex: Int,
                       allCards: List[Card], isReversed: Boolean = false,
                       discardPile: List[Card], drawPile: List[Card], selectedColor: Option[String] = None)
-  extends Observable  {
+  extends Observable, GameStateInterface {
 
   def nextPlayer(): GameState= {
     val playerCount = players.length

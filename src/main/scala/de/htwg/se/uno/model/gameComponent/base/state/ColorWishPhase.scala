@@ -1,4 +1,4 @@
-package de.htwg.se.uno.model.state
+package de.htwg.se.uno.model.gameComponent.base.state
 
 case class ColorWishPhase(context: UnoPhases) extends GamePhase {
   override def playCard(): GamePhase = {

@@ -3,6 +3,7 @@ package de.htwg.se.uno.aview
 import org.scalatest.wordspec.AnyWordSpec
 import de.htwg.se.uno.model.*
 import de.htwg.se.uno.aview.ColorPrinter.printCard
+import de.htwg.se.uno.model.cardComponent.{ActionCard, Card, NumberCard, WildCard}
 
 class ColorPrinterSpec extends AnyWordSpec {
 

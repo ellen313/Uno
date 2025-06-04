@@ -1,11 +1,12 @@
 package de.htwg.se.uno.aview
 
-import de.htwg.se.uno.model.{state, *}
+import de.htwg.se.uno.model.*
 import de.htwg.se.uno.util.Observer
-import de.htwg.se.uno.controller.{ControllerInterface, GameBoard}
-import de.htwg.se.uno.controller.command.*
 import de.htwg.se.uno.aview.ColorPrinter.*
-import de.htwg.se.uno.model.state.UnoPhases
+import de.htwg.se.uno.controller.controllerComponent.base.command.{DrawCardCommand, PlayCardCommand, UnoCalledCommand}
+import de.htwg.se.uno.controller.controllerComponent.base.{ControllerInterface, GameBoard}
+import de.htwg.se.uno.model.cardComponent.WildCard
+import de.htwg.se.uno.model.playerComponent.PlayerHand
 
 import scala.io.StdIn.readLine
 

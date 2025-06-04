@@ -1,8 +1,9 @@
-package de.htwg.se.uno.model.state
+package de.htwg.se.uno.model.gameComponent.base.state
 
-case class PlayerTurnPhase(context: UnoPhases) extends GamePhase {
+case class SkipPhase(context: UnoPhases) extends GamePhase {
   override def nextPlayer(): GamePhase = {
-    context.gameState = context.gameState.nextPlayer()
+    context.gameState = context.gameState.nextPlayer().nextPlayer()
+    context.setState(PlayerTurnPhase(context))
     context.state
   }
   override def playCard(): GamePhase = this

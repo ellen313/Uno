@@ -1,9 +1,13 @@
+import de.htwg.se.uno.controller.controllerComponent.base.GameBoard
+import de.htwg.se.uno.controller.controllerComponent.base.command.UnoCalledCommand
 import org.scalatest.matchers.should.Matchers
 import org.scalatest.wordspec.AnyWordSpec
-import de.htwg.se.uno.controller.GameBoard
-import de.htwg.se.uno.controller.command.UnoCalledCommand
-import de.htwg.se.uno.model._
-import de.htwg.se.uno.model.state._
+import de.htwg.se.uno.model.*
+import de.htwg.se.uno.model.cardComponent.NumberCard
+import de.htwg.se.uno.model.gameComponent.base.GameState
+import de.htwg.se.uno.model.gameComponent.base.state.{GameOverPhase, UnoPhases}
+import de.htwg.se.uno.model.playerComponent.PlayerHand
+import de.htwg.se.uno.model.state.*
 
 class UnoCalledCommandSpec extends AnyWordSpec with Matchers {
 

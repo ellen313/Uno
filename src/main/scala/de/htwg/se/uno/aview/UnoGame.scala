@@ -1,12 +1,17 @@
 package de.htwg.se.uno.aview
 
+import de.htwg.se.uno.controller.controllerComponent.base.GameBoard
+import de.htwg.se.uno.controller.controllerComponent.base.command.UnoCalledCommand
+
 import scala.annotation.tailrec
 import scala.io.StdIn.readLine
 import de.htwg.se.uno.model.*
-import de.htwg.se.uno.controller.GameBoard
-import de.htwg.se.uno.controller.command.UnoCalledCommand
-import de.htwg.se.uno.model.state.UnoPhases
-import scala.util.{Success, Failure, Try}
+import de.htwg.se.uno.model.cardComponent.Card
+import de.htwg.se.uno.model.gameComponent.base.GameState
+import de.htwg.se.uno.model.gameComponent.base.state.UnoPhases
+import de.htwg.se.uno.model.playerComponent.PlayerHand
+
+import scala.util.{Failure, Success, Try}
 
 object UnoGame {
   def runUno(numberPlayers: Option[Int] = None, cardsPerPlayer: Int = 7): UnoTUI = {

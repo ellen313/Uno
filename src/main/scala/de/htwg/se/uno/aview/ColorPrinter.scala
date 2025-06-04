@@ -1,6 +1,7 @@
 package de.htwg.se.uno.aview
 
 import de.htwg.se.uno.model.*
+import de.htwg.se.uno.model.cardComponent.{ActionCard, Card, NumberCard, WildCard}
 
 object ColorPrinter {
   //ansi escape codes

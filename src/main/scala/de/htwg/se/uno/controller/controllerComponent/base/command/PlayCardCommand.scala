@@ -1,7 +1,9 @@
-package de.htwg.se.uno.controller.command
+package de.htwg.se.uno.controller.controllerComponent.base.command
 
+import de.htwg.se.uno.controller.controllerComponent.base.GameBoard
 import de.htwg.se.uno.model.*
-import de.htwg.se.uno.controller.GameBoard
+import de.htwg.se.uno.model.cardComponent.{ActionCard, Card, WildCard}
+import de.htwg.se.uno.model.gameComponent.base.GameState
 import de.htwg.se.uno.util.Command
 
 case class PlayCardCommand(card: Card, chooseColor: Option[String] = None) extends Command {

@@ -1,10 +1,7 @@
 import de.htwg.se.uno.aview.UnoTUI
 import de.htwg.se.uno.aview.gui.UnoGUI
 import de.htwg.se.uno.aview.UnoGame
-import de.htwg.se.uno.aview.UnoGame.readValidInt
-import de.htwg.se.uno.controller.GameBoard
-import de.htwg.se.uno.model.GameState
-import de.htwg.se.uno.model.state.UnoPhases
+import de.htwg.se.uno.controller.controllerComponent.base.GameBoard
 
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future

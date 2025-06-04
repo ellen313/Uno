@@ -1,10 +1,14 @@
 package de.htwg.se.uno.aview
 
+import de.htwg.se.uno.controller.controllerComponent.base.GameBoard
 import org.scalatest.wordspec.AnyWordSpec
 import org.scalatest.matchers.should.Matchers
 import de.htwg.se.uno.model.*
+import de.htwg.se.uno.model.cardComponent.{NumberCard, WildCard}
+import de.htwg.se.uno.model.gameComponent.base.GameState
+import de.htwg.se.uno.model.gameComponent.base.state.UnoPhases
+import de.htwg.se.uno.model.playerComponent.PlayerHand
 import de.htwg.se.uno.model.state.*
-import de.htwg.se.uno.controller.GameBoard
 
 class UnoTUISpec extends AnyWordSpec with Matchers {
 

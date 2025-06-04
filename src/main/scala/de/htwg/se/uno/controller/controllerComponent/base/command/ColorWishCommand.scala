@@ -1,7 +1,8 @@
-package de.htwg.se.uno.controller.command
+package de.htwg.se.uno.controller.controllerComponent.base.command
 
+import de.htwg.se.uno.controller.controllerComponent.base.GameBoard
 import de.htwg.se.uno.model.*
-import de.htwg.se.uno.controller.GameBoard
+import de.htwg.se.uno.model.gameComponent.base.GameState
 import de.htwg.se.uno.util.Command
 
 case class ColorWishCommand(color: String) extends Command {

@@ -1,11 +1,15 @@
 package de.htwg.se.uno.model.gameComponent.base
 
+import de.htwg.se.uno.controller.controllerComponent.base.GameBoard
+import de.htwg.se.uno.controller.controllerComponent.base.command.PlayCardCommand
 import de.htwg.se.uno.model.*
 import de.htwg.se.uno.model.cardComponent.{ActionCard, Card, NumberCard, WildCard}
 import de.htwg.se.uno.model.gameComponent.{Failure, InputResult, Success}
 import de.htwg.se.uno.model.playerComponent.PlayerHand
 import de.htwg.se.uno.util.Observable
 import de.htwg.se.uno.model.gameComponent.GameStateInterface
+
+import scala.util.Try
 
 case class GameState( players: List[PlayerHand], currentPlayerIndex: Int,
                       allCards: List[Card], isReversed: Boolean = false,
@@ -183,7 +187,7 @@ case class GameState( players: List[PlayerHand], currentPlayerIndex: Int,
 
     input match {
       case s"play wild:$index:$color" =>
-        scala.util.Try(index.toInt) match {
+        Try(index.toInt) match {
           case scala.util.Success(index) if index >= 0 && index < currentPlayer.cards.length =>
             currentPlayer.cards(index) match {
               case wild: WildCard =>
@@ -204,31 +208,63 @@ case class GameState( players: List[PlayerHand], currentPlayerIndex: Int,
             Failure("Card index must be a number.")
         }
 
+//      case s"play card:$index" =>
+//        scala.util.Try(index.toInt) match {
+//          case scala.util.Success(index) if index >= 0 && index < currentPlayer.cards.length =>
+//            val card = currentPlayer.cards(index)
+//            val topCard = discardPile.lastOption
+//
+//            if (!isValidPlay(card, topCard)) {
+//              Failure("Invalid card! Please select a valid card.")
+//            } else {
+//              val updatedGame = playCard(card)
+//              Success(updatedGame)
+//            }
+//
+//          case scala.util.Success(_) =>
+//            Failure("Invalid card index.")
+//
+//          case scala.util.Failure(_) =>
+//            Failure("Card index must be a number.")
+//        }
+//
+//      case _ =>
+//        Failure("Unknown input command.")
+//    }
       case s"play card:$index" =>
-        scala.util.Try(index.toInt) match {
-          case scala.util.Success(index) if index >= 0 && index < currentPlayer.cards.length =>
-            val card = currentPlayer.cards(index)
+        Try(index.toInt) match {
+          case scala.util.Success(idx) if idx >= 0 && idx < currentPlayer.cards.length =>
+            val card = currentPlayer.cards(idx)
             val topCard = discardPile.lastOption
+            val chooseColor = selectedColor
+            val controller = GameBoard
 
-            if (!isValidPlay(card, topCard)) {
-              Failure("Invalid card! Please select a valid card.")
-            } else {
-              val updatedGame = playCard(card)
-              Success(updatedGame)
+            val isValid = isValidPlay(card, topCard)
+            val command = PlayCardCommand(card, chooseColor, controller)
+
+            controller.executeCommand(command)
+
+            if (!isValid) {
+              println("⚠️ Wrong card played. Your play will be undone. A penalty card will be drawn.")
+
+              controller.undoCommand()
+
+              val (newState, drawnCard) = controller.gameState.get.drawCardAndReturnDrawn()
+              controller.updateState(newState)
+
+              return Failure("Invalid play. You received a penalty card.")
             }
+
+            Success(controller.gameState.get)
 
           case scala.util.Success(_) =>
             Failure("Invalid card index.")
-
           case scala.util.Failure(_) =>
-            Failure("Card index must be a number.")
+            Failure("Card index must be a digit.")
         }
 
-      case _ =>
-        Failure("Unknown input command.")
     }
   }
-
 
   override def notifyObservers(): Unit = {
     super.notifyObservers()

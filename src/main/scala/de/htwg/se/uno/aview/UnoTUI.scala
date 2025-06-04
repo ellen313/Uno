@@ -74,7 +74,7 @@ class UnoTUI(controller: ControllerInterface) extends Observer {
                 if (drawnCard.isInstanceOf[WildCard]) Some(chooseWildColor())
                 else None
 
-              GameBoard.executeCommand(PlayCardCommand(drawnCard, chosenColor))
+              GameBoard.executeCommand(PlayCardCommand(drawnCard, chosenColor, GameBoard))
             } else {
               println("Card cannot be played, turn ends.")
               val skipped = newState.nextPlayer()
@@ -96,7 +96,7 @@ class UnoTUI(controller: ControllerInterface) extends Observer {
                   if (chosenCard.isInstanceOf[WildCard]) Some(chooseWildColor())
                   else None
 
-                GameBoard.executeCommand(PlayCardCommand(chosenCard, chosenColor))
+                GameBoard.executeCommand(PlayCardCommand(chosenCard, chosenColor, GameBoard))
                 
               case scala.util.Success(_) =>
                 println(s"Invalid index.")

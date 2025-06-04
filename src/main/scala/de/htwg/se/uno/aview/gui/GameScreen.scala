@@ -294,7 +294,7 @@ class GameScreen(players: Int, cardsPerPlayer: Int) extends StackPane {
           card match {
             case wild: WildCard => showColorPickerDialog(wild)
             case _ =>
-              GameBoard.executeCommand(PlayCardCommand(card, None))
+              GameBoard.executeCommand(PlayCardCommand(card, None, GameBoard))
               GameBoard.gameState match {
                 case Success(newState) =>
                   println(s"Current player: ${newState.currentPlayerIndex}")
@@ -303,7 +303,10 @@ class GameScreen(players: Int, cardsPerPlayer: Int) extends StackPane {
               }
           }
         } else {
+          // draw penalty card
+          GameBoard.executeCommand(DrawCardCommand())
           showInvalidMoveMessage()
+          update()
         }
       case Failure(e) => println(s"Error: ${e.getMessage}")
     }
@@ -311,9 +314,9 @@ class GameScreen(players: Int, cardsPerPlayer: Int) extends StackPane {
 
   private def showInvalidMoveMessage(): Unit = {
     new Alert(Alert.AlertType.Warning) {
-      title = "Invalid move"
+      title = "Nice try..."
       headerText = "This card can not be played"
-      contentText = "It does not match the top card on the discard pile."
+      contentText = "You must draw a penalty card ¯\\_(ツ)_/¯."
     }.showAndWait()
   }
 
@@ -346,7 +349,7 @@ class GameScreen(players: Int, cardsPerPlayer: Int) extends StackPane {
   private def playWildCard(wildCard: WildCard, color: String): Unit = {
     println(s"Playing wildcard with color: $color")
 
-    GameBoard.executeCommand(PlayCardCommand(wildCard, Some(color)))
+    GameBoard.executeCommand(PlayCardCommand(wildCard, Some(color), GameBoard))
     GameBoard.gameState match {
       case Success(newState) =>
         println(s"Wildcard played successfully, new player index: ${newState.currentPlayerIndex}")

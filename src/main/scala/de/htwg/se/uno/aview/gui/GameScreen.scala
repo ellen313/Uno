@@ -8,7 +8,7 @@ import de.htwg.se.uno.model.gameComponent.base.GameState
 import de.htwg.se.uno.model.playerComponent.PlayerHand
 import scalafx.animation.{FadeTransition, PauseTransition}
 import scalafx.geometry.{Insets, Pos}
-import scalafx.scene.control.{Alert, Button, ButtonBar, ButtonType, Dialog, Label}
+import scalafx.scene.control.{Alert, Button, ButtonBar, ButtonType, Label}
 import scalafx.scene.image.{Image, ImageView}
 import scalafx.scene.input.MouseEvent
 import scalafx.scene.layout.{HBox, StackPane, VBox}
@@ -17,7 +17,6 @@ import scalafx.scene.text.{Font, FontWeight}
 import scalafx.scene.Cursor
 import scalafx.util.Duration
 import scalafx.Includes.*
-import scalafx.application.Platform
 
 import scala.util.{Failure, Success}
 
@@ -25,12 +24,12 @@ class GameScreen(players: Int, cardsPerPlayer: Int) extends StackPane {
   private var unoCaller: Option[Int] = None
   private var gameOver: Boolean = false
 
-  val allCards = CardFactory.createFullDeck()
-  val hands = fullDeck.grouped(cardsPerPlayer).take(players).map(cards => PlayerHand(cards)).toList
-  val usedCards = hands.flatMap(_.cards)
-  val remainingDeck = fullDeck.diff(usedCards)
-  val initialDiscard = remainingDeck.head
-  val updatedRemainingDeck = remainingDeck.tail
+  val allCards: List[Card] = CardFactory.createFullDeck()
+  private val hands = fullDeck.grouped(cardsPerPlayer).take(players).map(cards => PlayerHand(cards)).toList
+  private val usedCards = hands.flatMap(_.cards)
+  private val remainingDeck = fullDeck.diff(usedCards)
+  private val initialDiscard = remainingDeck.head
+  private val updatedRemainingDeck = remainingDeck.tail
 
   GameBoard.initGame(GameState(
     players = hands,

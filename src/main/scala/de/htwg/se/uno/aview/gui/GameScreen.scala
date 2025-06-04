@@ -58,7 +58,7 @@ class GameScreen(players: Int, cardsPerPlayer: Int) extends StackPane {
   }
 
   private val gameInfo = new Label {
-    text = s"Spieler: $players | Karten: $cardsPerPlayer"
+    text = s"Players: $players | Cards: $cardsPerPlayer"
     font = Font(24)
     textFill = Color.White
     style = "-fx-background-color: rgba(0,0,0,0.7); -fx-padding: 10; -fx-background-radius: 10;"
@@ -142,9 +142,9 @@ class GameScreen(players: Int, cardsPerPlayer: Int) extends StackPane {
 
   private def updateBackground(isReversed: Boolean): Unit = {
     val imagePath = if (isReversed)
-      "file:src/main/resources/gameboard/uno_gameboard_right.jpg"
-    else
       "file:src/main/resources/gameboard/uno_gameboard_left.jpg"
+    else
+      "file:src/main/resources/gameboard/uno_gameboard_right.jpg"
     gameBoardImage.image = new Image(imagePath)
   }
 
@@ -242,7 +242,7 @@ class GameScreen(players: Int, cardsPerPlayer: Int) extends StackPane {
 
   private def createCardView(cards: List[Card], hidden: Boolean = false): Seq[ImageView] = {
     cards.zipWithIndex.map { case (card, index) =>
-      val imagePath = /*if (hidden) "file:src/main/resources/cards/back.png" else*/ cardImagePath(card)
+      val imagePath = cardImagePath(card)
       new ImageView(new Image(imagePath)) {
         fitWidth = 130
         fitHeight = 190
@@ -320,7 +320,6 @@ class GameScreen(players: Int, cardsPerPlayer: Int) extends StackPane {
   }
 
 
-  // Alternative Implementierung mit direkter Farbauswahl
   private def showColorPickerDialog(wildCard: WildCard): Unit = {
     val alert = new Alert(Alert.AlertType.Confirmation) {
       title = "Choose Color"

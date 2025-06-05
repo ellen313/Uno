@@ -2,7 +2,6 @@ package de.htwg.se.uno.model.gameComponent.mock
 
 import de.htwg.se.uno.model.cardComponent.{Card, WildCard}
 import de.htwg.se.uno.model.playerComponent.PlayerHand
-import de.htwg.se.uno.model.gameComponent.base.GameState
 import de.htwg.se.uno.model.gameComponent.{GameStateInterface, InputResult, Success}
 
 case class GameStateMock( override val players: List[PlayerHand] = List.fill(2)(PlayerHand(List())),
@@ -36,15 +35,27 @@ case class GameStateMock( override val players: List[PlayerHand] = List.fill(2)(
   }
 
   override def notifyObservers(): Unit = {
+    this.notifyObservers()
   }
 
-  override def dealInitialCards(cardsPerPlayer: Int): GameStateInterface = ???
+  override def dealInitialCards(cardsPerPlayer: Int): GameStateInterface = {
+    this.dealInitialCards(cardsPerPlayer)
+  }
 
-  override def playerSaysUno(playerIndex: Int): GameStateInterface = ???
+  override def playerSaysUno(playerIndex: Int): GameStateInterface = {
+    this.playerSaysUno(playerIndex)
+  }
 
-  override def drawCard(playerHand: PlayerHand, drawPile: List[Card], discardPile: List[Card]): (Card, PlayerHand, List[Card], List[Card]) = ???
+  override def drawCard(playerHand: PlayerHand, drawPile: List[Card], discardPile: List[Card]):
+  (Card, PlayerHand, List[Card], List[Card]) = {
+    this.drawCard(playerHand, drawPile, discardPile)
+  }
 
-  override def handleDrawCards(count: Int): GameStateInterface = ???
+  override def handleDrawCards(count: Int): GameStateInterface = {
+    this.handleDrawCards(count)
+  }
 
-  override def setSelectedColor(color: String): GameStateInterface = ???
+  override def setSelectedColor(color: String): GameStateInterface = {
+    this.setSelectedColor(color)
+  }
 }

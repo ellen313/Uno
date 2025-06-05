@@ -25,12 +25,15 @@ class GameBoardMock extends ControllerInterface {
   }
 
   override def executeCommand(command: Command): Unit = {
+    this.executeCommand(command)
   }
 
   override def undoCommand(): Unit = {
+    this.undoCommand()
   }
 
   override def redoCommand(): Unit = {
+    this.redoCommand()
   }
 
   override def checkForWinner(): Option[Int] = {
@@ -38,6 +41,7 @@ class GameBoardMock extends ControllerInterface {
   }
 
   override def addObserver(observer: Observer): Unit = {
+    this.addObserver(observer)
   }
 
   def isValidPlay(card: Card, topCard: Card, selectedColor: Option[String]): Boolean = {

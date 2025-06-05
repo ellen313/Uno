@@ -1,4 +1,4 @@
-package de.htwg.se.uno.model
+package de.htwg.se.uno.model.playerComponent
 
 import de.htwg.se.uno.model.cardComponent.{ActionCard, NumberCard, WildCard}
 import de.htwg.se.uno.model.playerComponent.PlayerHand

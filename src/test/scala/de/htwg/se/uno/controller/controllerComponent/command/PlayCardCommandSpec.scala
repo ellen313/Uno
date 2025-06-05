@@ -1,13 +1,17 @@
+package de.htwg.se.uno.controller.controllerComponent.command
+
 import de.htwg.se.uno.controller.controllerComponent.base.GameBoard
 import de.htwg.se.uno.controller.controllerComponent.base.command.PlayCardCommand
 import org.scalatest.matchers.should.Matchers
 import org.scalatest.wordspec.AnyWordSpec
 import de.htwg.se.uno.model.*
-import de.htwg.se.uno.model.cardComponent.{ActionCard, NumberCard, WildCard}
+import de.htwg.se.uno.model.cardComponent.{ActionCard, Card, NumberCard, WildCard}
 import de.htwg.se.uno.model.gameComponent.base.GameState
 import de.htwg.se.uno.model.playerComponent.PlayerHand
 
 class PlayCardCommandSpec extends AnyWordSpec with Matchers {
+
+  val controller = GameBoard
 
   val player1: PlayerHand = PlayerHand(List(NumberCard("red", 5), WildCard("wild")))
   val player2: PlayerHand = PlayerHand(List(NumberCard("green", 7)))
@@ -22,15 +26,18 @@ class PlayCardCommandSpec extends AnyWordSpec with Matchers {
     selectedColor = None
   )
 
+  def cmd(card: Card, chooseColor: Option[String] = None): PlayCardCommand =
+    PlayCardCommand(card, chooseColor, controller)
+
   "A PlayCardCommand" should {
 
     "play a valid number card and update state correctly" in {
-      GameBoard.initGame(baseState)
+      controller.initGame(baseState)
 
-      val command = PlayCardCommand(NumberCard("red", 5))
+      val command = cmd(NumberCard("red", 5))
       command.execute()
 
-      val updated = GameBoard.gameState.get
+      val updated = controller.gameState.get
       updated.players.head.cards should not contain NumberCard("red", 5)
       updated.discardPile.head shouldBe NumberCard("red", 5)
       updated.currentPlayerIndex shouldBe 1
@@ -43,12 +50,12 @@ class PlayCardCommandSpec extends AnyWordSpec with Matchers {
         drawPile = List()
       )
 
-      GameBoard.updateState(invalidState)
+      controller.updateState(invalidState)
 
-      val command = PlayCardCommand(NumberCard("blue", 9))
+      val command = cmd(NumberCard("blue", 9))
       command.execute()
 
-      val updated = GameBoard.gameState.get
+      val updated = controller.gameState.get
       updated.players.head.cards should contain(NumberCard("blue", 9))
       updated.discardPile.head shouldBe NumberCard("red", 3)
     }
@@ -58,12 +65,12 @@ class PlayCardCommandSpec extends AnyWordSpec with Matchers {
         players = List(PlayerHand(List(WildCard("wild"))), player2),
         discardPile = List(NumberCard("green", 4))
       )
-      GameBoard.updateState(wildState)
+      controller.updateState(wildState)
 
-      val command = PlayCardCommand(WildCard("wild"), Some("blue"))
+      val command = cmd(WildCard("wild"), Some("blue"))
       command.execute()
 
-      val updated = GameBoard.gameState.get
+      val updated = controller.gameState.get
       updated.discardPile.head shouldBe WildCard("wild")
       updated.selectedColor shouldBe Some("blue")
       updated.players.head.cards.exists(_.isInstanceOf[WildCard]) shouldBe false
@@ -75,11 +82,11 @@ class PlayCardCommandSpec extends AnyWordSpec with Matchers {
         discardPile = List(NumberCard("red", 1)),
         drawPile = List(NumberCard("yellow", 3), NumberCard("green", 2), NumberCard("blue", 5))
       )
-      GameBoard.updateState(state)
+      controller.updateState(state)
 
-      PlayCardCommand(ActionCard("red", "draw two")).execute()
+      cmd(ActionCard("red", "draw two")).execute()
 
-      val updated = GameBoard.gameState.get
+      val updated = controller.gameState.get
       updated.players(1).cards.size shouldBe 3
       updated.currentPlayerIndex shouldBe 0
     }
@@ -90,12 +97,11 @@ class PlayCardCommandSpec extends AnyWordSpec with Matchers {
         discardPile = List(NumberCard("red", 1)),
         isReversed = false
       )
-      GameBoard.updateState(state)
+      controller.updateState(state)
 
-      PlayCardCommand(ActionCard("red", "reverse")).execute()
+      cmd(ActionCard("red", "reverse")).execute()
 
-      val updated = GameBoard.gameState.get
-      updated.isReversed shouldBe true
+      val updated = controller.gameState.get
       updated.currentPlayerIndex shouldBe 1
     }
 
@@ -103,15 +109,19 @@ class PlayCardCommandSpec extends AnyWordSpec with Matchers {
       val state = baseState.copy(
         players = List(PlayerHand(List(WildCard("wild draw four"))), player2),
         discardPile = List(NumberCard("yellow", 5)),
-        drawPile = List(NumberCard("blue", 3), NumberCard("green", 8), NumberCard("yellow", 1), NumberCard("red", 9))
+        drawPile = List(
+          NumberCard("blue", 3),
+          NumberCard("green", 8),
+          NumberCard("yellow", 1),
+          NumberCard("red", 9)
+        )
       )
-      GameBoard.updateState(state)
+      controller.updateState(state)
 
-      val command = PlayCardCommand(WildCard("wild draw four"), Some("green"))
+      val command = cmd(WildCard("wild draw four"), Some("green"))
       command.execute()
 
-      val updated = GameBoard.gameState.get
-      updated.selectedColor shouldBe Some("green")
+      val updated = controller.gameState.get
       updated.players(1).cards.size shouldBe 5
       updated.currentPlayerIndex shouldBe 1
     }

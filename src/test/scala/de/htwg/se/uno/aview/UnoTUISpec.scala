@@ -8,7 +8,6 @@ import de.htwg.se.uno.model.cardComponent.{NumberCard, WildCard}
 import de.htwg.se.uno.model.gameComponent.base.GameState
 import de.htwg.se.uno.model.gameComponent.base.state.UnoPhases
 import de.htwg.se.uno.model.playerComponent.PlayerHand
-import de.htwg.se.uno.model.state.*
 
 class UnoTUISpec extends AnyWordSpec with Matchers {
 
@@ -28,7 +27,7 @@ class UnoTUISpec extends AnyWordSpec with Matchers {
 
     GameBoard.updateState(gameState)
     val context = new UnoPhases(gameState)
-    val tui = new UnoTUI(context)
+    val tui = new UnoTUI(GameBoard)
 
     "display the game state without throwing" in {
       GameBoard.gameState match {

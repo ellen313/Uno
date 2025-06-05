@@ -1,3 +1,5 @@
+package de.htwg.se.uno.model.gameComponent.state
+
 import org.scalatest.matchers.should.Matchers
 import org.scalatest.wordspec.AnyWordSpec
 import de.htwg.se.uno.model.*
@@ -5,7 +7,7 @@ import de.htwg.se.uno.model.cardComponent.{Card, NumberCard}
 import de.htwg.se.uno.model.gameComponent.base.GameState
 import de.htwg.se.uno.model.gameComponent.base.state.{DrawCardPhase, UnoPhases}
 import de.htwg.se.uno.model.playerComponent.PlayerHand
-import de.htwg.se.uno.model.state.*
+import de.htwg.se.uno.model.gameComponent.base.state.*
 
 class DrawCardPhaseSpec extends AnyWordSpec with Matchers {
 

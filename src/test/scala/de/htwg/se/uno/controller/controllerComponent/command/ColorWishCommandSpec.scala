@@ -1,3 +1,5 @@
+package de.htwg.se.uno.controller.controllerComponent.command
+
 import de.htwg.se.uno.controller.controllerComponent.base.GameBoard
 import de.htwg.se.uno.controller.controllerComponent.base.command.ColorWishCommand
 import org.scalatest.matchers.should.Matchers

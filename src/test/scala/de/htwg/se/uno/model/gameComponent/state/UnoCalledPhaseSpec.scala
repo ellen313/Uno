@@ -1,10 +1,11 @@
+package de.htwg.se.uno.model.gameComponent.state
+
 import org.scalatest.matchers.should.Matchers
 import org.scalatest.wordspec.AnyWordSpec
 import de.htwg.se.uno.model.*
 import de.htwg.se.uno.model.gameComponent.base.GameState
 import de.htwg.se.uno.model.gameComponent.base.state.{GamePhase, UnoCalledPhase, UnoPhases}
 import de.htwg.se.uno.model.playerComponent.PlayerHand
-import de.htwg.se.uno.model.state.*
 
 class UnoCalledPhaseSpec extends AnyWordSpec with Matchers {
 

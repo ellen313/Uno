@@ -1,5 +1,6 @@
 package de.htwg.se.uno.model.gameComponent.base
 
+import de.htwg.se.uno.controller.controllerComponent.base.GameBoard
 import de.htwg.se.uno.model.cardComponent.{ActionCard, Card, NumberCard, WildCard}
 import de.htwg.se.uno.model.playerComponent.PlayerHand
 import de.htwg.se.uno.model.gameComponent.{Failure, Success}
@@ -84,6 +85,60 @@ class GameStateSpec extends AnyWordSpec with Matchers {
     "reject out-of-bounds card index in inputHandler" in {
       val result = initialState.inputHandler("play wild:9:red")
       result shouldBe a[Failure]
+    }
+
+    "successfully play a valid card using inputHandler" in {
+      GameBoard.updateState(initialState)
+
+      val result = initialState.inputHandler("play card:0")
+
+      result match {
+        case Success(newState) =>
+          newState.players.head.cards should not contain red5
+          newState.discardPile.head shouldBe red5
+
+        case _ => fail("Expected Success but got Failure or other")
+      }
+    }
+
+    "fail inputHandler with invalid card index" in {
+      GameBoard.updateState(initialState)
+
+      val result = initialState.inputHandler("play card:99")
+
+      result match {
+        case Failure(msg) => msg should include ("Invalid card index")
+        case _ => fail("Expected Failure but got Success or other")
+      }
+    }
+
+    "fail inputHandler if card index is not a number" in {
+      val result = initialState.inputHandler("play card:abc")
+
+      result match {
+        case Failure(msg) => msg should include ("must be a digit")
+        case _ => fail("Expected Failure but got Success or other")
+      }
+    }
+
+    "undo invalid play and assign penalty card in inputHandler" in {
+      val state = initialState.copy(
+        players = List(PlayerHand(List(redDraw2)), player2),
+        discardPile = List(blue5)
+      )
+      GameBoard.updateState(state)
+
+      val result = state.inputHandler("play card:0")
+
+      result match {
+        case Failure(msg) =>
+          msg should include ("Invalid play")
+
+          val currentState = GameBoard.gameState.get
+          currentState.players(1).cards.length should be > player2.cards.length
+
+        case _ => fail("Expected Failure but got Success or other")
+      }
     }
   }
 }

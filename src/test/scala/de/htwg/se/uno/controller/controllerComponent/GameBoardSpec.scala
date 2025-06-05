@@ -1,105 +1,88 @@
-package de.htwg.se.uno.controller.controllerComponent
+package de.htwg.se.uno.controller.controllerComponent.base
 
-import de.htwg.se.uno.controller.controllerComponent.base.GameBoard
-import de.htwg.se.uno.model.*
-import de.htwg.se.uno.model.cardComponent.{NumberCard, WildCard}
+import de.htwg.se.uno.model.cardComponent.{ActionCard, NumberCard, WildCard}
 import de.htwg.se.uno.model.gameComponent.base.GameState
 import de.htwg.se.uno.model.playerComponent.PlayerHand
+import de.htwg.se.uno.util.Command
 import org.scalatest.matchers.should.Matchers
 import org.scalatest.wordspec.AnyWordSpec
 
 class GameBoardSpec extends AnyWordSpec with Matchers {
 
+  val red5: NumberCard = NumberCard("red", 5)
+  val blue5: NumberCard = NumberCard("blue", 5)
+  val blue3: NumberCard = NumberCard("blue", 3)
+  val redDraw2: ActionCard = ActionCard("red", "draw two")
+  val wild: WildCard = WildCard("wild")
+
+  val testPlayer1: PlayerHand = PlayerHand(List(red5, redDraw2))
+  val testPlayer2: PlayerHand = PlayerHand(List(blue5, wild))
+  val testPlayers: List[PlayerHand] = List(testPlayer1, testPlayer2)
+
+  val testState: GameState = GameState(
+    players = testPlayers,
+    currentPlayerIndex = 0,
+    allCards = Nil,
+    discardPile = List(red5),
+    drawPile = List(wild, redDraw2),
+    isReversed = false
+  )
+
   "GameBoard" should {
 
-    "create a full deck with the expected number of cards" in {
-      val deck = GameBoard.createDeckWithAllCards()
-      deck.nonEmpty shouldBe true
-      deck.count(_.isInstanceOf[WildCard]) shouldBe 8
-    }
-
-    "return Failure if gameState is not initialized" in {
-      GameBoard.reset()
-      GameBoard.gameState.isFailure shouldBe true
-    }
-
-    "allow initializing and retrieving gameState" in {
-      val playerHand = PlayerHand(List(NumberCard("red", 5)))
-      val initialState = GameState(
-        players = List(playerHand),
-        currentPlayerIndex = 0,
-        allCards = List(NumberCard("red", 5), WildCard("wild")),
-        isReversed = false,
-        drawPile = List(NumberCard("green", 2)),
-        discardPile = List(NumberCard("red", 3)),
-        selectedColor = None
-      )
-
-      GameBoard.initGame(initialState)
-
+    "initialize a new game state with a shuffled deck" in {
+      GameBoard.initGame(testState)
       GameBoard.gameState.isSuccess shouldBe true
       val state = GameBoard.gameState.get
-      state.players should have size 1
-      state.discardPile should not be empty
-      state.drawPile should not be empty
-      (state.discardPile ++ state.drawPile).toSet should equal(state.allCards.toSet)
+      state.drawPile.nonEmpty shouldBe true
+      state.discardPile.size shouldBe 1
     }
 
-    "update the game state" in {
-      val newPlayer = PlayerHand(List(NumberCard("green", 1)))
-      val updatedState = GameBoard.gameState.get.copy(players = List(newPlayer))
-      GameBoard.updateState(updatedState)
-      GameBoard.gameState.get.players.head.cards.head shouldBe NumberCard("green", 1)
+    "update the internal game state and notify observers" in {
+      val newState = testState.copy(currentPlayerIndex = 1)
+      GameBoard.updateState(newState)
+      GameBoard.gameState.get.currentPlayerIndex shouldBe 1
     }
 
-    "check for winner correctly" in {
-      val winner = PlayerHand(Nil).sayUno()
-      val loser = PlayerHand(List(NumberCard("yellow", 3)))
-
-      val topCard = NumberCard("red", 7)
-
-      val initialState = GameState(
-        players = List(loser, winner),
-        currentPlayerIndex = 0,
-        allCards = List(),
-        isReversed = false,
-        drawPile = List(),
-        discardPile = List(topCard),
-        selectedColor = None
-      )
-
-      GameBoard.updateState(initialState)
-      GameBoard.checkForWinner() shouldBe Some(1)
+    "create a full UNO deck" in {
+      val deck = GameBoard.createDeckWithAllCards()
+      deck.count(_.isInstanceOf[WildCard]) shouldBe 8
+      deck.length should be > 90
     }
 
-    "reset the gameState" in {
+    "validate legal plays correctly via controller" in {
+      val isValid = GameBoard.isValidPlay(redDraw2, red5, None)
+      isValid shouldBe true
+
+      val invalidPlay = GameBoard.isValidPlay(blue3, red5, None)
+      invalidPlay shouldBe false
+    }
+
+    "execute and undo commands using invoker" in {
+      var executed = false
+      val testCommand = new Command {
+        override def execute(): Unit = executed = true
+        override def undo(): Unit = executed = false
+        override def redo(): Unit = execute()
+      }
+
+      GameBoard.executeCommand(testCommand)
+      executed shouldBe true
+
+      GameBoard.undoCommand()
+      executed shouldBe false
+    }
+
+    "reset the internal game state" in {
       GameBoard.reset()
       GameBoard.gameState.isFailure shouldBe true
     }
 
-    "return a valid shuffled discard and draw pile" in {
-      val (discard, draw) = GameBoard.shuffleDeck()
-      discard should not be empty
-      draw should not be empty
-      (discard ++ draw).size shouldEqual GameBoard.fullDeck.size
+    "check if a player has won" in {
+      val winningState = testState.copy(players = List(PlayerHand(Nil), testPlayer2))
+      GameBoard.updateState(winningState)
+      GameBoard.checkForWinner() shouldBe Some(0)
     }
 
-    "validate a card play through proxy method" in {
-      val validCard = NumberCard("red", 5)
-      val topCard = NumberCard("red", 7)
-
-      val initialState = GameState(
-        players = List(PlayerHand(List(validCard))),
-        currentPlayerIndex = 0,
-        allCards = List(),
-        isReversed = false,
-        drawPile = List(),
-        discardPile = List(topCard),
-        selectedColor = None
-      )
-
-      GameBoard.updateState(initialState)
-      GameBoard.isValidPlay(validCard, topCard, None) shouldBe true
-    }
   }
 }

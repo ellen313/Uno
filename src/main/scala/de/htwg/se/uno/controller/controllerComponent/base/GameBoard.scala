@@ -2,7 +2,7 @@ package de.htwg.se.uno.controller.controllerComponent.base
 
 import de.htwg.se.uno.aview.UnoGame
 import de.htwg.se.uno.model.*
-import de.htwg.se.uno.model.cardComponent.{Card, WildCard}
+import de.htwg.se.uno.model.cardComponent.{ActionCard, Card, NumberCard, WildCard}
 import de.htwg.se.uno.model.gameComponent.base.GameState
 import de.htwg.se.uno.util.{Command, CommandInvoker, Observable, Observer}
 
@@ -44,20 +44,21 @@ object GameBoard extends Observable, ControllerInterface {
 
   def createDeckWithAllCards(): List[Card] = {
     val numberCards = for {
-      // 1x0 and 2x1-9 for each color
-      number <- 0 to 9
       color <- Card.colors
+      number <- 0 to 9
       count = if (number == 0) 1 else 2
-    } yield Card("number")
+      _ <- 1 to count
+    } yield NumberCard(color, number)
 
     val actionCards = for {
-      _ <- 1 to 2
-      action <- Card.actions
       color <- Card.colors
-    } yield Card("action")
-      val wildCards = List.fill(4)(WildCard("wild")) ++ List.fill(4)(WildCard("wild draw four"))
+      action <- Card.actions
+      _ <- 1 to 2
+    } yield ActionCard(color, action)
 
-      numberCards.toList ++ actionCards.toList ++ wildCards
+    val wildCards = List.fill(4)(WildCard("wild")) ++ List.fill(4)(WildCard("wild draw four"))
+
+    numberCards.toList ++ actionCards.toList ++ wildCards
   }
 
   def shuffleDeck(): (List[Card], List[Card]) = {

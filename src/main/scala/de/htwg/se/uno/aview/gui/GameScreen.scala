@@ -17,6 +17,7 @@ import scalafx.scene.text.{Font, FontWeight}
 import scalafx.scene.Cursor
 import scalafx.util.Duration
 import scalafx.Includes.*
+import scalafx.application.Platform
 import scalafx.scene.effect.DropShadow
 
 import scala.util.{Failure, Success}
@@ -302,27 +303,43 @@ class GameScreen(players: Int, cardsPerPlayer: Int) extends StackPane {
   def playCard(card: Card): Unit = {
     GameBoard.gameState match {
       case Success(state) =>
-        if (GameBoard.isValidPlay(card, state.discardPile.headOption.getOrElse(card), None)) {
-          card match {
-            case wild: WildCard => showColorPickerDialog(wild)
-            case _ =>
-              GameBoard.executeCommand(PlayCardCommand(card, None, GameBoard))
-              GameBoard.gameState match {
+        val oldTop = state.discardPile.headOption.getOrElse(card)
+
+        card match {
+          case wc: WildCard =>
+            showColorPickerDialog(wc)
+          case _ =>
+            GameBoard.executeCommand(PlayCardCommand(card, None, GameBoard))
+            update()
+
+            val pause = new PauseTransition(Duration(400))
+            pause.setOnFinished(_ => {
+              val afterPlayState = GameBoard.gameState
+              afterPlayState match {
                 case Success(newState) =>
-                  println(s"Current player: ${newState.currentPlayerIndex}")
-                  update()
-                case Failure(e) => println(s"Error: ${e.getMessage}")
+                  val isValid = GameBoard.isValidPlay(card, oldTop, None)
+                  if (!isValid) {
+                    Platform.runLater {
+                      GameBoard.undoCommand()
+                      GameBoard.executeCommand(DrawCardCommand())
+                      update()
+                      showInvalidMoveMessage()
+                    }
+                  } else {
+                    update()
+                  }
+
+                case Failure(e) => println(s"State error: ${e.getMessage}")
               }
-          }
-        } else {
-          // draw penalty card
-          GameBoard.executeCommand(DrawCardCommand())
-          showInvalidMoveMessage()
-          update()
+            })
+
+            pause.play()
         }
-      case Failure(e) => println(s"Error: ${e.getMessage}")
+
+      case Failure(e) => println(s"Initial game state error: ${e.getMessage}")
     }
   }
+
 
   private def showInvalidMoveMessage(): Unit = {
     new Alert(Alert.AlertType.Warning) {

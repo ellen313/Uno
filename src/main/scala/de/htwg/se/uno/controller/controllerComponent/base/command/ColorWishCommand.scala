@@ -1,21 +1,22 @@
 package de.htwg.se.uno.controller.controllerComponent.base.command
 
+import de.htwg.se.uno.controller.controllerComponent.ControllerInterface
 import de.htwg.se.uno.controller.controllerComponent.base.GameBoard
 import de.htwg.se.uno.model.*
 import de.htwg.se.uno.model.gameComponent.base.GameState
 import de.htwg.se.uno.util.Command
 
-case class ColorWishCommand(color: String) extends Command {
+case class ColorWishCommand(color: String, gameBoard: ControllerInterface) extends Command {
 
   private var previousState: Option[GameState] = None
 
   override def execute(): Unit = {
-    GameBoard.gameState.foreach { state =>
+    gameBoard.gameState.foreach { state =>
       previousState = Some(state)
 
       val updatedState: GameState = state.setSelectedColor(color)
 
-      GameBoard.updateState(updatedState)
+      gameBoard.updateState(updatedState)
 
       println(s"Chose color for Wild Card: $color")
     }
@@ -23,7 +24,7 @@ case class ColorWishCommand(color: String) extends Command {
 
   override def undo(): Unit = {
     previousState.foreach { oldState =>
-      GameBoard.updateState(oldState)
+      gameBoard.updateState(oldState)
       println(s"Undo: color reseted")
     }
   }

@@ -1,6 +1,6 @@
 package de.htwg.se.uno.model.gameComponent.base.state
 
-case class GameOverPhase(context: UnoPhases) extends GamePhase {
+case class GameOverPhase() extends GamePhase {
   override def playCard(): GamePhase = this
 
   override def drawCard(): GamePhase = this

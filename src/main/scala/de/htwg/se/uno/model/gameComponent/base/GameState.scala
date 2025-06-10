@@ -8,13 +8,17 @@ import de.htwg.se.uno.model.gameComponent.{Failure, InputResult, Success}
 import de.htwg.se.uno.model.playerComponent.PlayerHand
 import de.htwg.se.uno.util.Observable
 import de.htwg.se.uno.model.gameComponent.GameStateInterface
+import de.htwg.se.uno.model.gameComponent.base.state.{GameOverPhase, GamePhase, UnoPhases}
 
 import scala.util.Try
 
 case class GameState( players: List[PlayerHand], currentPlayerIndex: Int,
                       allCards: List[Card], isReversed: Boolean = false,
-                      discardPile: List[Card], drawPile: List[Card], selectedColor: Option[String] = None)
+                      discardPile: List[Card], drawPile: List[Card], selectedColor: Option[String] = None,
+                      currentPhase: Option[GamePhase] = None)
   extends Observable, GameStateInterface {
+
+  private val gameBoard = new GameBoard()
 
   def nextPlayer(): GameState= {
     val playerCount = players.length
@@ -55,12 +59,23 @@ case class GameState( players: List[PlayerHand], currentPlayerIndex: Int,
         None
     }
   }
+  
+  def setGameOver(): GameState = {
+    this.copy(currentPhase = Some(GameOverPhase()))
+  }
 
   def playerSaysUno(playerIndex: Int): GameState = {
     val updatedPlayers = players.updated(
       playerIndex,
       players(playerIndex).copy(hasSaidUno = true))
-    this.copy(players = updatedPlayers)
+    if (updatedPlayers(playerIndex).cards.isEmpty && updatedPlayers(playerIndex).hasSaidUno) {
+      this.copy(
+        players = updatedPlayers,
+        currentPhase = Some(GameOverPhase())
+      )
+    } else {
+      this.copy(players = updatedPlayers)
+    }
   }
 
   def drawCard(playerHand: PlayerHand, drawPile: List[Card], discardPile: List[Card]):
@@ -208,54 +223,30 @@ case class GameState( players: List[PlayerHand], currentPlayerIndex: Int,
             Failure("Card index must be a number.")
         }
 
-//      case s"play card:$index" =>
-//        scala.util.Try(index.toInt) match {
-//          case scala.util.Success(index) if index >= 0 && index < currentPlayer.cards.length =>
-//            val card = currentPlayer.cards(index)
-//            val topCard = discardPile.lastOption
-//
-//            if (!isValidPlay(card, topCard)) {
-//              Failure("Invalid card! Please select a valid card.")
-//            } else {
-//              val updatedGame = playCard(card)
-//              Success(updatedGame)
-//            }
-//
-//          case scala.util.Success(_) =>
-//            Failure("Invalid card index.")
-//
-//          case scala.util.Failure(_) =>
-//            Failure("Card index must be a number.")
-//        }
-//
-//      case _ =>
-//        Failure("Unknown input command.")
-//    }
       case s"play card:$index" =>
         Try(index.toInt) match {
           case scala.util.Success(idx) if idx >= 0 && idx < currentPlayer.cards.length =>
             val card = currentPlayer.cards(idx)
             val topCard = discardPile.lastOption
             val chooseColor = selectedColor
-            val controller = GameBoard
 
             val isValid = isValidPlay(card, topCard)
-            val command = PlayCardCommand(card, chooseColor, controller)
+            val command = PlayCardCommand(card, chooseColor, gameBoard)
 
-            controller.executeCommand(command)
+            gameBoard.executeCommand(command)
 
             if (!isValid) {
               println("⚠️ Wrong card played. Your play will be undone. A penalty card will be drawn.")
 
-              controller.undoCommand()
+              gameBoard.undoCommand()
 
-              val (newState, drawnCard) = controller.gameState.get.drawCardAndReturnDrawn()
-              controller.updateState(newState)
+              val (newState, drawnCard) = gameBoard.gameState.get.drawCardAndReturnDrawn()
+              gameBoard.updateState(newState)
 
               return Failure("Invalid play. You received a penalty card.")
             }
 
-            Success(controller.gameState.get)
+            Success(gameBoard.gameState.get)
 
           case scala.util.Success(_) =>
             Failure("Invalid card index.")

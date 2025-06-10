@@ -1,30 +1,30 @@
 package de.htwg.se.uno.controller.controllerComponent.base.command
 
+import de.htwg.se.uno.controller.controllerComponent.ControllerInterface
 import de.htwg.se.uno.controller.controllerComponent.base.GameBoard
 import de.htwg.se.uno.model.gameComponent.base.GameState
 import de.htwg.se.uno.model.gameComponent.base.state.{GameOverPhase, UnoPhases}
 import de.htwg.se.uno.util.Command
 
-case class UnoCalledCommand(context: Option[UnoPhases] = None) extends Command {
+case class UnoCalledCommand(gameBoard: ControllerInterface) extends Command {
   private var previousState: Option[GameState] = None
 
   override def execute(): Unit = {
-    GameBoard.gameState.foreach { state =>
+    gameBoard.gameState.foreach { state =>
       previousState = Some(state)
       val idx = state.currentPlayerIndex
       val updatedGame = state.playerSaysUno(idx)
-      GameBoard.updateState(updatedGame)
-
-      val player = updatedGame.players(idx)
-      if (player.cards.isEmpty && player.hasSaidUno) {
-        context.foreach(state => state.setState(GameOverPhase(state)))
+      if (updatedGame.players(updatedGame.currentPlayerIndex).cards.isEmpty) {
+        gameBoard.updateState(updatedGame.setGameOver())
+      } else {
+        gameBoard.updateState(updatedGame)
       }
     }
   }
 
   override def undo(): Unit = {
     previousState.foreach { oldState =>
-      GameBoard.updateState(oldState)
+      gameBoard.updateState(oldState)
     }
   }
 

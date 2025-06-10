@@ -1,5 +1,6 @@
-package de.htwg.se.uno.controller.controllerComponent.base
+package de.htwg.se.uno.controller.controllerComponent
 
+import de.htwg.se.uno.model.cardComponent.Card
 import de.htwg.se.uno.model.gameComponent.base.GameState
 import de.htwg.se.uno.util.{Command, Observable}
 
@@ -13,4 +14,7 @@ trait ControllerInterface extends Observable {
   def redoCommand(): Unit
   def executeCommand(cmd: Command): Unit
   def checkForWinner(): Option[Int]
+  val fullDeck: List[Card]
+  def initGame(state: GameState): Unit
+  def isValidPlay(card: Card, topCard: Card, selectedColor: Option[String]): Boolean
 }

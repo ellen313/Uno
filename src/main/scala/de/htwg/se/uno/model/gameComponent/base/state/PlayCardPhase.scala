@@ -74,7 +74,7 @@ case class PlayCardPhase(context: UnoPhases, card: Card) extends GamePhase {
     this
   }
 
-  override def checkForWinner(): GamePhase = GameOverPhase(context)
+  override def checkForWinner(): GamePhase = GameOverPhase()
 
   override def playerSaysUno(): GamePhase = UnoCalledPhase(context)
 

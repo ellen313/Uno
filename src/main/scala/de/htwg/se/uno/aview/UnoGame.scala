@@ -14,12 +14,14 @@ import de.htwg.se.uno.model.playerComponent.PlayerHand
 import scala.util.{Failure, Success, Try}
 
 object UnoGame {
+  private val gameBoard = new GameBoard()
+
   def runUno(numberPlayers: Option[Int] = None, cardsPerPlayer: Int = 7): UnoTUI = {
     println("Welcome to UNO!")
 
     val players = numberPlayers.getOrElse(readValidInt("How many players? (2-10): ", min = 2, max = 10))
 
-    val fullDeck = scala.util.Random.shuffle(GameBoard.createDeckWithAllCards())
+    val fullDeck = scala.util.Random.shuffle(gameBoard.createDeckWithAllCards())
     val (newDrawPile, playerHands) = dealCards(fullDeck, players, cardsPerPlayer)
 
     // Put first card to discard pile
@@ -37,16 +39,16 @@ object UnoGame {
       discardPile = List(firstCard)
     )
 
-    GameBoard.initGame(gameState)
+    gameBoard.initGame(gameState)
     println("Let's start the Game!")
     Thread.sleep(2000)
 
-    val initialGameState = GameBoard.gameState
+    val initialGameState = gameBoard.gameState
 
-    GameBoard.gameState match {
+    gameBoard.gameState match {
       case scala.util.Success(initialGameState) =>
         //val context = new UnoPhases(initialGameState)
-        val controller = GameBoard
+        val controller = gameBoard
         val tui = new UnoTUI(controller)
         tui.display()
         inputLoop(tui)
@@ -81,8 +83,8 @@ object UnoGame {
 
   @tailrec
   def inputLoop(tui: UnoTUI): Unit = {
-    val currentState = GameBoard.gameState
-    GameBoard.gameState match {
+    val currentState = gameBoard.gameState
+    gameBoard.gameState match {
       case scala.util.Success(currentState) =>
 
         if (currentState.players.exists(_.cards.isEmpty)) {
@@ -95,7 +97,7 @@ object UnoGame {
         val currentPlayer = currentState.players(currentState.currentPlayerIndex)
 
         if (currentPlayer.cards.length == 1 && !currentPlayer.hasSaidUno) {
-          GameBoard.executeCommand(UnoCalledCommand(None))
+          gameBoard.executeCommand(UnoCalledCommand(gameBoard))
           println(s"$name said UNO!")
         }
 

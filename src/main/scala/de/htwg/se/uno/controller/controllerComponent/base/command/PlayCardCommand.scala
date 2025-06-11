@@ -4,13 +4,14 @@ import de.htwg.se.uno.controller.controllerComponent.ControllerInterface
 import de.htwg.se.uno.controller.controllerComponent.base.GameBoard
 import de.htwg.se.uno.model.*
 import de.htwg.se.uno.model.cardComponent.{ActionCard, Card, WildCard}
+import de.htwg.se.uno.model.gameComponent.GameStateInterface
 import de.htwg.se.uno.model.gameComponent.base.GameState
 import de.htwg.se.uno.util.Command
 
 case class PlayCardCommand(card: Card, chooseColor: Option[String] = None, gameBoard: ControllerInterface) extends Command {
 
   private var validPlay: Boolean = false
-  private var previousState: Option[GameState] = None
+  private var previousState: Option[GameStateInterface] = None
 
   override def execute(): Unit = {
     gameBoard.gameState.foreach { state =>
@@ -27,16 +28,16 @@ case class PlayCardCommand(card: Card, chooseColor: Option[String] = None, gameB
             newState.nextPlayer().nextPlayer()
 
           case ActionCard(_, "reverse") =>
-            newState.copy(isReversed = !newState.isReversed).nextPlayer()
+            newState.copyWithIsReversed(isReversed = !newState.isReversed).nextPlayer()
 
           case ActionCard(_, "draw two") =>
             newState.handleDrawCards(2).nextPlayer().nextPlayer()
 
           case WildCard("wild draw four") =>
-            newState.copy(selectedColor = chooseColor).handleDrawCards(4).nextPlayer()
+            newState.copyWithSelectedColor(selectedColor = chooseColor).handleDrawCards(4).nextPlayer()
 
           case WildCard(_) =>
-            newState.copy(selectedColor = chooseColor).nextPlayer()
+            newState.copyWithSelectedColor(selectedColor = chooseColor).nextPlayer()
 
           case _ =>
             newState.nextPlayer()

@@ -113,7 +113,7 @@ class GameScreen(players: Int, cardsPerPlayer: Int, gameBoard: ControllerInterfa
     style = buttonStyle
     onAction = _ => {
       gameBoard.executeCommand(UnoCalledCommand(gameBoard))
-      unoCaller = Some(gameBoard.gameState.get.currentPlayerIndex)
+      unoCaller = gameBoard.gameState.toOption.map(_.currentPlayerIndex)
       update()
     }
   }

@@ -1,5 +1,6 @@
 package de.htwg.se.uno.aview
 
+import de.htwg.se.uno.controller.controllerComponent.ControllerInterface
 import de.htwg.se.uno.controller.controllerComponent.base.GameBoard
 import de.htwg.se.uno.controller.controllerComponent.base.command.UnoCalledCommand
 
@@ -14,9 +15,8 @@ import de.htwg.se.uno.model.playerComponent.PlayerHand
 import scala.util.{Failure, Success, Try}
 
 object UnoGame {
-  private val gameBoard = new GameBoard()
 
-  def runUno(numberPlayers: Option[Int] = None, cardsPerPlayer: Int = 7): UnoTUI = {
+  def runUno(gameBoard: ControllerInterface, numberPlayers: Option[Int] = None, cardsPerPlayer: Int = 7): UnoTUI = {
     println("Welcome to UNO!")
 
     val players = numberPlayers.getOrElse(readValidInt("How many players? (2-10): ", min = 2, max = 10))
@@ -51,7 +51,7 @@ object UnoGame {
         val controller = gameBoard
         val tui = new UnoTUI(controller)
         tui.display()
-        inputLoop(tui)
+        inputLoop(gameBoard, tui)
         tui
 
       case scala.util.Failure(exception: Throwable) =>
@@ -82,7 +82,7 @@ object UnoGame {
   }
 
   @tailrec
-  def inputLoop(tui: UnoTUI): Unit = {
+  def inputLoop(gameBoard: ControllerInterface, tui: UnoTUI): Unit = {
     val currentState = gameBoard.gameState
     gameBoard.gameState match {
       case scala.util.Success(currentState) =>
@@ -111,7 +111,7 @@ object UnoGame {
             tui.handleInput(input)
 
             tui.display()
-            inputLoop(tui)
+            inputLoop(gameBoard, tui)
         }
 
       case scala.util.Failure(exception) =>

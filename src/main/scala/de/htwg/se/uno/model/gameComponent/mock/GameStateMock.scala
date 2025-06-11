@@ -19,6 +19,10 @@ case class GameStateMock( override val players: List[PlayerHand] = List.fill(2)(
 
   override def checkForWinner(): Option[Int] = None
 
+  override def setGameOver(): GameStateInterface = {
+    this.setGameOver()
+  }
+
   override def playCard(card: Card, chosenColor: Option[String] = None): GameStateMock = {
     this.copy(discardPile = card :: discardPile)
   }
@@ -55,7 +59,19 @@ case class GameStateMock( override val players: List[PlayerHand] = List.fill(2)(
     this.handleDrawCards(count)
   }
 
+  override def copyWithPiles(drawPile: List[Card], discardPile: List[Card]): GameStateInterface = {
+    this.copyWithPiles(drawPile, discardPile)
+  }
+
   override def setSelectedColor(color: String): GameStateInterface = {
     this.setSelectedColor(color)
+  }
+
+  override def copyWithIsReversed(isReversed: Boolean): GameStateInterface = {
+    this.copyWithIsReversed(isReversed)
+  }
+
+  override def copyWithSelectedColor(selectedColor: Option[String]): GameStateInterface = {
+    this.copyWithSelectedColor(selectedColor)
   }
 }

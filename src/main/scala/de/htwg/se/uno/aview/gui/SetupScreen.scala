@@ -68,7 +68,7 @@ object SetupScreen {
         try {
           playersInput.value.value match {
             case players if players >= 2 && players <= 10 =>
-              gameBoard.startGame(players, defaultCardsPerPlayer)
+              gameBoard.startGame(gameBoard, players, defaultCardsPerPlayer)
               val gameScreen = new GameScreen(players, defaultCardsPerPlayer, gameBoard)
               primaryStage.scene = new Scene(gameScreen) {
                 fill = Color.DarkRed

@@ -8,6 +8,7 @@ import de.htwg.se.uno.aview.UnoGame
 import de.htwg.se.uno.controller.controllerComponent.ControllerInterface
 import de.htwg.se.uno.model.*
 import de.htwg.se.uno.model.cardComponent.{ActionCard, Card, NumberCard, WildCard}
+import de.htwg.se.uno.model.gameComponent.GameStateInterface
 import de.htwg.se.uno.model.gameComponent.base.GameState
 import de.htwg.se.uno.util.{Command, CommandInvoker, Observable, Observer}
 
@@ -15,7 +16,7 @@ import scala.util.{Failure, Random, Success, Try}
 
 class GameBoard @Inject() extends Observable, ControllerInterface {
   
-  private var _gameState: Option[GameState] = None
+  private var _gameState: Option[GameStateInterface] = None
   private val invoker = new CommandInvoker()
   val injector: Injector = Guice.createInjector(new UnoModule)
 
@@ -26,25 +27,22 @@ class GameBoard @Inject() extends Observable, ControllerInterface {
     (shuffled.headOption.toList, shuffled.tail)
   }
 
-  def gameState: Try[GameState] = _gameState match {
-    case Some(state) => Success(state)
-    case None => Failure(new IllegalStateException("GameState not initialized"))
+  def gameState: Try[GameStateInterface] = _gameState match {
+    case Some(state) => scala.util.Success(state)
+    case None => scala.util.Failure(new IllegalStateException("GameState not initialized"))
   }
 
-  private def requireGameState: GameState = gameState.get
+  private def requireGameState: GameStateInterface =
+    gameState.getOrElse(throw new IllegalStateException("GameState is not yet initialized!"))
 
-  def updateState(newState: GameState): Unit = {
+  def updateState(newState: GameStateInterface): Unit = {
     _gameState = Some(newState)
     notifyObservers()
   }
 
-  def initGame(state: GameState): Unit = {
+  def initGame(state: GameStateInterface): Unit = {
     val (discard, draw) = shuffleDeck()
-    val initializedState = state.copy(
-      drawPile = draw,
-      discardPile = discard,
-      allCards = discard ++ draw
-    )
+    val initializedState = state.copyWithPiles(draw, discard)
     updateState(initializedState)
   }
 
@@ -107,9 +105,9 @@ class GameBoard @Inject() extends Observable, ControllerInterface {
     _gameState = None
   }
 
-  override def startGame(players: Int, cardsPerPlayer: Int): Unit = {
+  override def startGame(gameBoard: ControllerInterface, players: Int, cardsPerPlayer: Int): Unit = {
     new Thread(() => {
-      val tui = UnoGame.runUno(Some(players), cardsPerPlayer)
+      val tui = UnoGame.runUno(gameBoard, Some(players), cardsPerPlayer)
     }).start()
   }
 }

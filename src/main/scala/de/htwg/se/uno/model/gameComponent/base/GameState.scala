@@ -59,8 +59,8 @@ case class GameState( players: List[PlayerHand], currentPlayerIndex: Int,
         None
     }
   }
-  
-  def setGameOver(): GameState = {
+
+  def setGameOver(): GameStateInterface = {
     this.copy(currentPhase = Some(GameOverPhase()))
   }
 
@@ -240,13 +240,21 @@ case class GameState( players: List[PlayerHand], currentPlayerIndex: Int,
 
               gameBoard.undoCommand()
 
-              val (newState, drawnCard) = gameBoard.gameState.get.drawCardAndReturnDrawn()
-              gameBoard.updateState(newState)
+              gameBoard.gameState match {
+                case scala.util.Success(state) =>
+                  val (newState, drawnCard) = state.drawCardAndReturnDrawn()
+                  gameBoard.updateState(newState)
+                  Failure("Invalid play. You received a penalty card.")
 
-              return Failure("Invalid play. You received a penalty card.")
+                case scala.util.Failure(_) =>
+                  Failure("Game state not initialized.")
+              }
+            } else {
+              gameBoard.gameState match {
+                case scala.util.Success(state) => Success(state)
+                case scala.util.Failure(_) => Failure("Game state not initialized.")
+              }
             }
-
-            Success(gameBoard.gameState.get)
 
           case scala.util.Success(_) =>
             Failure("Invalid card index.")
@@ -257,7 +265,23 @@ case class GameState( players: List[PlayerHand], currentPlayerIndex: Int,
     }
   }
 
+  override def copyWithPiles(drawPile: List[Card], discardPile: List[Card]): GameStateInterface = {
+    this.copy(
+      drawPile = drawPile,
+      discardPile = discardPile,
+      allCards = discardPile ++ drawPile
+    )
+  }
+
   override def notifyObservers(): Unit = {
     super.notifyObservers()
+  }
+
+  override def copyWithIsReversed(isReversed: Boolean): GameStateInterface = {
+    this.copy(isReversed = isReversed)
+  }
+
+  override def copyWithSelectedColor(selectedColor: Option[String]): GameStateInterface = {
+    this.copy(selectedColor = selectedColor)
   }
 }

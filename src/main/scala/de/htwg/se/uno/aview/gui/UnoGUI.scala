@@ -31,9 +31,9 @@ class UnoGUI(gameBoard: ControllerInterface) extends JFXApp3 with Observer {
     }
   }
 
-  def startGame(players: Int, cards: Int): Unit = {
+  def startGame(gameBoard: ControllerInterface, players: Int, cards: Int): Unit = {
     new Thread(() => {
-      val tui = UnoGame.runUno(Some(players), cards)
+      val tui = UnoGame.runUno(gameBoard, Some(players), cards)
     }).start()
   }
 }

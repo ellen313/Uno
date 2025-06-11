@@ -1,10 +1,9 @@
 package de.htwg.se.uno.model.gameComponent
 
+import de.htwg.se.uno.controller.controllerComponent.ControllerInterface
 import de.htwg.se.uno.model.cardComponent.Card
 import de.htwg.se.uno.model.playerComponent.PlayerHand
 import de.htwg.se.uno.util.Observable
-import de.htwg.se.uno.model.gameComponent.InputResult
-import de.htwg.se.uno.model.gameComponent.base.GameState
 
 trait GameStateInterface extends Observable {
   def players: List[PlayerHand]
@@ -27,7 +26,10 @@ trait GameStateInterface extends Observable {
   def isValidPlay(card: Card, topCard: Option[Card], selectedColor: Option[String] = None): Boolean
   def drawCardAndReturnDrawn(): (GameStateInterface, Card)
   def setSelectedColor(color: String): GameStateInterface
-  def inputHandler(input: String): InputResult
+  def inputHandler(input: String, gameBoard: ControllerInterface): InputResult
   def copyWithIsReversed(isReversed: Boolean): GameStateInterface
   def copyWithSelectedColor(selectedColor: Option[String]): GameStateInterface
+  def copyWithPlayersAndPiles(players: List[PlayerHand], drawPile: List[Card],
+                              discardPile: List[Card]): GameStateInterface
+
 }

@@ -8,7 +8,7 @@ case class DrawCardPhase(context: UnoPhases) extends GamePhase {
       context.gameState.drawCard(currentPlayer, context.gameState.drawPile, context.gameState.discardPile)
 
     val updatedPlayers = context.gameState.players.updated(context.gameState.currentPlayerIndex, updatedHand)
-    context.gameState = context.gameState.copy(
+    context.gameState = context.gameState.copyWithPlayersAndPiles(
       players = updatedPlayers,
       drawPile = updatedDrawPile,
       discardPile = updatedDiscardPile

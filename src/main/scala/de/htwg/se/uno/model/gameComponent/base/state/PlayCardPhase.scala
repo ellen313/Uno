@@ -2,6 +2,7 @@ package de.htwg.se.uno.model.gameComponent.base.state
 
 import de.htwg.se.uno.model.*
 import de.htwg.se.uno.model.cardComponent.{ActionCard, Card, WildCard}
+import de.htwg.se.uno.model.gameComponent.GameStateInterface
 import de.htwg.se.uno.model.gameComponent.base.GameState
 
 case class PlayCardPhase(context: UnoPhases, card: Card) extends GamePhase {
@@ -16,7 +17,7 @@ case class PlayCardPhase(context: UnoPhases, card: Card) extends GamePhase {
         PlayerTurnPhase(context)
 
       case ActionCard(_, "reverse") =>
-        context.gameState = context.gameState.copy(isReversed = !context.gameState.isReversed)
+        context.gameState = context.gameState.copyWithIsReversed(isReversed = !context.gameState.isReversed)
         PlayerTurnPhase(context)
 
       case ActionCard(_, "draw two") =>
@@ -40,7 +41,7 @@ case class PlayCardPhase(context: UnoPhases, card: Card) extends GamePhase {
     finalGameState
   }
 
-  private def handlePenaltyCards(state: GameState, count: Int): GameState = {
+  private def handlePenaltyCards(state: GameStateInterface, count: Int): GameStateInterface = {
     val nextPlayerIdx = if (state.isReversed) {
       (state.currentPlayerIndex - 1 + state.players.length) % state.players.length
     } else {
@@ -54,9 +55,10 @@ case class PlayCardPhase(context: UnoPhases, card: Card) extends GamePhase {
           (newHand, newDraw, Nil)
       }
 
-    state.copy(
-      players = state.players.updated(nextPlayerIdx, updatedHand),
-      drawPile = updatedDrawPile
+    state.copyWithPlayersAndPiles(
+      state.players.updated(nextPlayerIdx, updatedHand),
+      updatedDrawPile,
+      state.discardPile
     )
   }
 

@@ -1,7 +1,6 @@
 package de.htwg.se.uno.aview
 
 import de.htwg.se.uno.controller.controllerComponent.ControllerInterface
-import de.htwg.se.uno.controller.controllerComponent.base.GameBoard
 import de.htwg.se.uno.controller.controllerComponent.base.command.UnoCalledCommand
 
 import scala.annotation.tailrec
@@ -9,7 +8,6 @@ import scala.io.StdIn.readLine
 import de.htwg.se.uno.model.*
 import de.htwg.se.uno.model.cardComponent.Card
 import de.htwg.se.uno.model.gameComponent.base.GameState
-import de.htwg.se.uno.model.gameComponent.base.state.UnoPhases
 import de.htwg.se.uno.model.playerComponent.PlayerHand
 
 import scala.util.{Failure, Success, Try}
@@ -24,7 +22,6 @@ object UnoGame {
     val fullDeck = scala.util.Random.shuffle(gameBoard.createDeckWithAllCards())
     val (newDrawPile, playerHands) = dealCards(fullDeck, players, cardsPerPlayer)
 
-    // Put first card to discard pile
     val (firstCard, remainingDrawPile) = newDrawPile match {
       case head :: tail => (head, tail)
       case Nil => throw new IllegalStateException("No cards left in draw pile")
@@ -45,9 +42,8 @@ object UnoGame {
 
     val initialGameState = gameBoard.gameState
 
-    gameBoard.gameState match {
+    initialGameState match {
       case scala.util.Success(initialGameState) =>
-        //val context = new UnoPhases(initialGameState)
         val controller = gameBoard
         val tui = new UnoTUI(controller)
         tui.display()
@@ -84,7 +80,7 @@ object UnoGame {
   @tailrec
   def inputLoop(gameBoard: ControllerInterface, tui: UnoTUI): Unit = {
     val currentState = gameBoard.gameState
-    gameBoard.gameState match {
+    currentState match {
       case scala.util.Success(currentState) =>
 
         if (currentState.players.exists(_.cards.isEmpty)) {

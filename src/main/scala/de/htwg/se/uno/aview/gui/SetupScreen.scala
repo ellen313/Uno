@@ -1,6 +1,6 @@
 package de.htwg.se.uno.aview.gui
 
-import de.htwg.se.uno.controller.controllerComponent.base.GameBoard
+import de.htwg.se.uno.controller.controllerComponent.ControllerInterface
 import scalafx.application.JFXApp3.PrimaryStage
 import scalafx.collections.ObservableBuffer
 import scalafx.scene.layout.StackPane
@@ -16,9 +16,8 @@ import scalafx.scene.paint.{Color, CycleMethod, LinearGradient, Stops}
 import scalafx.scene.text.Text
 
 object SetupScreen {
-  private val gameBoard = new GameBoard()
 
-  def apply(primaryStage: PrimaryStage): StackPane = {
+  def apply(primaryStage: PrimaryStage, gameBoard: ControllerInterface): StackPane = {
     val setupImage = new ImageView(new Image("file:src/main/resources/UnoSetup.jpg")) {
       fitWidth = 1400
       fitHeight = 900

@@ -5,15 +5,12 @@ import de.htwg.se.uno.util.Observer
 import de.htwg.se.uno.aview.ColorPrinter.*
 import de.htwg.se.uno.controller.controllerComponent.ControllerInterface
 import de.htwg.se.uno.controller.controllerComponent.base.command.{DrawCardCommand, PlayCardCommand, UnoCalledCommand}
-import de.htwg.se.uno.controller.controllerComponent.base.GameBoard
 import de.htwg.se.uno.model.cardComponent.WildCard
 import de.htwg.se.uno.model.playerComponent.PlayerHand
 
 import scala.io.StdIn.readLine
 
-class UnoTUI(controller: ControllerInterface) extends Observer {
-
-  private val gameBoard = new GameBoard()
+class UnoTUI(gameBoard: ControllerInterface) extends Observer {
   private var gameShouldExit = false
   var selectedColor: Option[String] = None
 
@@ -171,7 +168,6 @@ class UnoTUI(controller: ControllerInterface) extends Observer {
       case scala.util.Failure(exception: Throwable) =>
         println(s"Game state not initialized: ${exception.getMessage}")
     }
-
   }
 
   override def update(): Unit = if (!gameShouldExit) display()

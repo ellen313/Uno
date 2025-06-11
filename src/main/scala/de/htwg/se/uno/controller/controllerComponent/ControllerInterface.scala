@@ -2,7 +2,6 @@ package de.htwg.se.uno.controller.controllerComponent
 
 import de.htwg.se.uno.model.cardComponent.Card
 import de.htwg.se.uno.model.gameComponent.GameStateInterface
-import de.htwg.se.uno.model.gameComponent.base.GameState
 import de.htwg.se.uno.util.{Command, Observable}
 
 import scala.util.Try

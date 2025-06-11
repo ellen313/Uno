@@ -3,7 +3,6 @@ package de.htwg.se.uno.aview.gui
 import de.htwg.se.uno.aview.UnoGame
 import de.htwg.se.uno.controller.controllerComponent.ControllerInterface
 import de.htwg.se.uno.util.Observer
-import de.htwg.se.uno.controller.controllerComponent.base.GameBoard
 import scalafx.application.JFXApp3
 import scalafx.scene.Scene
 import scalafx.Includes.jfxScene2sfx
@@ -25,7 +24,7 @@ class UnoGUI(gameBoard: ControllerInterface) extends JFXApp3 with Observer {
       scene = new Scene {
         fill = Color.rgb(40, 40, 40)
         content = StartScreen(() => {
-          stage.scene().root = SetupScreen(stage)
+          stage.scene().root = SetupScreen(stage, gameBoard)
         })
       }
     }

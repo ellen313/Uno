@@ -17,10 +17,10 @@ object Main {
       gui.main(args)
     }
 
-//    while (gameBoard.gameState.isFailure) {
-//      Thread.sleep(100)
-//    }
-//
+    while (gameBoard.gameState.isFailure) {
+      Thread.sleep(100)
+    }
+
     val tui = new UnoTUI(gameBoard)
     gameBoard.addObserver(tui)
 

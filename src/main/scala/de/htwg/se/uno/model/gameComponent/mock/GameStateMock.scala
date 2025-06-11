@@ -1,5 +1,6 @@
 package de.htwg.se.uno.model.gameComponent.mock
 
+import de.htwg.se.uno.controller.controllerComponent.ControllerInterface
 import de.htwg.se.uno.model.cardComponent.{Card, WildCard}
 import de.htwg.se.uno.model.playerComponent.PlayerHand
 import de.htwg.se.uno.model.gameComponent.{GameStateInterface, InputResult, Success}
@@ -34,7 +35,7 @@ case class GameStateMock( override val players: List[PlayerHand] = List.fill(2)(
     (this.copy(), dummyCard)
   }
 
-  override def inputHandler(input: String): InputResult = {
+  override def inputHandler(input: String, gameBoard: ControllerInterface): InputResult = {
     Success(this)
   }
 7
@@ -73,5 +74,10 @@ case class GameStateMock( override val players: List[PlayerHand] = List.fill(2)(
 
   override def copyWithSelectedColor(selectedColor: Option[String]): GameStateInterface = {
     this.copyWithSelectedColor(selectedColor)
+  }
+
+  override def copyWithPlayersAndPiles(players: List[PlayerHand], drawPile: List[Card],
+                              discardPile: List[Card]): GameStateInterface = {
+    this.copyWithPlayersAndPiles(players, drawPile, discardPile)
   }
 }

@@ -31,7 +31,6 @@ object ColorPrinter {
           case "wild" => "Wild Card"
           case "wild draw four" => "Wild Draw Four"
         }
-        //println(s"${Reset}$actionString$Reset")
     }
   }
 }

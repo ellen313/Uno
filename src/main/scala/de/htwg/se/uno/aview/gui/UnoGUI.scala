@@ -1,8 +1,9 @@
 package de.htwg.se.uno.aview.gui
 
 import de.htwg.se.uno.aview.UnoGame
+import de.htwg.se.uno.controller.controllerComponent.ControllerInterface
 import de.htwg.se.uno.util.Observer
-import de.htwg.se.uno.controller.controllerComponent.base.{ControllerInterface, GameBoard}
+import de.htwg.se.uno.controller.controllerComponent.base.GameBoard
 import scalafx.application.JFXApp3
 import scalafx.scene.Scene
 import scalafx.Includes.jfxScene2sfx

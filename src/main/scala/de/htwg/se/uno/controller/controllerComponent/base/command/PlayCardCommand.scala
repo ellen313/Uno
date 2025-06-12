@@ -1,6 +1,7 @@
 package de.htwg.se.uno.controller.controllerComponent.base.command
 
-import de.htwg.se.uno.controller.controllerComponent.base.{ControllerInterface, GameBoard}
+import de.htwg.se.uno.controller.controllerComponent.ControllerInterface
+import de.htwg.se.uno.controller.controllerComponent.base.GameBoard
 import de.htwg.se.uno.model.*
 import de.htwg.se.uno.model.cardComponent.{ActionCard, Card, WildCard}
 import de.htwg.se.uno.model.gameComponent.base.GameState

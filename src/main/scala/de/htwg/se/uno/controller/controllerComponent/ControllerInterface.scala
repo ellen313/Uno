@@ -1,4 +1,4 @@
-package de.htwg.se.uno.controller.controllerComponent.base
+package de.htwg.se.uno.controller.controllerComponent
 
 import de.htwg.se.uno.model.gameComponent.base.GameState
 import de.htwg.se.uno.util.{Command, Observable}

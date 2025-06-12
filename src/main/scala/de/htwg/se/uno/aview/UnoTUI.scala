@@ -3,8 +3,9 @@ package de.htwg.se.uno.aview
 import de.htwg.se.uno.model.*
 import de.htwg.se.uno.util.Observer
 import de.htwg.se.uno.aview.ColorPrinter.*
+import de.htwg.se.uno.controller.controllerComponent.ControllerInterface
 import de.htwg.se.uno.controller.controllerComponent.base.command.{DrawCardCommand, PlayCardCommand, UnoCalledCommand}
-import de.htwg.se.uno.controller.controllerComponent.base.{ControllerInterface, GameBoard}
+import de.htwg.se.uno.controller.controllerComponent.base.GameBoard
 import de.htwg.se.uno.model.cardComponent.WildCard
 import de.htwg.se.uno.model.playerComponent.PlayerHand
 

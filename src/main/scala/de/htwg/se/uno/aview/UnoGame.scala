@@ -8,7 +8,6 @@ import scala.io.StdIn.readLine
 import de.htwg.se.uno.model.*
 import de.htwg.se.uno.model.cardComponent.Card
 import de.htwg.se.uno.model.gameComponent.base.GameState
-import de.htwg.se.uno.model.gameComponent.base.state.UnoPhases
 import de.htwg.se.uno.model.playerComponent.PlayerHand
 
 import scala.util.{Failure, Success, Try}
@@ -22,7 +21,6 @@ object UnoGame {
     val fullDeck = scala.util.Random.shuffle(GameBoard.createDeckWithAllCards())
     val (newDrawPile, playerHands) = dealCards(fullDeck, players, cardsPerPlayer)
 
-    // Put first card to discard pile
     val (firstCard, remainingDrawPile) = newDrawPile match {
       case head :: tail => (head, tail)
       case Nil => throw new IllegalStateException("No cards left in draw pile")
@@ -45,7 +43,6 @@ object UnoGame {
 
     GameBoard.gameState match {
       case scala.util.Success(initialGameState) =>
-        //val context = new UnoPhases(initialGameState)
         val controller = GameBoard
         val tui = new UnoTUI(controller)
         tui.display()

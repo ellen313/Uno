@@ -1,6 +1,6 @@
 package de.htwg.se.uno.controller.controllerComponent.mock
 
-import de.htwg.se.uno.controller.controllerComponent.base.ControllerInterface
+import de.htwg.se.uno.controller.controllerComponent.ControllerInterface
 import de.htwg.se.uno.model.cardComponent.Card
 import de.htwg.se.uno.model.gameComponent.base.GameState
 import de.htwg.se.uno.util.{Command, Observer}

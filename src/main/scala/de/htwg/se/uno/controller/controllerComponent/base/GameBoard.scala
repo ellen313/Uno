@@ -1,6 +1,7 @@
 package de.htwg.se.uno.controller.controllerComponent.base
 
 import de.htwg.se.uno.aview.UnoGame
+import de.htwg.se.uno.controller.controllerComponent.ControllerInterface
 import de.htwg.se.uno.model.*
 import de.htwg.se.uno.model.cardComponent.{ActionCard, Card, NumberCard, WildCard}
 import de.htwg.se.uno.model.gameComponent.base.GameState
@@ -9,7 +10,6 @@ import de.htwg.se.uno.util.{Command, CommandInvoker, Observable, Observer}
 import scala.util.{Failure, Random, Success, Try}
 
 object GameBoard extends Observable, ControllerInterface {
-  
   private var _gameState: Option[GameState] = None
   private val invoker = new CommandInvoker()
 

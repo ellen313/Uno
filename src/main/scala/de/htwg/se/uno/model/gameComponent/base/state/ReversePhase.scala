@@ -2,7 +2,7 @@ package de.htwg.se.uno.model.gameComponent.base.state
 
 case class ReversePhase(context: UnoPhases) extends GamePhase {
   override def nextPlayer(): GamePhase = {
-    context.gameState = context.gameState.copy(isReversed = !context.gameState.isReversed).nextPlayer()
+    context.gameState = context.gameState.copyWithIsReversed(isReversed = !context.gameState.isReversed).nextPlayer()
     context.setState(PlayerTurnPhase(context))
     context.state
   }

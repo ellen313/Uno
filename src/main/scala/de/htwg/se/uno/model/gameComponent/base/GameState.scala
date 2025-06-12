@@ -1,6 +1,6 @@
 package de.htwg.se.uno.model.gameComponent.base
 
-import de.htwg.se.uno.controller.controllerComponent.base.GameBoard
+import de.htwg.se.uno.controller.controllerComponent.ControllerInterface
 import de.htwg.se.uno.controller.controllerComponent.base.command.PlayCardCommand
 import de.htwg.se.uno.model.*
 import de.htwg.se.uno.model.cardComponent.{ActionCard, Card, NumberCard, WildCard}
@@ -8,15 +8,17 @@ import de.htwg.se.uno.model.gameComponent.{Failure, InputResult, Success}
 import de.htwg.se.uno.model.playerComponent.PlayerHand
 import de.htwg.se.uno.util.Observable
 import de.htwg.se.uno.model.gameComponent.GameStateInterface
+import de.htwg.se.uno.model.gameComponent.base.state.{GameOverPhase, GamePhase, UnoPhases}
 
 import scala.util.Try
 
 case class GameState( players: List[PlayerHand], currentPlayerIndex: Int,
                       allCards: List[Card], isReversed: Boolean = false,
-                      discardPile: List[Card], drawPile: List[Card], selectedColor: Option[String] = None)
+                      discardPile: List[Card], drawPile: List[Card], selectedColor: Option[String] = None,
+                      currentPhase: Option[GamePhase] = None)
   extends Observable, GameStateInterface {
 
-  def nextPlayer(): GameState= {
+  def nextPlayer(): GameStateInterface = {
     val playerCount = players.length
     val nextIndex = if (isReversed) {
       (currentPlayerIndex - 1 + playerCount) % playerCount
@@ -27,19 +29,23 @@ case class GameState( players: List[PlayerHand], currentPlayerIndex: Int,
     this.copy(currentPlayerIndex = nextIndex)
   }
 
-  def dealInitialCards(cardsPerPlayer: Int): GameState = {
-    var updatedGameState = this
+  def dealInitialCards(cardsPerPlayer: Int): GameStateInterface = {
+    var updatedGameState: GameStateInterface = this
     for (_ <- 1 to cardsPerPlayer) {
       for (playerIndex <- updatedGameState.players.indices) {
         val (drawnCard, updatedHand, updatedDrawPile, updatedDiscardPile) =
           updatedGameState.drawCard(updatedGameState.players(playerIndex),
             updatedGameState.drawPile, updatedGameState.discardPile)
 
-        updatedGameState = updatedGameState.copy(
-          players = updatedGameState.players.updated(playerIndex, updatedHand),
-          drawPile = updatedDrawPile,
-          discardPile = updatedDiscardPile
-        )
+        val updatedPlayers = updatedGameState.players.updated(playerIndex, updatedHand)
+
+        updatedGameState = updatedGameState.copyWithPiles(updatedDrawPile, updatedDiscardPile)
+          .asInstanceOf[GameState]
+        
+        updatedGameState = updatedGameState match {
+          case gs: GameState => gs.copy(players = updatedPlayers)
+          case other => other
+        }
       }
     }
     updatedGameState
@@ -56,31 +62,53 @@ case class GameState( players: List[PlayerHand], currentPlayerIndex: Int,
     }
   }
 
+  def setGameOver(): GameStateInterface = {
+    this.copy(currentPhase = Some(GameOverPhase()))
+  }
+
   def playerSaysUno(playerIndex: Int): GameState = {
     val updatedPlayers = players.updated(
       playerIndex,
       players(playerIndex).copy(hasSaidUno = true))
-    this.copy(players = updatedPlayers)
+    if (updatedPlayers(playerIndex).cards.isEmpty && updatedPlayers(playerIndex).hasSaidUno) {
+      this.copy(
+        players = updatedPlayers,
+        currentPhase = Some(GameOverPhase())
+      )
+    } else {
+      this.copy(players = updatedPlayers)
+    }
   }
 
   def drawCard(playerHand: PlayerHand, drawPile: List[Card], discardPile: List[Card]):
   (Card, PlayerHand, List[Card], List[Card]) = {
-    if (drawPile.isEmpty) {
-      if (discardPile.size <= 1) {
-        throw new RuntimeException("No cards left in the draw pile")
-      } else {
-        val reshuffled = scala.util.Random.shuffle(discardPile.init)
-        return drawCard(playerHand, reshuffled, List(discardPile.last))
-      }
+
+    val reshuffledDrawPile =
+      if (drawPile.isEmpty && discardPile.size > 1)
+        scala.util.Random.shuffle(discardPile.init)
+      else
+        drawPile
+
+    val updatedDiscardPile =
+      if (drawPile.isEmpty && discardPile.size > 1)
+        List(discardPile.last)
+      else
+        discardPile
+
+    if (reshuffledDrawPile.isEmpty) {
+      println("❌ No cards available to draw!")
+      return (null.asInstanceOf[Card], playerHand, reshuffledDrawPile, updatedDiscardPile)
     }
 
-    val drawnCard = drawPile.head
-    val updatedDrawPile = drawPile.tail
+    val drawnCard = reshuffledDrawPile.head
+    val newDrawPile = reshuffledDrawPile.tail
     val updatedPlayerHand = playerHand + drawnCard
-    (drawnCard, updatedPlayerHand, updatedDrawPile, discardPile)
+
+    (drawnCard, updatedPlayerHand, newDrawPile, updatedDiscardPile)
   }
 
-  def playCard(card: Card, chosenColor: Option[String] = None): GameState = {
+
+  def playCard(card: Card, chosenColor: Option[String] = None): GameStateInterface = {
     if (players.exists(_.cards.isEmpty)) return this
 
     val topCard = discardPile.headOption
@@ -104,7 +132,7 @@ case class GameState( players: List[PlayerHand], currentPlayerIndex: Int,
     )
   }
 
-  def handleDrawCards(count: Int): GameState = {
+  def handleDrawCards(count: Int): GameStateInterface = {
     val nextPlayerIndex = if (isReversed) {
       (currentPlayerIndex - 1 + players.length) % players.length
     } else {
@@ -170,19 +198,30 @@ case class GameState( players: List[PlayerHand], currentPlayerIndex: Int,
     }
   }
 
-  def drawCardAndReturnDrawn(): (GameState, Card) = {
-    val card = drawPile.head
-    val updatedPlayer = players(currentPlayerIndex) + card
+  def drawCardAndReturnDrawn(): (GameStateInterface, Card) = {
+    val (card, updatedPlayer, newDrawPile, newDiscardPile) =
+      drawCard(players(currentPlayerIndex), drawPile, discardPile)
+
+    if (card == null) {
+      println("⚠️ Card could not be drawn.")
+      return (this, null.asInstanceOf[Card])
+    }
+
     val updatedPlayers = players.updated(currentPlayerIndex, updatedPlayer)
-    val newState = this.copy(drawPile = drawPile.tail, players = updatedPlayers)
+    val newState = this.copy(
+      drawPile = newDrawPile,
+      discardPile = newDiscardPile,
+      players = updatedPlayers
+    )
     (newState, card)
   }
 
-  def setSelectedColor(color: String): GameState = {
+
+  def setSelectedColor(color: String): GameStateInterface = {
     this.copy(selectedColor = Some(color))
   }
 
-  def inputHandler(input: String): InputResult = {
+  def inputHandler(input: String, gameBoard: ControllerInterface): InputResult = {
     val currentPlayer = players(currentPlayerIndex)
 
     input match {
@@ -208,54 +247,38 @@ case class GameState( players: List[PlayerHand], currentPlayerIndex: Int,
             Failure("Card index must be a number.")
         }
 
-//      case s"play card:$index" =>
-//        scala.util.Try(index.toInt) match {
-//          case scala.util.Success(index) if index >= 0 && index < currentPlayer.cards.length =>
-//            val card = currentPlayer.cards(index)
-//            val topCard = discardPile.lastOption
-//
-//            if (!isValidPlay(card, topCard)) {
-//              Failure("Invalid card! Please select a valid card.")
-//            } else {
-//              val updatedGame = playCard(card)
-//              Success(updatedGame)
-//            }
-//
-//          case scala.util.Success(_) =>
-//            Failure("Invalid card index.")
-//
-//          case scala.util.Failure(_) =>
-//            Failure("Card index must be a number.")
-//        }
-//
-//      case _ =>
-//        Failure("Unknown input command.")
-//    }
       case s"play card:$index" =>
         Try(index.toInt) match {
           case scala.util.Success(idx) if idx >= 0 && idx < currentPlayer.cards.length =>
             val card = currentPlayer.cards(idx)
             val topCard = discardPile.lastOption
             val chooseColor = selectedColor
-            val controller = GameBoard
 
             val isValid = isValidPlay(card, topCard)
-            val command = PlayCardCommand(card, chooseColor, controller)
+            val command = PlayCardCommand(card, chooseColor, gameBoard)
 
-            controller.executeCommand(command)
+            gameBoard.executeCommand(command)
 
             if (!isValid) {
               println("⚠️ Wrong card played. Your play will be undone. A penalty card will be drawn.")
 
-              controller.undoCommand()
+              gameBoard.undoCommand()
 
-              val (newState, drawnCard) = controller.gameState.get.drawCardAndReturnDrawn()
-              controller.updateState(newState)
+              gameBoard.gameState match {
+                case scala.util.Success(state) =>
+                  val (newState, drawnCard) = state.drawCardAndReturnDrawn()
+                  gameBoard.updateState(newState)
+                  Failure("Invalid play. You received a penalty card.")
 
-              return Failure("Invalid play. You received a penalty card.")
+                case scala.util.Failure(_) =>
+                  Failure("Game state not initialized.")
+              }
+            } else {
+              gameBoard.gameState match {
+                case scala.util.Success(state) => Success(state)
+                case scala.util.Failure(_) => Failure("Game state not initialized.")
+              }
             }
-
-            Success(controller.gameState.get)
 
           case scala.util.Success(_) =>
             Failure("Invalid card index.")
@@ -266,7 +289,32 @@ case class GameState( players: List[PlayerHand], currentPlayerIndex: Int,
     }
   }
 
+  override def copyWithPiles(drawPile: List[Card], discardPile: List[Card]): GameStateInterface = {
+    this.copy(
+      drawPile = drawPile,
+      discardPile = discardPile,
+      allCards = discardPile ++ drawPile
+    )
+  }
+
   override def notifyObservers(): Unit = {
     super.notifyObservers()
+  }
+
+  override def copyWithIsReversed(isReversed: Boolean): GameStateInterface = {
+    this.copy(isReversed = isReversed)
+  }
+
+  override def copyWithSelectedColor(selectedColor: Option[String]): GameStateInterface = {
+    this.copy(selectedColor = selectedColor)
+  }
+
+  override def copyWithPlayersAndPiles(players: List[PlayerHand], drawPile: List[Card],
+                               discardPile: List[Card]): GameStateInterface = {
+    this.copy(
+      players = players,
+      drawPile = drawPile,
+      discardPile = discardPile
+    )
   }
 }

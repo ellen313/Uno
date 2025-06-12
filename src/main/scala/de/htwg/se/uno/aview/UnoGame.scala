@@ -7,6 +7,7 @@ import scala.annotation.tailrec
 import scala.io.StdIn.readLine
 import de.htwg.se.uno.model.*
 import de.htwg.se.uno.model.cardComponent.Card
+import de.htwg.se.uno.model.gameComponent.GameStateInterface
 import de.htwg.se.uno.model.gameComponent.base.GameState
 import de.htwg.se.uno.model.playerComponent.PlayerHand
 
@@ -35,7 +36,7 @@ object UnoGame {
       discardPile = List(firstCard)
     )
 
-    GameBoard.initGame(gameState)
+    GameBoard.initGame(gameState: GameStateInterface)
     println("Let's start the Game!")
     Thread.sleep(2000)
 

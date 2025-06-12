@@ -9,10 +9,10 @@ import scala.util.Try
 
 trait ControllerInterface extends Observable {
   val fullDeck: List[Card]
-  def gameState: Try[GameState]
+  def gameState: Try[GameStateInterface]
   def startGame(players: Int, cardsPerPlayer: Int): Unit
   def updateState(newState: GameStateInterface): Unit
-  def initGame(state: GameState): Unit
+  def initGame(state: GameStateInterface): Unit
   def undoCommand(): Unit
   def redoCommand(): Unit
   def executeCommand(cmd: Command): Unit

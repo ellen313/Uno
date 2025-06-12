@@ -8,22 +8,22 @@ import scala.concurrent.Future
 
 object Main {
   def main(args: Array[String]): Unit = {
-    val gameBoard = new GameBoard()
+    val controller = GameBoard
 
-    val gui =  new UnoGUI(gameBoard)
-    gameBoard.addObserver(gui)
+    val gui =  new UnoGUI(controller)
+    GameBoard.addObserver(gui)
 
     Future {
       gui.main(args)
     }
 
-    while (gameBoard.gameState.isFailure) {
+    while (GameBoard.gameState.isFailure) {
       Thread.sleep(100)
     }
 
-    val tui = new UnoTUI(gameBoard)
-    gameBoard.addObserver(tui)
+    val tui = new UnoTUI(controller)
+    GameBoard.addObserver(tui)
 
-    UnoGame.inputLoop(gameBoard, tui)
+    UnoGame.inputLoop(tui)
   }
 }

@@ -92,7 +92,7 @@ object UnoGame {
         val currentPlayer = currentState.players(currentState.currentPlayerIndex)
 
         if (currentPlayer.cards.length == 1 && !currentPlayer.hasSaidUno) {
-          GameBoard.executeCommand(UnoCalledCommand(None))
+          GameBoard.executeCommand(UnoCalledCommand(GameBoard))
           println(s"$name said UNO!")
         }
 

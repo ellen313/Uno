@@ -44,7 +44,7 @@ class UnoTUI(controller: ControllerInterface) extends Observer {
 
         if (!currentPlayer.cards.exists(card => state.isValidPlay(card, Some(topCard), selectedColor))) {
           println("No playable Card! You have to draw a card...")
-          GameBoard.executeCommand(DrawCardCommand())
+          GameBoard.executeCommand(DrawCardCommand(controller))
           gameShouldExit = false
           display()
         } else {
@@ -166,7 +166,7 @@ class UnoTUI(controller: ControllerInterface) extends Observer {
         val updatedPlayer = state.players(state.currentPlayerIndex)
 
         if (updatedPlayer.cards.length == 1 && !updatedPlayer.hasSaidUno) {
-          GameBoard.executeCommand(UnoCalledCommand(None))
+          GameBoard.executeCommand(UnoCalledCommand(controller))
           println("You said 'UNO'!")
         }
       case scala.util.Failure(exception: Throwable) =>

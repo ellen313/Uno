@@ -26,9 +26,9 @@ class GameScreen(players: Int, cardsPerPlayer: Int, gameBoard: ControllerInterfa
   private var gameOver: Boolean = false
 
   val allCards: List[Card] = CardFactory.createFullDeck()
-  private val hands = gameBoard.fullDeck.grouped(cardsPerPlayer).take(players).map(cards => PlayerHand(cards)).toList
+  private val hands = allCards.grouped(cardsPerPlayer).take(players).map(cards => PlayerHand(cards)).toList
   private val usedCards = hands.flatMap(_.cards)
-  private val remainingDeck = gameBoard.fullDeck.diff(usedCards)
+  private val remainingDeck = allCards.diff(usedCards)
   private val initialDiscard = remainingDeck.head
   private val updatedRemainingDeck = remainingDeck.tail
 

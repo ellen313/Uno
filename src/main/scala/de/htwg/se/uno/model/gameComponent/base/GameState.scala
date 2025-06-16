@@ -317,4 +317,10 @@ case class GameState( players: List[PlayerHand], currentPlayerIndex: Int,
       discardPile = discardPile
     )
   }
+  
+  object GameState {
+    import play.api.libs.json.*
+    implicit val stateWrites = Json.writes[GameState]
+    implicit val stateReads = Json.reads[GameState]
+  }
 }

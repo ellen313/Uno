@@ -38,7 +38,7 @@ case class GameStateMock( override val players: List[PlayerHand] = List.fill(2)(
   override def inputHandler(input: String, gameBoard: ControllerInterface): InputResult = {
     Success(this)
   }
-7
+
   override def notifyObservers(): Unit = {
     this.notifyObservers()
   }

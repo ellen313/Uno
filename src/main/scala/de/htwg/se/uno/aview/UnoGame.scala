@@ -7,8 +7,8 @@ import scala.annotation.tailrec
 import scala.io.StdIn.readLine
 import de.htwg.se.uno.model.*
 import de.htwg.se.uno.model.cardComponent.Card
+import de.htwg.se.uno.model.gameComponent.GameStateInterface
 import de.htwg.se.uno.model.gameComponent.base.GameState
-import de.htwg.se.uno.model.gameComponent.base.state.UnoPhases
 import de.htwg.se.uno.model.playerComponent.PlayerHand
 
 import scala.util.{Failure, Success, Try}
@@ -22,7 +22,6 @@ object UnoGame {
     val fullDeck = scala.util.Random.shuffle(GameBoard.createDeckWithAllCards())
     val (newDrawPile, playerHands) = dealCards(fullDeck, players, cardsPerPlayer)
 
-    // Put first card to discard pile
     val (firstCard, remainingDrawPile) = newDrawPile match {
       case head :: tail => (head, tail)
       case Nil => throw new IllegalStateException("No cards left in draw pile")
@@ -37,7 +36,7 @@ object UnoGame {
       discardPile = List(firstCard)
     )
 
-    GameBoard.initGame(gameState)
+    GameBoard.initGame(gameState: GameStateInterface)
     println("Let's start the Game!")
     Thread.sleep(2000)
 
@@ -45,7 +44,6 @@ object UnoGame {
 
     GameBoard.gameState match {
       case scala.util.Success(initialGameState) =>
-        //val context = new UnoPhases(initialGameState)
         val controller = GameBoard
         val tui = new UnoTUI(controller)
         tui.display()
@@ -95,7 +93,7 @@ object UnoGame {
         val currentPlayer = currentState.players(currentState.currentPlayerIndex)
 
         if (currentPlayer.cards.length == 1 && !currentPlayer.hasSaidUno) {
-          GameBoard.executeCommand(UnoCalledCommand(None))
+          GameBoard.executeCommand(UnoCalledCommand(GameBoard))
           println(s"$name said UNO!")
         }
 

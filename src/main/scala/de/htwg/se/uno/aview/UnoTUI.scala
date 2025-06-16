@@ -3,8 +3,9 @@ package de.htwg.se.uno.aview
 import de.htwg.se.uno.model.*
 import de.htwg.se.uno.util.Observer
 import de.htwg.se.uno.aview.ColorPrinter.*
+import de.htwg.se.uno.controller.controllerComponent.ControllerInterface
 import de.htwg.se.uno.controller.controllerComponent.base.command.{DrawCardCommand, PlayCardCommand, UnoCalledCommand}
-import de.htwg.se.uno.controller.controllerComponent.base.{ControllerInterface, GameBoard}
+import de.htwg.se.uno.controller.controllerComponent.base.GameBoard
 import de.htwg.se.uno.model.cardComponent.WildCard
 import de.htwg.se.uno.model.playerComponent.PlayerHand
 
@@ -43,7 +44,7 @@ class UnoTUI(controller: ControllerInterface) extends Observer {
 
         if (!currentPlayer.cards.exists(card => state.isValidPlay(card, Some(topCard), selectedColor))) {
           println("No playable Card! You have to draw a card...")
-          GameBoard.executeCommand(DrawCardCommand())
+          GameBoard.executeCommand(DrawCardCommand(controller))
           gameShouldExit = false
           display()
         } else {
@@ -165,7 +166,7 @@ class UnoTUI(controller: ControllerInterface) extends Observer {
         val updatedPlayer = state.players(state.currentPlayerIndex)
 
         if (updatedPlayer.cards.length == 1 && !updatedPlayer.hasSaidUno) {
-          GameBoard.executeCommand(UnoCalledCommand(None))
+          GameBoard.executeCommand(UnoCalledCommand(controller))
           println("You said 'UNO'!")
         }
       case scala.util.Failure(exception: Throwable) =>

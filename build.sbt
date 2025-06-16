@@ -11,6 +11,7 @@ lazy val root = project
       libraryDependencies += "org.scalactic" %% "scalactic" % "3.2.14",
       libraryDependencies += "org.scalatest" %% "scalatest" % "3.2.14" % "test",
       libraryDependencies += "org.scalafx" %% "scalafx" % "20.0.0-R31",
+      libraryDependencies += "net.codingwell" %% "scala-guice" % "7.0.0",
 
       coverageEnabled := true
   )

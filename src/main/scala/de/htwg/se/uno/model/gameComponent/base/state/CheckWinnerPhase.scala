@@ -4,7 +4,7 @@ case class CheckWinnerPhase(context: UnoPhases) extends GamePhase {
   override def checkForWinner(): GamePhase = {
     context.gameState.checkForWinner() match {
       case Some(_) =>
-        context.setState(GameOverPhase(context))
+        context.setState(GameOverPhase())
       case None =>
         context.setState(PlayerTurnPhase(context))
     }

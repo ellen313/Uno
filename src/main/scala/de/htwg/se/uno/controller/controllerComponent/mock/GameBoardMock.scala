@@ -1,26 +1,26 @@
 package de.htwg.se.uno.controller.controllerComponent.mock
 
-import de.htwg.se.uno.controller.controllerComponent.base.ControllerInterface
-import de.htwg.se.uno.model.cardComponent.Card
-import de.htwg.se.uno.model.gameComponent.base.GameState
+import de.htwg.se.uno.controller.controllerComponent.ControllerInterface
+import de.htwg.se.uno.model.cardComponent.{ActionCard, Card, NumberCard, WildCard}
+import de.htwg.se.uno.model.gameComponent.GameStateInterface
 import de.htwg.se.uno.util.{Command, Observer}
 
 import scala.util.{Failure, Success, Try}
 
 class GameBoardMock extends ControllerInterface {
 
-  private var _gameState: Option[GameState] = None
+  private var _gameState: Option[GameStateInterface] = None
 
-  override def gameState: Try[GameState] = _gameState match {
+  override def gameState: Try[GameStateInterface] = _gameState match {
     case Some(state) => Success(state)
     case None => Failure(new IllegalStateException("Mock: No GameState"))
   }
 
-  override def updateState(newState: GameState): Unit = {
+  override def updateState(newState: GameStateInterface): Unit = {
     _gameState = Some(newState)
   }
 
-  def initGame(state: GameState): Unit = {
+  def initGame(state: GameStateInterface): Unit = {
     _gameState = Some(state)
   }
 
@@ -54,4 +54,10 @@ class GameBoardMock extends ControllerInterface {
 
   override def startGame(players: Int, cardsPerPlayer: Int): Unit = {
   }
+
+  override val fullDeck: List[Card] = List(
+    NumberCard("green", 5),
+    ActionCard("red", "skip"),
+    WildCard("wild")
+  )
 }

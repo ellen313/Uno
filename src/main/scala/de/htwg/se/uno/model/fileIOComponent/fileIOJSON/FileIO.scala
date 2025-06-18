@@ -1,26 +1,27 @@
 package de.htwg.se.uno.model.fileIOComponent.fileIOJSON
 
 import de.htwg.se.uno.model.fileIOComponent.FileIOInterface
-import de.htwg.se.uno.model.gameComponent.GameStateInterface
+import de.htwg.se.uno.model.gameComponent.base.GameState
+import play.api.libs.json.*
 
 import java.io.{File, PrintWriter}
+import scala.io.Source
+import de.htwg.se.uno.model.JsonFormats.*
+import de.htwg.se.uno.model.gameComponent.GameStateInterface
 
 class FileIO extends FileIOInterface {
-  override def save(gameState: Any, path: String = "game.json"): Unit = {
-    gameState match {
-      case state: GameStateInterface =>
-        val json: JsValue = Json.toJson(state)
-        val writer = new PrintWriter(new File(path))
-        writer.write(Json.prettyPrint(json))
-        writer.close()
-      case _ => throw new IllegalArgumentException("Unsupported type")
-    }
+
+  override def save(gameState: GameStateInterface): Unit = {
+    val concreteState = gameState.asInstanceOf[GameState]
+    val pw = new PrintWriter(new File("Uno.json"))
+    pw.write(Json.prettyPrint(Json.toJson(concreteState)))
+    pw.close()
   }
 
-  override def load(path: String = "game.json"): Any = {
-    val source = Source.fromFile(path)
-    val content = try source.getLines().mkString finally source.close()
-
-    Json.parse(content).as[GameStateInterface]
+  override def load(): GameStateInterface = {
+    val source = scala.io.Source.fromFile("Uno.json")
+    val content = source.mkString
+    source.close()
+    Json.parse(content).as[GameState]
   }
 }

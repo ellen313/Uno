@@ -1,7 +1,6 @@
 package de.htwg.se.uno.model.playerComponent
 
 import de.htwg.se.uno.model.cardComponent.{ActionCard, Card, NumberCard, WildCard}
-
 import scala.annotation.targetName
 
 case class PlayerHand(cards: List[Card], var hasSaidUno: Boolean = false) {

@@ -6,6 +6,9 @@ import de.htwg.se.uno.model.*
 import de.htwg.se.uno.model.cardComponent.{ActionCard, Card, NumberCard, WildCard}
 import de.htwg.se.uno.model.gameComponent.{Failure, InputResult, Success}
 import de.htwg.se.uno.model.playerComponent.PlayerHand
+import de.htwg.se.uno.model.playerComponent.PlayerJsonFormat.*
+import de.htwg.se.uno.model.cardComponent.CardJsonFormat.*
+import de.htwg.se.uno.model.gameComponent.base.state.GamePhaseJsonFormat.*
 import de.htwg.se.uno.util.Observable
 import de.htwg.se.uno.model.gameComponent.GameStateInterface
 import de.htwg.se.uno.model.gameComponent.base.state.{GameOverPhase, GamePhase, UnoPhases}
@@ -317,10 +320,11 @@ case class GameState( players: List[PlayerHand], currentPlayerIndex: Int,
       discardPile = discardPile
     )
   }
-  
+
   object GameState {
     import play.api.libs.json.*
-    implicit val stateWrites = Json.writes[GameState]
-    implicit val stateReads = Json.reads[GameState]
+    implicit val stateWrites: Writes[GameState] = Json.writes[GameState]
+    implicit val stateReads: Reads[GameState] = Json.reads[GameState]
+    implicit val gameStateFormat: OFormat[GameState] = Json.format[GameState]
   }
 }

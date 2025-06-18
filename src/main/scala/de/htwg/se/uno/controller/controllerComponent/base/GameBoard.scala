@@ -4,7 +4,9 @@ import de.htwg.se.uno.aview.UnoGame
 import de.htwg.se.uno.controller.controllerComponent.ControllerInterface
 import de.htwg.se.uno.model.*
 import de.htwg.se.uno.model.cardComponent.{ActionCard, Card, NumberCard, WildCard}
+import de.htwg.se.uno.model.fileIOComponent.fileIOJSON.FileIO
 import de.htwg.se.uno.model.gameComponent.GameStateInterface
+import de.htwg.se.uno.model.gameComponent.base.GameState
 import de.htwg.se.uno.util.{Command, CommandInvoker, Observable, Observer}
 
 import scala.util.{Failure, Random, Success, Try}
@@ -12,6 +14,7 @@ import scala.util.{Failure, Random, Success, Try}
 object GameBoard extends Observable, ControllerInterface {
   private var _gameState: Option[GameStateInterface] = None
   private val invoker = new CommandInvoker()
+  val JsonFileIO = new FileIO()
 
   val fullDeck: List[Card] = createDeckWithAllCards()
 
@@ -30,6 +33,7 @@ object GameBoard extends Observable, ControllerInterface {
   def updateState(newState: GameStateInterface): Unit = {
     _gameState = Some(newState)
     notifyObservers()
+    JsonFileIO.save(newState.asInstanceOf[GameState])
   }
 
   def initGame(state: GameStateInterface): Unit = {
@@ -64,6 +68,7 @@ object GameBoard extends Observable, ControllerInterface {
 
   def executeCommand(command: Command): Unit = {
     invoker.executeCommand(command)
+    // _gameState.foreach(s => JsonFileIO.save(s.asInstanceOf[GameState]))
   }
 
   def undoCommand(): Unit = {

@@ -13,7 +13,7 @@ lazy val root = project
       libraryDependencies += "org.scalafx" %% "scalafx" % "20.0.0-R31",
       libraryDependencies += "net.codingwell" %% "scala-guice" % "7.0.0",
       libraryDependencies += "org.scala-lang.modules" %% "scala-xml" % "2.3.0",
-      libraryDependencies += "com.typesafe.play" %% "play-json" % "2.10.0-RC9",
+      libraryDependencies += "com.typesafe.play" %% "play-json" % "2.10.0",
 
       coverageEnabled := true
   )
